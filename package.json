@@ -20,7 +20,10 @@
 		"test:coverage": "bun test --coverage",
 		"release": "bumpp -r --commit --push --tag",
 		"publish:ci": "bun run --filter './packages/**' publish:ci",
-		"prepare": "husky"
+		"prepare": "husky",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:preview": "vitepress preview docs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
@@ -30,7 +33,8 @@
 		"bumpp": "^10.2.0",
 		"bunup": "^0.8.64",
 		"husky": "^9.1.7",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitepress": "^1.6.3"
 	},
 	"peerDependencies": {
 		"typescript": ">=4.5.0"
