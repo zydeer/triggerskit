@@ -8,7 +8,7 @@ export default defineWorkspace([
 		config: {
 			entry: ['src/index.ts'],
 			format: ['esm', 'cjs'],
-			plugins: [exports(), unused()],
+			plugins: [unused()],
 		},
 	},
 ])
