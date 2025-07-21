@@ -19,7 +19,7 @@
 		"test:watch": "bun test --watch",
 		"test:coverage": "bun test --coverage",
 		"release": "bumpp -r --commit --push --tag",
-		"publish:ci": "bun --filter './packages/**' publish --access public --no-git-checks",
+		"publish:ci": "bun run --filter './packages/**' publish",
 		"prepare": "husky"
 	},
 	"devDependencies": {
