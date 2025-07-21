@@ -10,3 +10,5 @@ Bun.serve({
 		},
 	},
 })
+
+console.log('Test server is running on http://localhost:4000')
