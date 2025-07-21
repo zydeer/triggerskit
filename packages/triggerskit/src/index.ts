@@ -1,3 +1,3 @@
 export function greet(name: string): string {
-	return `Hello, ${name}! Welcome to the triggerskit package.`
+	return `Hello, ${name}! Welcome to the triggerskit packages`
 }

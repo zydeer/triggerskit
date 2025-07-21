@@ -8,13 +8,14 @@
 	"private": true,
 	"scripts": {
 		"build": "bunup",
-		"dev": "bunup --watch",
+		"dev": "bunup --watch --clean=false",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
 		"tsc": "tsc --noEmit",
 		"test": "bun test",
+		"test:dev": "bun --filter './tests' dev",
 		"test:watch": "bun test --watch",
 		"test:coverage": "bun test --coverage",
 		"release": "bumpp -r --commit --push --tag",
@@ -39,7 +40,7 @@
 			"optional": true
 		}
 	},
-	"workspaces": ["packages/*"],
+	"workspaces": ["packages/*", "tests"],
 	"homepage": "https://github.com/zydeer/triggerskit#readme",
 	"bugs": {
 		"url": "https://github.com/zydeer/triggerskit/issues"
