@@ -1,0 +1,48 @@
+{
+	"name": "triggerskit-monorepo",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zydeer/triggerskit.git"
+	},
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "bunup",
+		"dev": "bunup --watch",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format .",
+		"format:fix": "biome format --write .",
+		"tsc": "tsc --noEmit",
+		"test": "bun test",
+		"test:watch": "bun test --watch",
+		"test:coverage": "bun test --coverage",
+		"release": "bumpp -r --commit --push --tag",
+		"publish:ci": "bun --filter './packages/**' publish --access public --no-git-checks",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@commitlint/cli": "^19.8.1",
+		"@commitlint/config-conventional": "^19.8.1",
+		"@types/bun": "^1.2.18",
+		"bumpp": "^10.2.0",
+		"bunup": "^0.8.60",
+		"husky": "^9.1.7",
+		"typescript": "^5.8.3"
+	},
+	"peerDependencies": {
+		"typescript": ">=4.5.0"
+	},
+	"peerDependenciesMeta": {
+		"typescript": {
+			"optional": true
+		}
+	},
+	"workspaces": ["packages/*"],
+	"homepage": "https://github.com/zydeer/triggerskit#readme",
+	"bugs": {
+		"url": "https://github.com/zydeer/triggerskit/issues"
+	},
+	"license": "MIT"
+}
