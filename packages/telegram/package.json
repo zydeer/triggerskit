@@ -9,9 +9,6 @@
   "module": "./dist/index.js",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "publish:ci": "bun publish --access public --no-git-checks"
-  },
   "exports": {
     ".": {
       "import": {
@@ -23,6 +20,9 @@
         "default": "./dist/index.cjs"
       }
     }
+  },
+  "scripts": {
+    "publish:ci": "bun publish --access public --no-git-checks"
   },
   "license": "MIT",
   "repository": {
