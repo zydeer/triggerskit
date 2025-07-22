@@ -1,22 +1,10 @@
 {
   "name": "triggerskit-monorepo",
+  "type": "module",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zydeer/triggerskit.git"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@types/bun": "^1.2.18",
-    "bumpp": "^10.2.0",
-    "bunup": "^0.8.64",
-    "simple-git-hooks": "^2.13.0",
-    "typescript": "^5.8.3",
-    "vitepress": "^1.6.3"
-  },
-  "peerDependencies": {
-    "typescript": ">=4.5.0"
   },
   "bugs": {
     "url": "https://github.com/zydeer/triggerskit/issues"
@@ -28,7 +16,6 @@
       "optional": true
     }
   },
-  "private": true,
   "scripts": {
     "build": "bunup",
     "dev": "bunup --watch --clean=false",
@@ -49,11 +36,25 @@
     "docs:preview": "vitepress preview docs"
   },
   "simple-git-hooks": {
-    "pre-commit": "bun run lint && bun run tsc && bun run format && npx --no -- commitlint --edit $1"
+    "pre-commit": "bun run lint && bun run tsc && bun run format",
+    "commit-msg": "bunx --no -- commitlint --edit"
   },
-  "type": "module",
   "workspaces": [
     "packages/*",
     "tests"
-  ]
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/bun": "^1.2.18",
+    "bumpp": "^10.2.0",
+    "bunup": "^0.8.64",
+    "simple-git-hooks": "^2.13.0",
+    "typescript": "^5.8.3",
+    "vitepress": "^1.6.3"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.5.0"
+  }
 }
