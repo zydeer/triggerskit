@@ -11,4 +11,13 @@ export default defineWorkspace([
       plugins: [exports(), unused()],
     },
   },
+  {
+    name: 'telegram',
+    root: 'packages/telegram',
+    config: {
+      entry: ['src/index.ts'],
+      format: ['esm', 'cjs'],
+      plugins: [exports(), unused()],
+    },
+  },
 ])
