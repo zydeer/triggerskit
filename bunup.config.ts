@@ -1,5 +1,5 @@
 import { defineWorkspace } from 'bunup'
-import { exports, unused } from 'bunup/plugins'
+import { unused } from 'bunup/plugins'
 
 export default defineWorkspace(
   [
