@@ -1,4 +1,7 @@
+import { coreFunction } from '@triggerskit/core'
+
 export function greet(name: string): string {
+  coreFunction()
   return `Hello, ${name}!`
 }
 

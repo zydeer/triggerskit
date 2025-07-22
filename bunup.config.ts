@@ -4,6 +4,10 @@ import { exports, unused } from 'bunup/plugins'
 export default defineWorkspace(
   [
     {
+      name: 'core',
+      root: 'packages/core',
+    },
+    {
       name: 'triggerskit',
       root: 'packages/triggerskit',
     },
