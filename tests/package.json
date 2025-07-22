@@ -1,11 +1,11 @@
 {
-	"name": "test",
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"dev": "bun --hot run dev.ts"
-	},
-	"dependencies": {
-		"triggerskit": "workspace:*"
-	}
+  "name": "test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot run dev.ts"
+  },
+  "dependencies": {
+    "triggerskit": "workspace:*"
+  }
 }
