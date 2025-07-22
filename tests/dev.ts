@@ -1,3 +1,4 @@
+import { telegram } from '@triggerskit/telegram'
 import { greet, sum } from 'triggerskit'
 
 Bun.serve({
@@ -11,6 +12,11 @@ Bun.serve({
     '/sum': {
       GET: () => {
         return new Response(sum(5, 5).toString())
+      },
+    },
+    '/telegram': {
+      GET: () => {
+        return new Response(telegram())
       },
     },
   },

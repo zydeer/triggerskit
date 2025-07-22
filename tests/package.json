@@ -6,6 +6,7 @@
     "dev": "bun --hot run dev.ts"
   },
   "dependencies": {
-    "triggerskit": "workspace:*"
+    "triggerskit": "workspace:*",
+    "@triggerskit/telegram": "workspace:*"
   }
 }
