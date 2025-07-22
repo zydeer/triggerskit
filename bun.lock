@@ -9,7 +9,7 @@
         "@commitlint/config-conventional": "^19.8.1",
         "@types/bun": "^1.2.18",
         "bumpp": "^10.2.0",
-        "bunup": "^0.8.65",
+        "bunup": "^0.8.70",
         "simple-git-hooks": "^2.13.0",
         "typescript": "^5.8.3",
         "vitepress": "^1.6.3",
@@ -23,18 +23,18 @@
     },
     "packages/core": {
       "name": "@triggerskit/core",
-      "version": "0.1.5",
+      "version": "0.1.6",
     },
     "packages/telegram": {
       "name": "@triggerskit/telegram",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "dependencies": {
         "@triggerskit/core": "workspace:*",
       },
     },
     "packages/triggerskit": {
       "name": "triggerskit",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "dependencies": {
         "@triggerskit/core": "workspace:*",
       },
@@ -444,7 +444,7 @@
 
     "bun-types": ["bun-types@1.2.19", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-uAOTaZSPuYsWIXRpj7o56Let0g/wjihKCkeRqUBhlLVM/Bt+Fj9xTo+LhC1OV1XDaGkz4hNC80et5xgy+9KTHQ=="],
 
-    "bunup": ["bunup@0.8.65", "", { "dependencies": { "@clack/prompts": "^0.10.1", "chokidar": "^4.0.3", "coffi": "^0.1.31", "giget": "^2.0.0", "picocolors": "^1.1.1", "replace-in-file": "^8.3.0", "tinyexec": "^1.0.1", "typeroll": "^0.6.20" }, "peerDependencies": { "lightningcss": ">=1.17.0", "typescript": ">=4.5.0" }, "optionalPeers": ["lightningcss", "typescript"], "bin": { "bunup": "dist/cli/index.js" } }, "sha512-5PyVl++6Dlmc9S1OTZm7ibf7XnKlwL43Gkp60yl0J23xFq5WGZxCKQMKfzK413p+qAN7xQdIpoZStIZGHckJuQ=="],
+    "bunup": ["bunup@0.8.70", "", { "dependencies": { "@clack/prompts": "^0.10.1", "chokidar": "^4.0.3", "coffi": "^0.1.31", "fast-deep-equal": "^3.1.3", "giget": "^2.0.0", "picocolors": "^1.1.1", "replace-in-file": "^8.3.0", "tinyexec": "^1.0.1", "typeroll": "^0.6.20" }, "peerDependencies": { "lightningcss": ">=1.17.0", "typescript": ">=4.5.0" }, "optionalPeers": ["lightningcss", "typescript"], "bin": { "bunup": "dist/cli/index.js" } }, "sha512-hRk2po+RuGL7DZ6DSWfYmpc9hesoeWfljBy3NeUOjRVwcerRUJDxnmjYB0OBzmtxaEKyLejGe+iro15fkK/bgA=="],
 
     "c12": ["c12@3.1.0", "", { "dependencies": { "chokidar": "^4.0.3", "confbox": "^0.2.2", "defu": "^6.1.4", "dotenv": "^16.6.1", "exsolve": "^1.0.7", "giget": "^2.0.0", "jiti": "^2.4.2", "ohash": "^2.0.11", "pathe": "^2.0.3", "perfect-debounce": "^1.0.0", "pkg-types": "^2.2.0", "rc9": "^2.1.2" }, "peerDependencies": { "magicast": "^0.3.5" }, "optionalPeers": ["magicast"] }, "sha512-uWoS8OU1MEIsOv8p/5a82c3H31LsWVR5qiyXVfBNOzfffjUWtPnhAb4BYI2uG2HfGmZmFjCtui5XNWaps+iFuw=="],
 
