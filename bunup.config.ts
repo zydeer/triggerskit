@@ -20,4 +20,13 @@ export default defineWorkspace([
       plugins: [exports(), unused()],
     },
   },
+  {
+    name: 'slack',
+    root: 'packages/slack',
+    config: {
+      entry: ['src/index.ts'],
+      format: ['esm', 'cjs'],
+      plugins: [exports(), unused()],
+    },
+  },
 ])
