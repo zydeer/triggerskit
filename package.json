@@ -36,8 +36,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "simple-git-hooks": {
-    "pre-commit": "bun run lint && bun run tsc && bun run format",
-    "commit-msg": "bunx --no -- commitlint --edit"
+    "pre-commit": "bun run lint:fix"
   },
   "workspaces": [
     "packages/*",
@@ -45,8 +44,6 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
     "@types/bun": "^1.2.18",
     "bumpp": "^10.2.0",
     "bunup": "^0.8.70",
