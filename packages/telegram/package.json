@@ -7,22 +7,19 @@
     "dist"
   ],
   "module": "./dist/index.js",
-  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "dependencies": {
-    "@triggerskit/core": "workspace:*"
+    "@triggerskit/core": "workspace:*",
+    "tsdown": "^0.15.5"
   },
   "scripts": {
     "publish:ci": "bun publish --access public --no-git-checks"
@@ -32,5 +29,8 @@
     "type": "git",
     "url": "git+https://github.com/zydeer/triggerskit.git"
   },
-  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme"
+  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
+  "devDependencies": {
+    "zlye": "^0.4.4"
+  }
 }

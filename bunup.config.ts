@@ -1,5 +1,4 @@
 import { defineWorkspace } from 'bunup'
-import { exports, unused } from 'bunup/plugins'
 
 export default defineWorkspace(
   [
@@ -17,8 +16,7 @@ export default defineWorkspace(
     },
   ],
   {
-    entry: ['src/index.ts'],
-    format: ['esm', 'cjs'],
-    plugins: [exports(), unused()],
+    exports: true,
+    unused: true,
   },
 )

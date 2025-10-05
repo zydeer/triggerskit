@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "bunup",
-    "dev": "bunup --watch --clean=false",
+    "dev": "bunup --watch --no-clean",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",
@@ -43,13 +43,13 @@
     "tests"
   ],
   "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
-    "@types/bun": "^1.2.18",
-    "bumpp": "^10.2.0",
-    "bunup": "^0.8.70",
-    "simple-git-hooks": "^2.13.0",
-    "typescript": "^5.8.3",
-    "vitepress": "^1.6.3"
+    "@biomejs/biome": "^2.2.5",
+    "@types/bun": "^1.2.23",
+    "bumpp": "^10.2.3",
+    "bunup": "^0.14.17",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4"
   },
   "peerDependencies": {
     "typescript": ">=4.5.0"
