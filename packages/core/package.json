@@ -1,13 +1,11 @@
 {
   "name": "@triggerskit/core",
-  "description": "Shared utilities and functions for TriggersKit",
   "version": "0.1.7",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zydeer/triggerskit.git"
+  },
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -17,16 +15,15 @@
     },
     "./package.json": "./package.json"
   },
+  "description": "Shared utilities and functions for TriggersKit",
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
+  "license": "MIT",
   "scripts": {
     "publish:ci": "bun publish --access public --no-git-checks"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zydeer/triggerskit.git"
-  },
-  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
-  "dependencies": {
-    "cac": "^6.7.14"
-  }
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }
