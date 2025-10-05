@@ -1,13 +1,14 @@
 {
   "name": "@triggerskit/telegram",
-  "description": "TriggersKit Telegram Adapter",
   "version": "0.1.8",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zydeer/triggerskit.git"
+  },
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@triggerskit/core": "workspace:*"
+  },
   "exports": {
     ".": {
       "import": {
@@ -17,16 +18,12 @@
     },
     "./package.json": "./package.json"
   },
-  "dependencies": {
-    "@triggerskit/core": "workspace:*"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zydeer/triggerskit.git"
-  },
+  "description": "TriggersKit Telegram Adapter",
+  "files": [
+    "dist"
+  ],
   "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
-  "devDependencies": {
-    "zlye": "^0.4.4"
-  }
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

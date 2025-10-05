@@ -21,21 +21,18 @@
     },
     "packages/core": {
       "name": "@triggerskit/core",
-      "version": "0.1.7",
+      "version": "0.1.8",
     },
     "packages/telegram": {
       "name": "@triggerskit/telegram",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "dependencies": {
         "@triggerskit/core": "workspace:*",
-      },
-      "devDependencies": {
-        "zlye": "^0.4.4",
       },
     },
     "packages/triggerskit": {
       "name": "triggerskit",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "dependencies": {
         "@triggerskit/core": "workspace:*",
       },
