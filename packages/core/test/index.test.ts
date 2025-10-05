@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
 
-test('core package should greet correctly', () => {
+test('true should be true', () => {
   expect(true).toBe(true)
 })
