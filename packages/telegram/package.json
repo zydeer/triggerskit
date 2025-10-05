@@ -20,9 +20,6 @@
   "dependencies": {
     "@triggerskit/core": "workspace:*"
   },
-  "scripts": {
-    "publish:ci": "bun publish --access public --no-git-checks"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",

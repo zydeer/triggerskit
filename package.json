@@ -29,14 +29,13 @@
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "release": "bumpp -r --commit --push --tag",
-    "publish:ci": "bun run --filter './packages/**' publish:ci",
     "prepare": "simple-git-hooks",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "simple-git-hooks": {
-    "pre-commit": "bun run lint:fix"
+    "pre-commit": "bun run lint"
   },
   "workspaces": [
     "packages/*",
