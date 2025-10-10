@@ -14,7 +14,46 @@ Thank you for your interest in contributing to our project! This guide will help
 2. Clone your fork: `git clone https://github.com/zydeer/triggerskit.git`
 3. Navigate to the project directory: `cd triggerskit`
 4. Install dependencies: `bun install`
-5. Start development: `bun run dev`
+
+### Testing Your Changes
+
+To test your changes in real-time:
+
+1. **Start the dev server** (watches for code changes):
+   ```bash
+   bun run dev
+   ```
+
+2. **In another terminal**, start the test playground:
+   ```bash
+   bun run test:dev
+   ```
+   This launches a local server at `http://localhost:4000`
+
+3. **Edit `tests/dev.ts`** to test packages as users would:
+   ```typescript
+   // Import and use packages like in a real application
+   import { something } from '@triggerskit/package-name';
+
+   Bun.serve({
+     port: 4000,
+     routes: {
+       '/': {
+         GET: () => {
+           return new Response(JSON.stringify(result));
+         }
+       },
+       '/test': {
+         GET: () => {
+           // Test in different routes and return responses
+           return new Response(JSON.stringify(anotherResult));
+         }
+       }
+     }
+   });
+   ```
+
+4. **Visit `http://localhost:4000`** in your browser to see results. Changes to your code will reflect immediately in the playground on file save.
 
 ## Working with the Monorepo
 
