@@ -15,7 +15,7 @@ const triggers = new Triggers({
 })
 
 triggers.init()
-triggers.logger() // log events realtime
+triggers.logger() // optional, log events realtime
 ```
 
 ```ts
