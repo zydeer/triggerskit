@@ -1,10 +1,18 @@
-import { coreFunction } from '@triggerskit/core'
+import type { Provider, ProviderActions } from '@triggerskit/core'
 
-export function greet(name: string): string {
-  coreFunction()
-  return `Hello, ${name}!`
+type TriggersConfig = {
+  providers: Provider<unknown, ProviderActions>[]
 }
 
-export function sum(num1: number, num2: number): number {
-  return num1 + num2
+export class Triggers {
+  #config: TriggersConfig
+
+  constructor(config: TriggersConfig) {
+    this.#config = config
+  }
+
+  init(): void {
+    this.#config
+    // eat 5-star, do nothing
+  }
 }

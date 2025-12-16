@@ -19,8 +19,8 @@
   "scripts": {
     "build": "bunup",
     "dev": "bunup --watch --no-clean",
-    "lint": "biome check",
-    "format": "biome format --write",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "tsc": "tsc --noEmit",
     "test": "bun test",
     "test:dev": "bun --filter './tests' dev",
