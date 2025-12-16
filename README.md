@@ -15,9 +15,12 @@ const triggers = new Triggers({
 })
 
 triggers.init()
+triggers.logger() // log events realtime
 ```
 
 ```ts
+// src/index.ts
+
 import { myTelegram } from "./triggers"
 
 const result = await myTelegram.actions.sendMessage({
