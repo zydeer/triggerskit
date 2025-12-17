@@ -21,7 +21,7 @@ export type TelegramActions = {
    * @example
    * ```typescript
    * const result = await kit.telegram.actions.getMe()
-   * if (result.ok) {
+   * if (result.data) {
    *   console.log('Bot username:', result.data.username)
    * }
    * ```

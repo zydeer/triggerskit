@@ -12,10 +12,7 @@ Bun.serve({
   routes: {
     '/': {
       GET: async () => {
-        const result = await kit.bot.actions.sendMessage({
-          chatId: 8432550641,
-          text: 'Hello Arshad!',
-        })
+        const result = await kit.bot.actions.getMe()
 
         return Response.json(result)
       },
