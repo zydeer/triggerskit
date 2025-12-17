@@ -22,7 +22,7 @@ kit.enableLogger() // optional
 ```ts
 // src/index.ts
 
-import { myTelegram } from "./triggers"
+import { kit } from "./triggers"
 
 const result = await kit.supportBot.sendMessage({
   chat_id: 123456,
