@@ -1,6 +1,14 @@
-import type { GetMeResult, TelegramContext } from '../types'
+import type { TelegramContext } from '../types'
 
-type GetMeResponse = {
+export type GetMeResult = {
+  ok: boolean
+  id: number
+  isBot: boolean
+  firstName: string
+  username?: string
+}
+
+type Response = {
   ok: boolean
   result?: {
     id: number
@@ -12,13 +20,13 @@ type GetMeResponse = {
 
 export function getMe(ctx: TelegramContext) {
   return async (): Promise<GetMeResult> => {
-    const data = await ctx.request<GetMeResponse>('/getMe')
+    const data = await ctx.request<Response>('/getMe')
 
     return {
       ok: data.ok ?? false,
       id: data.result?.id ?? 0,
-      is_bot: data.result?.is_bot ?? false,
-      first_name: data.result?.first_name ?? '',
+      isBot: data.result?.is_bot ?? false,
+      firstName: data.result?.first_name ?? '',
       username: data.result?.username,
     }
   }

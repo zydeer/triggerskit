@@ -3,6 +3,8 @@ export type RequestFn = <T = unknown>(
   init?: RequestInit,
 ) => Promise<T>
 
+export type ActionContext<TExtra = object> = { request: RequestFn } & TExtra
+
 export type ProviderInstance<
   TName extends string = string,
   TActions extends Record<string, (...args: never[]) => unknown> = Record<
@@ -19,8 +21,4 @@ export type TriggersConfig = Record<string, ProviderInstance>
 
 export type TriggersKit<TConfig extends TriggersConfig> = TConfig & {
   enableLogger: (enabled?: boolean) => void
-}
-
-export type ActionContext = {
-  request: RequestFn
 }

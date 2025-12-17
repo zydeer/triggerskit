@@ -18,7 +18,7 @@ Bun.serve({
     '/': {
       GET: async () => {
         const result = await kit.supportBot.actions.sendMessage({
-          chat_id: 123456,
+          chatId: 123456,
           text: 'Hello from Telegram!',
         })
         return Response.json(result)
