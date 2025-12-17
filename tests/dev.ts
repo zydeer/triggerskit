@@ -2,37 +2,34 @@ import { telegram } from '@triggerskit/telegram'
 import { triggers } from 'triggerskit'
 
 export const kit = triggers({
-  supportBot: telegram({
-    token: process.env.TELEGRAM_TOKEN || 'test-token',
-  }),
-  alertBot: telegram({
-    token: process.env.TELEGRAM_ALERT_TOKEN || 'alert-token',
+  bot: telegram({
+    token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
   }),
 })
-
-kit.enableLogger()
 
 Bun.serve({
   port: 4000,
   routes: {
     '/': {
       GET: async () => {
-        const result = await kit.supportBot.actions.sendMessage({
+        const result = await kit.bot.actions.sendMessage({
           chatId: 123456,
           text: 'Hello from Telegram!',
         })
+
         return Response.json(result)
       },
     },
     '/me': {
       GET: async () => {
-        const me = await kit.supportBot.actions.getMe()
+        const me = await kit.bot.actions.getMe()
+
         return Response.json(me)
       },
     },
     '/raw': {
       GET: async () => {
-        const result = await kit.supportBot.request('/getUpdates', {
+        const result = await kit.bot.request('/getUpdates', {
           method: 'POST',
           body: JSON.stringify({ offset: 0, limit: 10 }),
         })
