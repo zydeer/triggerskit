@@ -9,7 +9,18 @@ import { createRequest } from './request'
 import type { TelegramConfig } from './types'
 
 export type TelegramActions = {
+  /**
+   * Sends a text message to a chat.
+   *
+   * @param params - Message parameters including chat ID, text, and optional parse mode
+   * @returns Promise resolving to a Result containing the sent message ID
+   */
   sendMessage: (params: SendMessageParams) => Promise<Result<SendMessageData>>
+  /**
+   * Gets information about the bot user.
+   *
+   * @returns Promise resolving to a Result containing bot information
+   */
   getMe: () => Promise<Result<GetMeData>>
 }
 
