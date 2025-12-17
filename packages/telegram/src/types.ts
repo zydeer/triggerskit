@@ -1,4 +1,4 @@
-import type { ActionContext } from '@triggerskit/core'
+import type { ActionContext } from '@triggerskit/core/types'
 
 export type TelegramConfig = {
   token: string

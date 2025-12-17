@@ -1,4 +1,4 @@
-import type { RequestFn } from '@triggerskit/core'
+import type { RequestFn } from '@triggerskit/core/types'
 import type { TelegramConfig } from './types'
 
 export function createRequest(config: TelegramConfig): RequestFn {
