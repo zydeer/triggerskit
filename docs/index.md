@@ -4,15 +4,11 @@ layout: home
 
 hero:
   name: "TriggersKit"
-  text: "A typescript library"
-  tagline: My great project tagline
+  tagline: Stop reinventing integrations. One type-safe SDK for all platforms—Telegram, Slack, Discord & more. Setup in 2 minutes.
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
-    - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Get Started
+      link: /introduction
 
 features:
   - title: Feature A
@@ -22,4 +18,3 @@ features:
   - title: Feature C
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
-
