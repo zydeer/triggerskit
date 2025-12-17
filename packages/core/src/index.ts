@@ -1,6 +1,7 @@
 export type {
-  BaseProvider,
+  ActionContext,
   ProviderInstance,
+  RequestFn,
   TriggersConfig,
   TriggersKit,
 } from './types'

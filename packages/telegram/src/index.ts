@@ -1,54 +1,38 @@
-import type {
-  GetMeResult,
-  SendMessageParams,
-  SendMessageResult,
-  TelegramConfig,
-  TelegramInstance,
-} from './types'
+import type { RequestFn } from '@triggerskit/core'
+import { getMe } from './actions/get-me'
+import { sendMessage } from './actions/send-message'
+import type { TelegramConfig, TelegramInstance } from './types'
 
-export function telegram(config: TelegramConfig): TelegramInstance {
+function createRequest(config: TelegramConfig): RequestFn {
   const baseUrl = config.baseUrl ?? 'https://api.telegram.org'
 
-  async function sendMessage(
-    params: SendMessageParams,
-  ): Promise<SendMessageResult> {
-    const response = await fetch(`${baseUrl}/bot${config.token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
+  return async <T = unknown>(path: string, init?: RequestInit): Promise<T> => {
+    const method = path.startsWith('/') ? path.slice(1) : path
+
+    const response = await fetch(`${baseUrl}/bot${config.token}/${method}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
     })
 
-    const data = await response.json()
-    return {
-      ok: data.ok ?? false,
-      message_id: data.result?.message_id ?? 0,
-    }
+    return response.json()
   }
+}
 
-  async function getMe(): Promise<GetMeResult> {
-    const response = await fetch(`${baseUrl}/bot${config.token}/getMe`)
-    const data = await response.json()
-
-    return {
-      ok: data.ok ?? false,
-      id: data.result?.id ?? 0,
-      is_bot: data.result?.is_bot ?? false,
-      first_name: data.result?.first_name ?? '',
-      username: data.result?.username,
-    }
-  }
+export function telegram(config: TelegramConfig): TelegramInstance {
+  const request = createRequest(config)
+  const ctx = { request }
 
   return {
-    provider: 'telegram' as const,
-    sendMessage,
-    getMe,
+    provider: 'telegram',
+    actions: {
+      sendMessage: sendMessage(ctx),
+      getMe: getMe(ctx),
+    },
+    request,
   }
 }
 
-export type {
-  TelegramConfig,
-  TelegramInstance,
-  SendMessageParams,
-  SendMessageResult,
-  GetMeResult,
-}
+export type * from './types'

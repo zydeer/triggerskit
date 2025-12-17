@@ -1,18 +1,26 @@
-export type BaseProvider<TProviderName extends string = string> = {
-  /** Provider identifier for filtering/grouping */
-  readonly provider: TProviderName
-}
+export type RequestFn = <T = unknown>(
+  path: string,
+  init?: RequestInit,
+) => Promise<T>
 
 export type ProviderInstance<
-  TProviderName extends string = string,
-  TMethods = object,
-> = BaseProvider<TProviderName> & TMethods
+  TName extends string = string,
+  TActions extends Record<string, (...args: never[]) => unknown> = Record<
+    string,
+    (...args: never[]) => unknown
+  >,
+> = {
+  readonly provider: TName
+  readonly actions: TActions
+  readonly request: RequestFn
+}
 
-export type TriggersConfig = Record<string, BaseProvider>
+export type TriggersConfig = Record<string, ProviderInstance>
 
 export type TriggersKit<TConfig extends TriggersConfig> = TConfig & {
-  /**
-   * Enable debug logging for all providers
-   */
   enableLogger: (enabled?: boolean) => void
+}
+
+export type ActionContext = {
+  request: RequestFn
 }

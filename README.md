@@ -24,10 +24,14 @@ kit.enableLogger() // optional
 
 import { kit } from "./triggers"
 
-const result = await kit.supportBot.sendMessage({
+const result = await kit.supportBot.actions.sendMessage({
   chat_id: 123456,
   text: 'Hello from Telegram!',
 })
 
-const me = await kit.mainSlack.getMe()
+const me = await kit.mainSlack.actions.getMe()
+
+const result = await kit.supportBot.events.on("message:sent", (msg) => {
+  console.log(msg)
+})
 ```

@@ -17,18 +17,27 @@ Bun.serve({
   routes: {
     '/': {
       GET: async () => {
-        const result = await kit.supportBot.sendMessage({
+        const result = await kit.supportBot.actions.sendMessage({
           chat_id: 123456,
           text: 'Hello from Telegram!',
         })
-
         return Response.json(result)
       },
     },
     '/me': {
       GET: async () => {
-        const me = await kit.supportBot.getMe()
+        const me = await kit.supportBot.actions.getMe()
         return Response.json(me)
+      },
+    },
+    '/raw': {
+      GET: async () => {
+        const result = await kit.supportBot.request('/getUpdates', {
+          method: 'POST',
+          body: JSON.stringify({ offset: 0, limit: 10 }),
+        })
+
+        return Response.json(result)
       },
     },
   },
