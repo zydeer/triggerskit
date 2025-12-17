@@ -1,6 +1,6 @@
 {
   "name": "triggerskit",
-  "description": "A typescript library",
+  "description": "One type-safe SDK for all platforms, Telegram, Slack, Discord & more",
   "version": "0.1.10",
   "type": "module",
   "files": [
