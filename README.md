@@ -2,6 +2,7 @@
 
 ```ts
 // src/triggers.ts
+
 import triggers from 'triggerskit'
 import telegram from '@triggerskit/telegram'
 import slack from '@triggerskit/slack'
