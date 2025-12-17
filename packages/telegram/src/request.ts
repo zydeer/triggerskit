@@ -1,5 +1,5 @@
 import { type RequestFn, TriggersError } from '@triggerskit/core/types'
-import { fetchWithTimeout } from '@triggerskit/core/utils'
+import { capitalize, fetchWithTimeout } from '@triggerskit/core/utils'
 import type { TelegramConfig, TelegramErrorDetails } from './types'
 
 export function createRequest(config: TelegramConfig): RequestFn {
@@ -22,8 +22,10 @@ export function createRequest(config: TelegramConfig): RequestFn {
       const data = await response.json()
 
       if (!data.ok) {
+        const description = data.description?.replace('Bad Request:', '').trim()
+
         throw new TriggersError<TelegramErrorDetails>(
-          data.description ?? 'Telegram API error',
+          description ? capitalize(description) : 'Telegram API error',
           { errorCode: data.error_code },
         )
       }
