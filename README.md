@@ -2,20 +2,20 @@
 
 ```ts
 // src/triggers.ts
-
+import triggers from 'triggerskit'
 import telegram from '@triggerskit/telegram'
-import { Triggers } from 'triggerskit'
+import slack from '@triggerskit/slack'
 
-export const myTelegram = telegram({
-  apiKey: process.env.TELEGRAM_API_KEY,
+export const kit = triggers({
+  supportBot: telegram({
+    token: process.env.TELEGRAM_TOKEN,
+  }),
+  mainSlack: slack({
+    token: process.env.SLACK_TOKEN,
+  })
 })
 
-const triggers = new Triggers({
-  providers: [myTelegram],
-})
-
-triggers.init()
-triggers.logger() // optional, log events realtime
+kit.enableLogger() // optional
 ```
 
 ```ts
@@ -23,7 +23,10 @@ triggers.logger() // optional, log events realtime
 
 import { myTelegram } from "./triggers"
 
-const result = await myTelegram.actions.sendMessage({
-  message: 'hello',
+const result = await kit.supportBot.sendMessage({
+  chat_id: 123456,
+  text: 'Hello from Telegram!',
 })
+
+const me = await kit.mainSlack.getMe()
 ```

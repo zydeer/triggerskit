@@ -1,18 +1,44 @@
-import type { Provider, ProviderActions } from '@triggerskit/core'
+import type {
+  BaseProvider,
+  ProviderInstance,
+  TriggersConfig,
+  TriggersKit,
+} from '@triggerskit/core'
 
-type TriggersConfig = {
-  providers: Provider<unknown, ProviderActions>[]
-}
+export type { TriggersConfig, TriggersKit, BaseProvider, ProviderInstance }
 
-export class Triggers {
-  #config: TriggersConfig
+/**
+ * Create a triggers kit with multiple provider instances
+ *
+ * @example
+ * ```ts
+ * import { triggers } from 'triggerskit'
+ * import { telegram } from '@triggerskit/telegram'
+ *
+ * export const kit = triggers({
+ *   supportBot: telegram({ token: 'BOT_TOKEN' }),
+ * })
+ *
+ * // Usage
+ * await kit.supportBot.sendMessage({ chat_id: 123, text: 'Hello!' })
+ * ```
+ */
+export function triggers<TConfig extends TriggersConfig>(
+  config: TConfig,
+): TriggersKit<TConfig> {
+  let loggerEnabled = false
 
-  constructor(config: TriggersConfig) {
-    this.#config = config
+  function enableLogger(enabled = true): void {
+    loggerEnabled = enabled
+    if (loggerEnabled) {
+      console.log('[triggerskit] Logger enabled')
+    }
   }
 
-  init(): void {
-    this.#config
-    // eat 5-star, do nothing
+  return {
+    ...config,
+    enableLogger,
   }
 }
+
+export default triggers

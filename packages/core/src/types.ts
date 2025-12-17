@@ -1,13 +1,18 @@
-export type ProviderAction<TConfig = unknown, TResult = unknown> = (
-  config: TConfig,
-) => TResult
+export type BaseProvider<TProviderName extends string = string> = {
+  /** Provider identifier for filtering/grouping */
+  readonly provider: TProviderName
+}
 
-export type ProviderActions = Record<string, ProviderAction<never, unknown>>
+export type ProviderInstance<
+  TProviderName extends string = string,
+  TMethods = object,
+> = BaseProvider<TProviderName> & TMethods
 
-export type Provider<
-  TConfig,
-  TActions extends ProviderActions = ProviderActions,
-> = {
-  config: TConfig
-  actions: TActions
+export type TriggersConfig = Record<string, BaseProvider>
+
+export type TriggersKit<TConfig extends TriggersConfig> = TConfig & {
+  /**
+   * Enable debug logging for all providers
+   */
+  enableLogger: (enabled?: boolean) => void
 }

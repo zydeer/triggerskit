@@ -1,26 +1,34 @@
-import telegram from '@triggerskit/telegram'
-import { Triggers } from 'triggerskit'
+import { telegram } from '@triggerskit/telegram'
+import { triggers } from 'triggerskit'
 
-const abcTelegram = telegram({
-  token: '...',
+export const kit = triggers({
+  supportBot: telegram({
+    token: process.env.TELEGRAM_TOKEN || 'test-token',
+  }),
+  alertBot: telegram({
+    token: process.env.TELEGRAM_ALERT_TOKEN || 'alert-token',
+  }),
 })
 
-const triggers = new Triggers({
-  providers: [abcTelegram],
-})
-
-triggers.init()
+kit.enableLogger()
 
 Bun.serve({
   port: 4000,
   routes: {
     '/': {
-      GET: () => {
-        const result = abcTelegram.actions.sendMessage({
-          message: 'hello',
+      GET: async () => {
+        const result = await kit.supportBot.sendMessage({
+          chat_id: 123456,
+          text: 'Hello from Telegram!',
         })
 
-        return new Response(result.timestamp)
+        return Response.json(result)
+      },
+    },
+    '/me': {
+      GET: async () => {
+        const me = await kit.supportBot.getMe()
+        return Response.json(me)
       },
     },
   },
