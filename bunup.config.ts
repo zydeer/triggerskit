@@ -6,7 +6,7 @@ export default defineWorkspace(
       name: 'core',
       root: 'packages/core',
       config: {
-        entry: ['src/types.ts', 'src/utils.ts'],
+        entry: ['src/types/index.ts', 'src/utils/index.ts'],
       },
     },
     {
@@ -21,5 +21,6 @@ export default defineWorkspace(
   {
     exports: true,
     unused: true,
+    splitting: false,
   },
 )

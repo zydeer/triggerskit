@@ -7,14 +7,17 @@
     "dist"
   ],
   "exports": {
-    "./types": {
+    "./utils": {
       "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "types": "./dist/utils/index.d.ts",
+        "default": "./dist/utils/index.js"
       }
     },
-    "./utils": {
-      "import": "./dist/utils.js"
+    "./types": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/types/index.js"
+      }
     },
     "./package.json": "./package.json"
   },

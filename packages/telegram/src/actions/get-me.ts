@@ -1,7 +1,8 @@
+import type { Result } from '@triggerskit/core/types'
+import { fail, ok } from '@triggerskit/core/utils'
 import type { TelegramContext } from '../types'
 
-export type GetMeResult = {
-  ok: boolean
+export type GetMeData = {
   id: number
   isBot: boolean
   firstName: string
@@ -19,15 +20,18 @@ type Response = {
 }
 
 export function getMe(ctx: TelegramContext) {
-  return async (): Promise<GetMeResult> => {
-    const data = await ctx.request<Response>('/getMe')
+  return async (): Promise<Result<GetMeData>> => {
+    try {
+      const data = await ctx.request<Response>('/getMe')
 
-    return {
-      ok: data.ok ?? false,
-      id: data.result?.id ?? 0,
-      isBot: data.result?.is_bot ?? false,
-      firstName: data.result?.first_name ?? '',
-      username: data.result?.username,
+      return ok({
+        id: data.result?.id ?? 0,
+        isBot: data.result?.is_bot ?? false,
+        firstName: data.result?.first_name ?? '',
+        username: data.result?.username,
+      })
+    } catch (e) {
+      return fail(e)
     }
   }
 }

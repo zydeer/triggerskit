@@ -1,20 +1,42 @@
-import type { RequestFn } from '@triggerskit/core/types'
-import type { TelegramConfig } from './types'
+import { type RequestFn, TriggersError } from '@triggerskit/core/types'
+import { fetchWithTimeout } from '@triggerskit/core/utils'
+import type { TelegramConfig, TelegramErrorDetails } from './types'
 
 export function createRequest(config: TelegramConfig): RequestFn {
   const baseUrl = config.baseUrl ?? 'https://api.telegram.org'
 
   return async <T = unknown>(path: string, init?: RequestInit): Promise<T> => {
     const method = path.startsWith('/') ? path.slice(1) : path
+    const url = `${baseUrl}/bot${config.token}/${method}`
 
-    const response = await fetch(`${baseUrl}/bot${config.token}/${method}`, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers,
-      },
-    })
+    try {
+      const response = await fetchWithTimeout(url, {
+        ...init,
+        timeout: config.timeout,
+        headers: {
+          'Content-Type': 'application/json',
+          ...init?.headers,
+        },
+      })
 
-    return response.json()
+      const data = await response.json()
+
+      if (!data.ok) {
+        throw new TriggersError<TelegramErrorDetails>(
+          data.description ?? 'Telegram API error',
+          { errorCode: data.error_code },
+        )
+      }
+
+      return data as T
+    } catch (e) {
+      if (e instanceof TriggersError) throw e
+
+      if (e instanceof Error && e.name === 'AbortError') {
+        throw new TriggersError('Request timed out')
+      }
+
+      throw new TriggersError('Network request failed')
+    }
   }
 }
