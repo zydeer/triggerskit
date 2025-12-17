@@ -22,9 +22,9 @@ Bun.serve({
     },
     '/me': {
       GET: async () => {
-        const me = await kit.bot.actions.getMe()
+        const result = await kit.bot.actions.getMe()
 
-        return Response.json(me)
+        return Response.json(result)
       },
     },
     '/raw': {
