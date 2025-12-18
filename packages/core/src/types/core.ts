@@ -17,8 +17,8 @@ export type ProviderInstance<
   readonly request: RequestFn
 }
 
-export type TriggersConfig = Record<string, ProviderInstance>
-
-export type TriggersKit<TConfig extends TriggersConfig> = TConfig & {
-  enableLogger: (enabled?: boolean) => void
+export type TriggersConfig = {
+  providers: Record<string, ProviderInstance>
 }
+
+export type TriggersKit<TConfig extends TriggersConfig> = TConfig['providers']

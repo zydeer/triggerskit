@@ -2,9 +2,11 @@ import { telegram } from '@triggerskit/telegram'
 import { triggers } from 'triggerskit'
 
 export const kit = triggers({
-  bot: telegram({
-    token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
-  }),
+  providers: {
+    prettyBot: telegram({
+      token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
+    }),
+  },
 })
 
 Bun.serve({
@@ -12,7 +14,7 @@ Bun.serve({
   routes: {
     '/': {
       GET: async () => {
-        const result = await kit.bot.actions.sendMessage({
+        const result = await kit.prettyBot.actions.sendMessage({
           chatId: 8432550641,
           text: 'Replying to specific text',
         })
@@ -30,14 +32,14 @@ Bun.serve({
     },
     '/me': {
       GET: async () => {
-        const result = await kit.bot.actions.getMe()
+        const result = await kit.prettyBot.actions.getMe()
 
         return Response.json(result)
       },
     },
     '/raw': {
       GET: async () => {
-        const result = await kit.bot.request('/getUpdates', {
+        const result = await kit.prettyBot.request('/getUpdates', {
           method: 'POST',
           body: JSON.stringify({ offset: 0, limit: 10 }),
         })
@@ -48,14 +50,14 @@ Bun.serve({
 
     '/webhook': {
       POST: async (request) => {
-        const result = await kit.bot.handleUpdate(request)
+        const result = await kit.prettyBot.handleUpdate(request)
 
         if (result.data) {
           const update = result.data
 
           if (update.message) {
             console.log('New message:', update.message.text)
-            await kit.bot.actions.sendMessage({
+            await kit.prettyBot.actions.sendMessage({
               chatId: update.message.chat.id,
               text: `You said: ${update.message.text}`,
             })
@@ -71,7 +73,7 @@ Bun.serve({
     },
     '/webhook/setup': {
       GET: async () => {
-        const result = await kit.bot.actions.setWebhook({
+        const result = await kit.prettyBot.actions.setWebhook({
           url: 'https://example.com/webhook',
           secretToken: 'my-secret-token',
           allowedUpdates: ['channel_post'],
@@ -82,14 +84,14 @@ Bun.serve({
     },
     '/webhook/info': {
       GET: async () => {
-        const result = await kit.bot.actions.getWebhookInfo()
+        const result = await kit.prettyBot.actions.getWebhookInfo()
 
         return Response.json(result)
       },
     },
     '/webhook/delete': {
       GET: async () => {
-        const result = await kit.bot.actions.deleteWebhook()
+        const result = await kit.prettyBot.actions.deleteWebhook()
 
         return Response.json(result)
       },

@@ -1,10 +1,11 @@
 # triggerskit
 
-Current usage demo. Fully type-safe end to end.
+Below are the concepts. Fully type-safe end to end.
 
 ```ts
 import { triggers } from 'triggerskit'
 import { redis } from 'triggerskit/storage'
+import { logger } from 'triggerskit/plugins'
 import { telegram } from '@triggerskit/telegram'
 
 export const kit = triggers({
@@ -14,6 +15,7 @@ export const kit = triggers({
     }),
   },
   storage: redis({ url: process.env.REDIS_URL }),
+  plugins: [logger()],
 })
 
 Bun.serve({
