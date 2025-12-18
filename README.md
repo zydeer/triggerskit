@@ -1,37 +1,102 @@
 # triggerskit
 
-```ts
-// src/triggers.ts
+Current usage demo. Fully type-safe end to end.
 
-import triggers from 'triggerskit'
-import telegram from '@triggerskit/telegram'
-import slack from '@triggerskit/slack'
+```ts
+import { telegram } from '@triggerskit/telegram'
+import { triggers } from 'triggerskit'
 
 export const kit = triggers({
-  supportBot: telegram({
+  bot: telegram({
     token: process.env.TELEGRAM_TOKEN,
   }),
-  mainSlack: slack({
-    token: process.env.SLACK_TOKEN,
-  })
 })
 
-kit.enableLogger() // optional
-```
+Bun.serve({
+  port: 4000,
+  routes: {
+    '/': {
+      GET: async () => {
+        const result = await kit.bot.actions.sendMessage({
+          chatId: 1234,
+          text: 'Hey, how is going?',
+        })
 
-```ts
-// src/index.ts
+        if (result.data) {
+          return Response.json(result.data.chat)
+        }
 
-import { kit } from "./triggers"
+        if (result.error) {
+          return new Response(result.error.message)
+        }
 
-const result = await kit.supportBot.actions.sendMessage({
-  chat_id: 123456,
-  text: 'Hello from Telegram!',
-})
+        return new Response('Error')
+      },
+    },
+    '/me': {
+      GET: async () => {
+        const result = await kit.bot.actions.getMe()
 
-const me = await kit.mainSlack.actions.getMe()
+        return Response.json(result)
+      },
+    },
+    '/raw': {
+      GET: async () => {
+        const result = await kit.bot.request('/getUpdates', {
+          method: 'POST',
+          body: JSON.stringify({ offset: 0, limit: 10 }),
+        })
 
-const result = await kit.supportBot.events.on("message:sent", (msg) => {
-  console.log(msg)
+        return Response.json(result)
+      },
+    },
+    '/webhook': {
+      POST: async (request) => {
+        const result = await kit.bot.handleUpdate(request)
+
+        if (result.data) {
+          const update = result.data
+
+          if (update.message) {
+            console.log('New message:', update.message.text)
+            await kit.bot.actions.sendMessage({
+              chatId: update.message.chat.id,
+              text: `You said: ${update.message.text}`,
+            })
+          }
+
+          if (update.callbackQuery) {
+            console.log('Callback:', update.callbackQuery.data)
+          }
+        }
+
+        return new Response('OK')
+      },
+    },
+    '/webhook/setup': {
+      GET: async () => {
+        const result = await kit.bot.actions.setWebhook({
+          url: 'https://example.com/webhook',
+          secretToken: 'my-secret-token',
+        })
+
+        return Response.json(result)
+      },
+    },
+    '/webhook/info': {
+      GET: async () => {
+        const result = await kit.bot.actions.getWebhookInfo()
+
+        return Response.json(result)
+      },
+    },
+    '/webhook/delete': {
+      GET: async () => {
+        const result = await kit.bot.actions.deleteWebhook()
+
+        return Response.json(result)
+      },
+    },
+  },
 })
 ```
