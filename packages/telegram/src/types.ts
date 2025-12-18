@@ -999,3 +999,1411 @@ export type Message = {
  * @see https://core.telegram.org/bots/api#formatting-options
  */
 export type ParseMode = 'Markdown' | 'MarkdownV2' | 'HTML'
+
+/**
+ * This object represents a point on the map.
+ *
+ * @see https://core.telegram.org/bots/api#location
+ */
+export type Location = {
+  /**
+   * Latitude as defined by the sender.
+   */
+  latitude: number
+  /**
+   * Longitude as defined by the sender.
+   */
+  longitude: number
+  /**
+   * The radius of uncertainty for the location, measured in meters; 0-1500.
+   */
+  horizontalAccuracy?: number
+  /**
+   * Time relative to the message sending date, during which the location can be updated; in seconds.
+   * For active live locations only.
+   */
+  livePeriod?: number
+  /**
+   * The direction in which user is moving, in degrees; 1-360.
+   * For active live locations only.
+   */
+  heading?: number
+  /**
+   * The maximum distance for proximity alerts about approaching another chat member, in meters.
+   * For sent live locations only.
+   */
+  proximityAlertRadius?: number
+}
+
+/**
+ * This object represents an incoming inline query.
+ *
+ * When the user sends an empty query, your bot could return some default or trending results.
+ *
+ * @see https://core.telegram.org/bots/api#inlinequery
+ */
+export type InlineQuery = {
+  /**
+   * Unique identifier for this query.
+   */
+  id: string
+  /**
+   * Sender of the query.
+   */
+  from: User
+  /**
+   * Text of the query (up to 256 characters).
+   */
+  query: string
+  /**
+   * Offset of the results to be returned, can be controlled by the bot.
+   */
+  offset: string
+  /**
+   * Type of the chat from which the inline query was sent.
+   *
+   * Can be either `sender` for a private chat with the inline query sender,
+   * `private`, `group`, `supergroup`, or `channel`.
+   *
+   * The chat type should be always known for requests sent from official clients
+   * and most third-party clients, unless the request was sent from a secret chat.
+   */
+  chatType?: 'sender' | 'private' | 'group' | 'supergroup' | 'channel'
+  /**
+   * Sender location, only for bots that request user location.
+   */
+  location?: Location
+}
+
+/**
+ * Represents a result of an inline query that was chosen by the user and sent to their chat partner.
+ *
+ * **Note:** It is necessary to enable inline feedback via @BotFather in order to receive these objects in updates.
+ *
+ * @see https://core.telegram.org/bots/api#choseninlineresult
+ */
+export type ChosenInlineResult = {
+  /**
+   * The unique identifier for the result that was chosen.
+   */
+  resultId: string
+  /**
+   * The user that chose the result.
+   */
+  from: User
+  /**
+   * Sender location, only for bots that require user location.
+   */
+  location?: Location
+  /**
+   * Identifier of the sent inline message.
+   *
+   * Available only if there is an inline keyboard attached to the message.
+   * Will be also received in callback queries and can be used to edit the message.
+   */
+  inlineMessageId?: string
+  /**
+   * The query that was used to obtain the result.
+   */
+  query: string
+}
+
+/**
+ * This object represents a shipping address.
+ *
+ * @see https://core.telegram.org/bots/api#shippingaddress
+ */
+export type ShippingAddress = {
+  /**
+   * Two-letter ISO 3166-1 alpha-2 country code.
+   */
+  countryCode: string
+  /**
+   * State, if applicable.
+   */
+  state: string
+  /**
+   * City.
+   */
+  city: string
+  /**
+   * First line for the address.
+   */
+  streetLine1: string
+  /**
+   * Second line for the address.
+   */
+  streetLine2: string
+  /**
+   * Address post code.
+   */
+  postCode: string
+}
+
+/**
+ * This object contains information about an incoming shipping query.
+ *
+ * @see https://core.telegram.org/bots/api#shippingquery
+ */
+export type ShippingQuery = {
+  /**
+   * Unique query identifier.
+   */
+  id: string
+  /**
+   * User who sent the query.
+   */
+  from: User
+  /**
+   * Bot-specified invoice payload.
+   */
+  invoicePayload: string
+  /**
+   * User specified shipping address.
+   */
+  shippingAddress: ShippingAddress
+}
+
+/**
+ * This object represents information about an order.
+ *
+ * @see https://core.telegram.org/bots/api#orderinfo
+ */
+export type OrderInfo = {
+  /**
+   * User name.
+   */
+  name?: string
+  /**
+   * User's phone number.
+   */
+  phoneNumber?: string
+  /**
+   * User email.
+   */
+  email?: string
+  /**
+   * User shipping address.
+   */
+  shippingAddress?: ShippingAddress
+}
+
+/**
+ * This object contains information about an incoming pre-checkout query.
+ *
+ * @see https://core.telegram.org/bots/api#precheckoutquery
+ */
+export type PreCheckoutQuery = {
+  /**
+   * Unique query identifier.
+   */
+  id: string
+  /**
+   * User who sent the query.
+   */
+  from: User
+  /**
+   * Three-letter ISO 4217 currency code, or `XTR` for payments in Telegram Stars.
+   */
+  currency: string
+  /**
+   * Total price in the smallest units of the currency (integer, not float/double).
+   *
+   * For example, for a price of `US$ 1.45` pass `amount = 145`.
+   *
+   * @see https://core.telegram.org/bots/payments#supported-currencies
+   */
+  totalAmount: number
+  /**
+   * Bot-specified invoice payload.
+   */
+  invoicePayload: string
+  /**
+   * Identifier of the shipping option chosen by the user.
+   */
+  shippingOptionId?: string
+  /**
+   * Order information provided by the user.
+   */
+  orderInfo?: OrderInfo
+}
+
+/**
+ * This object contains information about one answer option in a poll.
+ *
+ * @see https://core.telegram.org/bots/api#polloption
+ */
+export type PollOption = {
+  /**
+   * Option text, 1-100 characters.
+   */
+  text: string
+  /**
+   * Special entities that appear in the option text.
+   * Currently, only custom emoji entities are allowed in poll option texts.
+   */
+  textEntities?: MessageEntity[]
+  /**
+   * Number of users that voted for this option.
+   */
+  voterCount: number
+}
+
+/**
+ * This object represents a poll.
+ *
+ * @see https://core.telegram.org/bots/api#poll
+ */
+export type Poll = {
+  /**
+   * Unique poll identifier.
+   */
+  id: string
+  /**
+   * Poll question, 1-300 characters.
+   */
+  question: string
+  /**
+   * Special entities that appear in the question.
+   * Currently, only custom emoji entities are allowed in poll questions.
+   */
+  questionEntities?: MessageEntity[]
+  /**
+   * List of poll options.
+   */
+  options: PollOption[]
+  /**
+   * Total number of users that voted in the poll.
+   */
+  totalVoterCount: number
+  /**
+   * `true` if the poll is closed.
+   */
+  isClosed: boolean
+  /**
+   * `true` if the poll is anonymous.
+   */
+  isAnonymous: boolean
+  /**
+   * Poll type.
+   *
+   * - `regular` - Regular poll
+   * - `quiz` - Quiz poll with a correct answer
+   */
+  type: 'regular' | 'quiz'
+  /**
+   * `true` if the poll allows multiple answers.
+   */
+  allowsMultipleAnswers: boolean
+  /**
+   * 0-based identifier of the correct answer option.
+   *
+   * Available only for polls in the quiz mode, which are closed,
+   * or was sent (not forwarded) by the bot or to the private chat with the bot.
+   */
+  correctOptionId?: number
+  /**
+   * Text that is shown when a user chooses an incorrect answer or taps on the lamp icon
+   * in a quiz-style poll, 0-200 characters.
+   */
+  explanation?: string
+  /**
+   * Special entities like usernames, URLs, bot commands, etc. that appear in the explanation.
+   */
+  explanationEntities?: MessageEntity[]
+  /**
+   * Amount of time in seconds the poll will be active after creation.
+   */
+  openPeriod?: number
+  /**
+   * Point in time (Unix timestamp) when the poll will be automatically closed.
+   */
+  closeDate?: number
+}
+
+/**
+ * This object represents an answer of a user in a non-anonymous poll.
+ *
+ * @see https://core.telegram.org/bots/api#pollanswer
+ */
+export type PollAnswer = {
+  /**
+   * Unique poll identifier.
+   */
+  pollId: string
+  /**
+   * The chat that changed the answer to the poll, if the voter is anonymous.
+   */
+  voterChat?: Chat
+  /**
+   * The user that changed the answer to the poll, if the voter isn't anonymous.
+   */
+  user?: User
+  /**
+   * 0-based identifiers of chosen answer options.
+   * May be empty if the vote was retracted.
+   */
+  optionIds: number[]
+}
+
+/**
+ * Represents a chat member that owns the chat and has all administrator privileges.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberowner
+ */
+export type ChatMemberOwner = {
+  /**
+   * The member's status in the chat, always `creator`.
+   */
+  status: 'creator'
+  /**
+   * Information about the user.
+   */
+  user: User
+  /**
+   * `true` if the user's presence in the chat is hidden.
+   */
+  isAnonymous: boolean
+  /**
+   * Custom title for this user.
+   */
+  customTitle?: string
+}
+
+/**
+ * Represents a chat member that has some additional privileges.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberadministrator
+ */
+export type ChatMemberAdministrator = {
+  /**
+   * The member's status in the chat, always `administrator`.
+   */
+  status: 'administrator'
+  /**
+   * Information about the user.
+   */
+  user: User
+  /**
+   * `true` if the bot is allowed to edit administrator privileges of that user.
+   */
+  canBeEdited: boolean
+  /**
+   * `true` if the user's presence in the chat is hidden.
+   */
+  isAnonymous: boolean
+  /**
+   * `true` if the administrator can access the chat event log, get boost list,
+   * see hidden supergroup and channel members, report spam messages and ignore slow mode.
+   * Implied by any other administrator privilege.
+   */
+  canManageChat: boolean
+  /**
+   * `true` if the administrator can delete messages of other users.
+   */
+  canDeleteMessages: boolean
+  /**
+   * `true` if the administrator can manage video chats.
+   */
+  canManageVideoChats: boolean
+  /**
+   * `true` if the administrator can restrict, ban or unban chat members,
+   * or access supergroup statistics.
+   */
+  canRestrictMembers: boolean
+  /**
+   * `true` if the administrator can add new administrators with a subset of their own privileges
+   * or demote administrators that they have promoted, directly or indirectly.
+   */
+  canPromoteMembers: boolean
+  /**
+   * `true` if the user is allowed to change the chat title, photo and other settings.
+   */
+  canChangeInfo: boolean
+  /**
+   * `true` if the user is allowed to invite new users to the chat.
+   */
+  canInviteUsers: boolean
+  /**
+   * `true` if the administrator can post stories to the chat.
+   */
+  canPostStories: boolean
+  /**
+   * `true` if the administrator can edit stories posted by other users,
+   * post stories to the chat page, pin chat stories, and access the chat's story archive.
+   */
+  canEditStories: boolean
+  /**
+   * `true` if the administrator can delete stories posted by other users.
+   */
+  canDeleteStories: boolean
+  /**
+   * `true` if the administrator can post messages in the channel,
+   * or access channel statistics; for channels only.
+   */
+  canPostMessages?: boolean
+  /**
+   * `true` if the administrator can edit messages of other users and can pin messages;
+   * for channels only.
+   */
+  canEditMessages?: boolean
+  /**
+   * `true` if the user is allowed to pin messages; for groups and supergroups only.
+   */
+  canPinMessages?: boolean
+  /**
+   * `true` if the user is allowed to create, rename, close, and reopen forum topics;
+   * for supergroups only.
+   */
+  canManageTopics?: boolean
+  /**
+   * Custom title for this user.
+   */
+  customTitle?: string
+}
+
+/**
+ * Represents a chat member that has no additional privileges or restrictions.
+ *
+ * @see https://core.telegram.org/bots/api#chatmembermember
+ */
+export type ChatMemberMember = {
+  /**
+   * The member's status in the chat, always `member`.
+   */
+  status: 'member'
+  /**
+   * Information about the user.
+   */
+  user: User
+  /**
+   * Date when the user's subscription will expire; Unix time.
+   */
+  untilDate?: number
+}
+
+/**
+ * Represents a chat member that is under certain restrictions in the chat. Supergroups only.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberrestricted
+ */
+export type ChatMemberRestricted = {
+  /**
+   * The member's status in the chat, always `restricted`.
+   */
+  status: 'restricted'
+  /**
+   * Information about the user.
+   */
+  user: User
+  /**
+   * `true` if the user is a member of the chat at the moment of the request.
+   */
+  isMember: boolean
+  /**
+   * `true` if the user is allowed to send text messages, contacts, giveaways, giveaway winners,
+   * invoices, locations and venues.
+   */
+  canSendMessages: boolean
+  /**
+   * `true` if the user is allowed to send audios.
+   */
+  canSendAudios: boolean
+  /**
+   * `true` if the user is allowed to send documents.
+   */
+  canSendDocuments: boolean
+  /**
+   * `true` if the user is allowed to send photos.
+   */
+  canSendPhotos: boolean
+  /**
+   * `true` if the user is allowed to send videos.
+   */
+  canSendVideos: boolean
+  /**
+   * `true` if the user is allowed to send video notes.
+   */
+  canSendVideoNotes: boolean
+  /**
+   * `true` if the user is allowed to send voice notes.
+   */
+  canSendVoiceNotes: boolean
+  /**
+   * `true` if the user is allowed to send polls.
+   */
+  canSendPolls: boolean
+  /**
+   * `true` if the user is allowed to send animations, games, stickers and use inline bots.
+   */
+  canSendOtherMessages: boolean
+  /**
+   * `true` if the user is allowed to add web page previews to their messages.
+   */
+  canAddWebPagePreviews: boolean
+  /**
+   * `true` if the user is allowed to change the chat title, photo and other settings.
+   */
+  canChangeInfo: boolean
+  /**
+   * `true` if the user is allowed to invite new users to the chat.
+   */
+  canInviteUsers: boolean
+  /**
+   * `true` if the user is allowed to pin messages.
+   */
+  canPinMessages: boolean
+  /**
+   * `true` if the user is allowed to create forum topics.
+   */
+  canManageTopics: boolean
+  /**
+   * Date when restrictions will be lifted for this user; Unix time.
+   * If 0, then the user is restricted forever.
+   */
+  untilDate: number
+}
+
+/**
+ * Represents a chat member that isn't currently a member of the chat,
+ * but may join it themselves.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberleft
+ */
+export type ChatMemberLeft = {
+  /**
+   * The member's status in the chat, always `left`.
+   */
+  status: 'left'
+  /**
+   * Information about the user.
+   */
+  user: User
+}
+
+/**
+ * Represents a chat member that was banned in the chat
+ * and can't return to the chat or view chat messages.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberbanned
+ */
+export type ChatMemberBanned = {
+  /**
+   * The member's status in the chat, always `kicked`.
+   */
+  status: 'kicked'
+  /**
+   * Information about the user.
+   */
+  user: User
+  /**
+   * Date when restrictions will be lifted for this user; Unix time.
+   * If 0, then the user is banned forever.
+   */
+  untilDate: number
+}
+
+/**
+ * This object contains information about one member of a chat.
+ *
+ * This is a union type of all possible chat member states.
+ *
+ * @see https://core.telegram.org/bots/api#chatmember
+ */
+export type ChatMember =
+  | ChatMemberOwner
+  | ChatMemberAdministrator
+  | ChatMemberMember
+  | ChatMemberRestricted
+  | ChatMemberLeft
+  | ChatMemberBanned
+
+/**
+ * Represents an invite link for a chat.
+ *
+ * @see https://core.telegram.org/bots/api#chatinvitelink
+ */
+export type ChatInviteLink = {
+  /**
+   * The invite link.
+   * If the link was created by another chat administrator, then the second part will be replaced with "…".
+   */
+  inviteLink: string
+  /**
+   * Creator of the link.
+   */
+  creator: User
+  /**
+   * `true` if users joining the chat via the link need to be approved by chat administrators.
+   */
+  createsJoinRequest: boolean
+  /**
+   * `true` if the link is primary.
+   */
+  isPrimary: boolean
+  /**
+   * `true` if the link is revoked.
+   */
+  isRevoked: boolean
+  /**
+   * Invite link name.
+   */
+  name?: string
+  /**
+   * Point in time (Unix timestamp) when the link will expire or has been expired.
+   */
+  expireDate?: number
+  /**
+   * The maximum number of users that can be members of the chat simultaneously
+   * after joining the chat via this invite link; 1-99999.
+   */
+  memberLimit?: number
+  /**
+   * Number of pending join requests created using this link.
+   */
+  pendingJoinRequestCount?: number
+  /**
+   * The number of seconds the subscription will be active for before the next payment.
+   */
+  subscriptionPeriod?: number
+  /**
+   * The amount of Telegram Stars a user must pay initially and after each subsequent
+   * subscription period to be a member of the chat using the link.
+   */
+  subscriptionPrice?: number
+}
+
+/**
+ * This object represents changes in the status of a chat member.
+ *
+ * @see https://core.telegram.org/bots/api#chatmemberupdated
+ */
+export type ChatMemberUpdated = {
+  /**
+   * Chat the user belongs to.
+   */
+  chat: Chat
+  /**
+   * Performer of the action, which resulted in the change.
+   */
+  from: User
+  /**
+   * Date the change was done in Unix time.
+   */
+  date: number
+  /**
+   * Previous information about the chat member.
+   */
+  oldChatMember: ChatMember
+  /**
+   * New information about the chat member.
+   */
+  newChatMember: ChatMember
+  /**
+   * Chat invite link, which was used by the user to join the chat;
+   * for joining by invite link events only.
+   */
+  inviteLink?: ChatInviteLink
+  /**
+   * `true` if the user joined the chat after sending a direct join request
+   * without using an invite link and being approved by an administrator.
+   */
+  viaJoinRequest?: boolean
+  /**
+   * `true` if the user joined the chat via a chat folder invite link.
+   */
+  viaChatFolderInviteLink?: boolean
+}
+
+/**
+ * Represents a join request sent to a chat.
+ *
+ * @see https://core.telegram.org/bots/api#chatjoinrequest
+ */
+export type ChatJoinRequest = {
+  /**
+   * Chat to which the request was sent.
+   */
+  chat: Chat
+  /**
+   * User that sent the join request.
+   */
+  from: User
+  /**
+   * Identifier of a private chat with the user who sent the join request.
+   *
+   * This number may have more than 32 significant bits and some programming languages
+   * may have difficulty/silent defects in interpreting it.
+   * But it has at most 52 significant bits, so a 64-bit integer or double-precision
+   * float type are safe for storing this identifier.
+   *
+   * The bot can use this identifier for 5 minutes to send messages until the join request is processed,
+   * assuming no other administrator contacted the user.
+   */
+  userChatId: number
+  /**
+   * Date the request was sent in Unix time.
+   */
+  date: number
+  /**
+   * Bio of the user.
+   */
+  bio?: string
+  /**
+   * Chat invite link that was used by the user to send the join request.
+   */
+  inviteLink?: ChatInviteLink
+}
+
+/**
+ * The reaction is based on an emoji.
+ *
+ * @see https://core.telegram.org/bots/api#reactiontypeemoji
+ */
+export type ReactionTypeEmoji = {
+  /**
+   * Type of the reaction, always `emoji`.
+   */
+  type: 'emoji'
+  /**
+   * Reaction emoji.
+   *
+   * Currently, it can be one of the following emojis:
+   * 👍, 👎, ❤, 🔥, 🥰, 👏, 😁, 🤔, 🤯, 😱, 🤬, 😢, 🎉, 🤩, 🤮, 💩, 🙏, 👌, 🕊, 🤡, 🥱, 🥴, 😍, 🐳, ❤‍🔥, 🌚, 🌭, 💯, 🤣, ⚡, 🍌, 🏆, 💔, 🤨, 😐, 🍓, 🍾, 💋, 🖕, 😈, 😴, 😭, 🤓, 👻, 👨‍💻, 👀, 🎃, 🙈, 😇, 😨, 🤝, ✍, 🤗, 🫡, 🎅, 🎄, ☃, 💅, 🤪, 🗿, 🆒, 💘, 🙉, 🦄, 😘, 💊, 🙊, 😎, 👾, 🤷‍♂, 🤷, 🤷‍♀, 😡
+   */
+  emoji: string
+}
+
+/**
+ * The reaction is based on a custom emoji.
+ *
+ * @see https://core.telegram.org/bots/api#reactiontypecustomemoji
+ */
+export type ReactionTypeCustomEmoji = {
+  /**
+   * Type of the reaction, always `custom_emoji`.
+   */
+  type: 'customEmoji'
+  /**
+   * Custom emoji identifier.
+   */
+  customEmojiId: string
+}
+
+/**
+ * The reaction is paid.
+ *
+ * @see https://core.telegram.org/bots/api#reactiontypepaid
+ */
+export type ReactionTypePaid = {
+  /**
+   * Type of the reaction, always `paid`.
+   */
+  type: 'paid'
+}
+
+/**
+ * This object describes the type of a reaction.
+ *
+ * This is a union type of all possible reaction types.
+ *
+ * @see https://core.telegram.org/bots/api#reactiontype
+ */
+export type ReactionType =
+  | ReactionTypeEmoji
+  | ReactionTypeCustomEmoji
+  | ReactionTypePaid
+
+/**
+ * Represents a reaction added to a message along with the number of times it was added.
+ *
+ * @see https://core.telegram.org/bots/api#reactioncount
+ */
+export type ReactionCount = {
+  /**
+   * Type of the reaction.
+   */
+  type: ReactionType
+  /**
+   * Number of times the reaction was added.
+   */
+  totalCount: number
+}
+
+/**
+ * This object represents a change of a reaction on a message performed by a user.
+ *
+ * @see https://core.telegram.org/bots/api#messagereactionupdated
+ */
+export type MessageReactionUpdated = {
+  /**
+   * The chat containing the message the user reacted to.
+   */
+  chat: Chat
+  /**
+   * Unique identifier of the message inside the chat.
+   */
+  messageId: number
+  /**
+   * The user that changed the reaction, if the user isn't anonymous.
+   */
+  user?: User
+  /**
+   * The chat on behalf of which the reaction was changed, if the user is anonymous.
+   */
+  actorChat?: Chat
+  /**
+   * Date of the change in Unix time.
+   */
+  date: number
+  /**
+   * Previous list of reaction types that were set by the user.
+   */
+  oldReaction: ReactionType[]
+  /**
+   * New list of reaction types that have been set by the user.
+   */
+  newReaction: ReactionType[]
+}
+
+/**
+ * This object represents reaction changes on a message with anonymous reactions.
+ *
+ * @see https://core.telegram.org/bots/api#messagereactioncountupdated
+ */
+export type MessageReactionCountUpdated = {
+  /**
+   * The chat containing the message.
+   */
+  chat: Chat
+  /**
+   * Unique identifier of the message inside the chat.
+   */
+  messageId: number
+  /**
+   * Date of the change in Unix time.
+   */
+  date: number
+  /**
+   * List of reactions that are present on the message.
+   */
+  reactions: ReactionCount[]
+}
+
+/**
+ * The boost was obtained by subscribing to Telegram Premium
+ * or by gifting a Telegram Premium subscription to another user.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostsourcepremium
+ */
+export type ChatBoostSourcePremium = {
+  /**
+   * Source of the boost, always `premium`.
+   */
+  source: 'premium'
+  /**
+   * User that boosted the chat.
+   */
+  user: User
+}
+
+/**
+ * The boost was obtained by the creation of Telegram Premium gift codes
+ * to boost a chat. Each such code boosts the chat 4 times for the duration
+ * of the corresponding Telegram Premium subscription.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostsourcegiftcode
+ */
+export type ChatBoostSourceGiftCode = {
+  /**
+   * Source of the boost, always `gift_code`.
+   */
+  source: 'giftCode'
+  /**
+   * User for which the gift code was created.
+   */
+  user: User
+}
+
+/**
+ * The boost was obtained by the creation of a Telegram Premium or a Telegram Star giveaway.
+ * This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription
+ * for Telegram Premium giveaways and `prize_star_count / 500` times for one year for Telegram Star giveaways.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostsourcegiveaway
+ */
+export type ChatBoostSourceGiveaway = {
+  /**
+   * Source of the boost, always `giveaway`.
+   */
+  source: 'giveaway'
+  /**
+   * Identifier of a message in the chat with the giveaway; the message could have been deleted already.
+   * May be 0 if the message isn't sent yet.
+   */
+  giveawayMessageId: number
+  /**
+   * User that won the prize in the giveaway if any; for Telegram Premium giveaways only.
+   */
+  user?: User
+  /**
+   * The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only.
+   */
+  prizeStarCount?: number
+  /**
+   * `true` if the giveaway was completed, but there was no user to win the prize.
+   */
+  isUnclaimed?: boolean
+}
+
+/**
+ * This object describes the source of a chat boost.
+ *
+ * This is a union type of all possible boost sources.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostsource
+ */
+export type ChatBoostSource =
+  | ChatBoostSourcePremium
+  | ChatBoostSourceGiftCode
+  | ChatBoostSourceGiveaway
+
+/**
+ * This object contains information about a chat boost.
+ *
+ * @see https://core.telegram.org/bots/api#chatboost
+ */
+export type ChatBoost = {
+  /**
+   * Unique identifier of the boost.
+   */
+  boostId: string
+  /**
+   * Point in time (Unix timestamp) when the chat was boosted.
+   */
+  addDate: number
+  /**
+   * Point in time (Unix timestamp) when the boost will automatically expire,
+   * unless the booster's Telegram Premium subscription is prolonged.
+   */
+  expirationDate: number
+  /**
+   * Source of the added boost.
+   */
+  source: ChatBoostSource
+}
+
+/**
+ * This object represents a boost added to a chat or changed.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostupdated
+ */
+export type ChatBoostUpdated = {
+  /**
+   * Chat which was boosted.
+   */
+  chat: Chat
+  /**
+   * Information about the chat boost.
+   */
+  boost: ChatBoost
+}
+
+/**
+ * This object represents a boost removed from a chat.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostremoved
+ */
+export type ChatBoostRemoved = {
+  /**
+   * Chat which was boosted.
+   */
+  chat: Chat
+  /**
+   * Unique identifier of the boost.
+   */
+  boostId: string
+  /**
+   * Point in time (Unix timestamp) when the boost was removed.
+   */
+  removeDate: number
+  /**
+   * Source of the removed boost.
+   */
+  source: ChatBoostSource
+}
+
+/**
+ * Describes the connection of the bot with a business account.
+ *
+ * @see https://core.telegram.org/bots/api#businessconnection
+ */
+export type BusinessConnection = {
+  /**
+   * Unique identifier of the business connection.
+   */
+  id: string
+  /**
+   * Business account user that created the business connection.
+   */
+  user: User
+  /**
+   * Identifier of a private chat with the user who created the business connection.
+   *
+   * This number may have more than 32 significant bits and some programming languages
+   * may have difficulty/silent defects in interpreting it.
+   * But it has at most 52 significant bits, so a 64-bit integer or double-precision
+   * float type are safe for storing this identifier.
+   */
+  userChatId: number
+  /**
+   * Date the connection was established in Unix time.
+   */
+  date: number
+  /**
+   * `true` if the bot can act on behalf of the business account in chats that were active in the last 24 hours.
+   */
+  canReply: boolean
+  /**
+   * `true` if the connection is active.
+   */
+  isEnabled: boolean
+}
+
+/**
+ * This object is received when messages are deleted from a connected business account.
+ *
+ * @see https://core.telegram.org/bots/api#businessmessagesdeleted
+ */
+export type BusinessMessagesDeleted = {
+  /**
+   * Unique identifier of the business connection.
+   */
+  businessConnectionId: string
+  /**
+   * Information about a chat in the business account.
+   * The bot may not have access to the chat or the corresponding user.
+   */
+  chat: Chat
+  /**
+   * The list of identifiers of deleted messages in the chat of the business account.
+   */
+  messageIds: number[]
+}
+
+/**
+ * This object contains information about a paid media purchase.
+ *
+ * @see https://core.telegram.org/bots/api#paidmediapurchased
+ */
+export type PaidMediaPurchased = {
+  /**
+   * User who purchased the media.
+   */
+  from: User
+  /**
+   * Bot-specified paid media payload.
+   */
+  paidMediaPayload: string
+}
+
+/**
+ * This object represents an incoming callback query from a callback button in an inline keyboard.
+ *
+ * @see https://core.telegram.org/bots/api#callbackquery
+ */
+export type CallbackQuery = {
+  /**
+   * Unique identifier for this query.
+   */
+  id: string
+  /**
+   * Sender.
+   */
+  from: User
+  /**
+   * Message sent by the bot with the callback button that originated the query.
+   */
+  message?: Message
+  /**
+   * Identifier of the message sent via the bot in inline mode, that originated the query.
+   */
+  inlineMessageId?: string
+  /**
+   * Global identifier, uniquely corresponding to the chat to which the message
+   * with the callback button was sent.
+   */
+  chatInstance: string
+  /**
+   * Data associated with the callback button.
+   */
+  data?: string
+  /**
+   * Short name of a Game to be returned.
+   */
+  gameShortName?: string
+}
+
+/**
+ * This object represents an incoming update.
+ *
+ * At most one of the optional parameters can be present in any given update.
+ *
+ * @see https://core.telegram.org/bots/api#update
+ */
+export type Update = {
+  /**
+   * The update's unique identifier.
+   *
+   * Update identifiers start from a certain positive number and increase sequentially.
+   * This identifier becomes especially handy if you're using webhooks,
+   * since it allows you to ignore repeated updates or to restore the correct update sequence,
+   * should they get out of order.
+   *
+   * If there are no new updates for at least a week, then identifier of the next update
+   * will be chosen randomly instead of sequentially.
+   */
+  updateId: number
+
+  // --- Message updates ---
+
+  /**
+   * New incoming message of any kind - text, photo, sticker, etc.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  message?: Message
+  /**
+   * New version of a message that is known to the bot and was edited.
+   *
+   * This update may at times be triggered by changes to message fields that are either
+   * unavailable or not actively used by your bot.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  editedMessage?: Message
+  /**
+   * New incoming channel post of any kind - text, photo, sticker, etc.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  channelPost?: Message
+  /**
+   * New version of a channel post that is known to the bot and was edited.
+   *
+   * This update may at times be triggered by changes to message fields that are either
+   * unavailable or not actively used by your bot.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  editedChannelPost?: Message
+
+  // --- Business updates ---
+
+  /**
+   * The bot was connected to or disconnected from a business account,
+   * or a user edited an existing connection with the bot.
+   *
+   * @see https://core.telegram.org/bots/api#businessconnection
+   */
+  businessConnection?: BusinessConnection
+  /**
+   * New message from a connected business account.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  businessMessage?: Message
+  /**
+   * New version of a message from a connected business account.
+   *
+   * @see https://core.telegram.org/bots/api#message
+   */
+  editedBusinessMessage?: Message
+  /**
+   * Messages were deleted from a connected business account.
+   *
+   * @see https://core.telegram.org/bots/api#businessmessagesdeleted
+   */
+  deletedBusinessMessages?: BusinessMessagesDeleted
+
+  // --- Reaction updates ---
+
+  /**
+   * A reaction to a message was changed by a user.
+   *
+   * The bot must be an administrator in the chat and must explicitly specify `message_reaction`
+   * in the list of `allowed_updates` to receive these updates.
+   * The update isn't received for reactions set by bots.
+   *
+   * @see https://core.telegram.org/bots/api#messagereactionupdated
+   */
+  messageReaction?: MessageReactionUpdated
+  /**
+   * Reactions to a message with anonymous reactions were changed.
+   *
+   * The bot must be an administrator in the chat and must explicitly specify `message_reaction_count`
+   * in the list of `allowed_updates` to receive these updates.
+   * The updates are grouped and can be sent with delay up to a few minutes.
+   *
+   * @see https://core.telegram.org/bots/api#messagereactioncountupdated
+   */
+  messageReactionCount?: MessageReactionCountUpdated
+
+  // --- Inline mode updates ---
+
+  /**
+   * New incoming inline query.
+   *
+   * @see https://core.telegram.org/bots/api#inlinequery
+   */
+  inlineQuery?: InlineQuery
+  /**
+   * The result of an inline query that was chosen by a user and sent to their chat partner.
+   *
+   * Please see our documentation on the feedback collecting for details on how to enable these updates for your bot.
+   *
+   * @see https://core.telegram.org/bots/api#choseninlineresult
+   * @see https://core.telegram.org/bots/inline#collecting-feedback
+   */
+  chosenInlineResult?: ChosenInlineResult
+
+  // --- Callback query ---
+
+  /**
+   * New incoming callback query.
+   *
+   * @see https://core.telegram.org/bots/api#callbackquery
+   */
+  callbackQuery?: CallbackQuery
+
+  // --- Payment updates ---
+
+  /**
+   * New incoming shipping query. Only for invoices with flexible price.
+   *
+   * @see https://core.telegram.org/bots/api#shippingquery
+   */
+  shippingQuery?: ShippingQuery
+  /**
+   * New incoming pre-checkout query. Contains full information about checkout.
+   *
+   * @see https://core.telegram.org/bots/api#precheckoutquery
+   */
+  preCheckoutQuery?: PreCheckoutQuery
+  /**
+   * A user purchased paid media with a non-empty payload sent by the bot in a non-channel chat.
+   *
+   * @see https://core.telegram.org/bots/api#paidmediapurchased
+   */
+  purchasedPaidMedia?: PaidMediaPurchased
+
+  // --- Poll updates ---
+
+  /**
+   * New poll state.
+   *
+   * Bots receive only updates about manually stopped polls and polls, which are sent by the bot.
+   *
+   * @see https://core.telegram.org/bots/api#poll
+   */
+  poll?: Poll
+  /**
+   * A user changed their answer in a non-anonymous poll.
+   *
+   * Bots receive new votes only in polls that were sent by the bot itself.
+   *
+   * @see https://core.telegram.org/bots/api#pollanswer
+   */
+  pollAnswer?: PollAnswer
+
+  // --- Chat member updates ---
+
+  /**
+   * The bot's chat member status was updated in a chat.
+   *
+   * For private chats, this update is received only when the bot is blocked or unblocked by the user.
+   *
+   * @see https://core.telegram.org/bots/api#chatmemberupdated
+   */
+  myChatMember?: ChatMemberUpdated
+  /**
+   * A chat member's status was updated in a chat.
+   *
+   * The bot must be an administrator in the chat and must explicitly specify `chat_member`
+   * in the list of `allowed_updates` to receive these updates.
+   *
+   * @see https://core.telegram.org/bots/api#chatmemberupdated
+   */
+  chatMember?: ChatMemberUpdated
+  /**
+   * A request to join the chat has been sent.
+   *
+   * The bot must have the `can_invite_users` administrator right in the chat to receive these updates.
+   *
+   * @see https://core.telegram.org/bots/api#chatjoinrequest
+   */
+  chatJoinRequest?: ChatJoinRequest
+
+  // --- Chat boost updates ---
+
+  /**
+   * A chat boost was added or changed.
+   *
+   * The bot must be an administrator in the chat to receive these updates.
+   *
+   * @see https://core.telegram.org/bots/api#chatboostupdated
+   */
+  chatBoost?: ChatBoostUpdated
+  /**
+   * A boost was removed from a chat.
+   *
+   * The bot must be an administrator in the chat to receive these updates.
+   *
+   * @see https://core.telegram.org/bots/api#chatboostremoved
+   */
+  removedChatBoost?: ChatBoostRemoved
+}
+
+/**
+ * Describes the current status of a webhook.
+ *
+ * @see https://core.telegram.org/bots/api#webhookinfo
+ */
+export type WebhookInfo = {
+  /**
+   * Webhook URL, may be empty if webhook is not set up.
+   */
+  url: string
+  /**
+   * `true` if a custom certificate was provided for webhook certificate checks.
+   */
+  hasCustomCertificate: boolean
+  /**
+   * Number of updates awaiting delivery.
+   */
+  pendingUpdateCount: number
+  /**
+   * Currently used webhook IP address.
+   */
+  ipAddress?: string
+  /**
+   * Unix time for the most recent error that happened when trying to deliver an update via webhook.
+   */
+  lastErrorDate?: number
+  /**
+   * Error message in human-readable format for the most recent error.
+   */
+  lastErrorMessage?: string
+  /**
+   * Unix time of the most recent error that happened when trying to synchronize available updates.
+   */
+  lastSynchronizationErrorDate?: number
+  /**
+   * The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery.
+   */
+  maxConnections?: number
+  /**
+   * A list of update types the bot is subscribed to.
+   */
+  allowedUpdates?: string[]
+}

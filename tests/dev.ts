@@ -49,6 +49,54 @@ Bun.serve({
         return Response.json(result)
       },
     },
+
+    '/webhook': {
+      POST: async (request) => {
+        const result = await kit.bot.handleUpdate(request)
+
+        if (result.data) {
+          const update = result.data
+
+          if (update.message) {
+            console.log('New message:', update.message.text)
+            await kit.bot.actions.sendMessage({
+              chatId: update.message.chat.id,
+              text: `You said: ${update.message.text}`,
+            })
+          }
+
+          if (update.callbackQuery) {
+            console.log('Callback:', update.callbackQuery.data)
+          }
+        }
+
+        return new Response('OK')
+      },
+    },
+    '/webhook/setup': {
+      GET: async () => {
+        const result = await kit.bot.actions.setWebhook({
+          url: 'https://example.com/webhook',
+          secretToken: 'my-secret-token',
+        })
+
+        return Response.json(result)
+      },
+    },
+    '/webhook/info': {
+      GET: async () => {
+        const result = await kit.bot.actions.getWebhookInfo()
+
+        return Response.json(result)
+      },
+    },
+    '/webhook/delete': {
+      GET: async () => {
+        const result = await kit.bot.actions.deleteWebhook()
+
+        return Response.json(result)
+      },
+    },
   },
 })
 
