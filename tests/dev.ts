@@ -56,7 +56,6 @@ Bun.serve({
           const update = result.data
 
           if (update.message) {
-            console.log('New message:', update.message.text)
             await kit.prettyBot.actions.sendMessage({
               chatId: update.message.chat.id,
               text: `You said: ${update.message.text}`,
@@ -76,7 +75,6 @@ Bun.serve({
         const result = await kit.prettyBot.actions.setWebhook({
           url: 'https://example.com/webhook',
           secretToken: 'my-secret-token',
-          allowedUpdates: ['channel_post'],
         })
 
         return Response.json(result)
