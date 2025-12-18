@@ -176,11 +176,6 @@ export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
    *   console.log('New message:', message.text)
    * })
    *
-   * // Listen for callback queries (inline keyboard)
-   * kit.telegram.on('callback_query', (query) => {
-   *   console.log('Button pressed:', query.data)
-   * })
-   *
    * // Unsubscribe
    * const off = kit.telegram.on('message', handler)
    * off()
