@@ -1,4 +1,10 @@
-import type { ProviderInstance, Result } from '@triggerskit/core/types'
+import type {
+  EventHandler,
+  ProviderInstance,
+  Result,
+  Unsubscribe,
+} from '@triggerskit/core/types'
+import { createEvents } from '@triggerskit/core/types'
 import { fail, ok } from '@triggerskit/core/utils'
 import { type GetMeData, getMe } from './actions/get-me'
 import {
@@ -14,6 +20,7 @@ import {
   setWebhook,
 } from './actions/webhook'
 import { type ApiUpdate, fromApi } from './api'
+import type { TelegramEvent, TelegramEventMap } from './events'
 import { createRequest } from './request'
 import type { TelegramConfig, Update, WebhookInfo } from './types'
 
@@ -153,11 +160,42 @@ export type TelegramWebhooks = {
 
 export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
   readonly webhooks: TelegramWebhooks
+  /**
+   * Subscribe to Telegram events.
+   *
+   * Events are emitted when processing updates via `webhooks.handle()`.
+   *
+   * @param event - The event name to listen for
+   * @param handler - The handler function called when the event occurs
+   * @returns Unsubscribe function to remove the listener
+   *
+   * @example
+   * ```typescript
+   * // Listen for new messages
+   * kit.telegram.on('message', (message) => {
+   *   console.log('New message:', message.text)
+   * })
+   *
+   * // Listen for callback queries (inline keyboard)
+   * kit.telegram.on('callback_query', (query) => {
+   *   console.log('Button pressed:', query.data)
+   * })
+   *
+   * // Unsubscribe
+   * const off = kit.telegram.on('message', handler)
+   * off()
+   * ```
+   */
+  readonly on: <K extends TelegramEvent>(
+    event: K,
+    handler: EventHandler<TelegramEventMap[K]>,
+  ) => Unsubscribe
 }
 
 export function telegram(config: TelegramConfig): TelegramInstance {
   const request = createRequest(config)
   const ctx = { request }
+  const events = createEvents<TelegramEventMap>()
 
   return {
     provider: 'telegram' as const,
@@ -172,12 +210,60 @@ export function telegram(config: TelegramConfig): TelegramInstance {
       async handle(req: Request): Promise<Result<Update>> {
         try {
           const body = (await req.json()) as ApiUpdate
-          return ok(fromApi.update(body))
+          const update = fromApi.update(body)
+
+          if (update.message) events.emit('message', update.message)
+          if (update.editedMessage)
+            events.emit('message:edited', update.editedMessage)
+          if (update.channelPost)
+            events.emit('channel_post', update.channelPost)
+          if (update.editedChannelPost)
+            events.emit('channel_post:edited', update.editedChannelPost)
+          if (update.callbackQuery)
+            events.emit('callback_query', update.callbackQuery)
+          if (update.inlineQuery)
+            events.emit('inline_query', update.inlineQuery)
+          if (update.chosenInlineResult)
+            events.emit('chosen_inline_result', update.chosenInlineResult)
+          if (update.shippingQuery)
+            events.emit('shipping_query', update.shippingQuery)
+          if (update.preCheckoutQuery)
+            events.emit('pre_checkout_query', update.preCheckoutQuery)
+          if (update.poll) events.emit('poll', update.poll)
+          if (update.pollAnswer) events.emit('poll_answer', update.pollAnswer)
+          if (update.myChatMember)
+            events.emit('my_chat_member', update.myChatMember)
+          if (update.chatMember) events.emit('chat_member', update.chatMember)
+          if (update.chatJoinRequest)
+            events.emit('chat_join_request', update.chatJoinRequest)
+          if (update.chatBoost) events.emit('chat_boost', update.chatBoost)
+          if (update.removedChatBoost)
+            events.emit('chat_boost_removed', update.removedChatBoost)
+          if (update.messageReaction)
+            events.emit('message_reaction', update.messageReaction)
+          if (update.messageReactionCount)
+            events.emit('message_reaction_count', update.messageReactionCount)
+          if (update.businessConnection)
+            events.emit('business_connection', update.businessConnection)
+          if (update.businessMessage)
+            events.emit('business_message', update.businessMessage)
+          if (update.editedBusinessMessage)
+            events.emit('business_message:edited', update.editedBusinessMessage)
+          if (update.deletedBusinessMessages)
+            events.emit(
+              'business_messages_deleted',
+              update.deletedBusinessMessages,
+            )
+          if (update.purchasedPaidMedia)
+            events.emit('paid_media_purchased', update.purchasedPaidMedia)
+
+          return ok(update)
         } catch (e) {
           return fail(e)
         }
       },
     },
+    on: events.on,
     request,
   }
 }

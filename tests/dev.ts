@@ -9,6 +9,15 @@ export const kit = triggers({
   },
 })
 
+kit.prettyBot.on('message', async (message) => {
+  console.log('New message:', message.text)
+
+  await kit.prettyBot.actions.sendMessage({
+    chatId: message.chat.id,
+    text: `You said: ${message.text}`,
+  })
+})
+
 Bun.serve({
   port: 4000,
   routes: {
@@ -23,11 +32,7 @@ Bun.serve({
           return Response.json(result.data.chat)
         }
 
-        if (result.error) {
-          return new Response(result.error.message)
-        }
-
-        return new Response('Error')
+        return new Response(result.error.message)
       },
     },
     '/me': {
@@ -50,23 +55,7 @@ Bun.serve({
 
     '/webhook': {
       POST: async (request) => {
-        const result = await kit.prettyBot.webhooks.handle(request)
-
-        if (result.data) {
-          const update = result.data
-
-          if (update.message) {
-            await kit.prettyBot.actions.sendMessage({
-              chatId: update.message.chat.id,
-              text: `You said: ${update.message.text}`,
-            })
-          }
-
-          if (update.callbackQuery) {
-            console.log('Callback:', update.callbackQuery.data)
-          }
-        }
-
+        await kit.prettyBot.webhooks.handle(request)
         return new Response('OK')
       },
     },
