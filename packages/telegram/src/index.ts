@@ -62,7 +62,9 @@ export type TelegramActions = {
    * ```
    */
   sendMessage: (params: SendMessageParams) => Promise<Result<SendMessageData>>
+}
 
+export type TelegramWebhooks = {
   /**
    * Use this method to specify a URL and receive incoming updates via an outgoing webhook.
    *
@@ -73,13 +75,13 @@ export type TelegramActions = {
    *
    * @example
    * ```typescript
-   * const result = await kit.telegram.actions.setWebhook({
+   * const result = await kit.telegram.webhooks.set({
    *   url: 'https://example.com/webhook',
    *   secretToken: 'my-secret-token'
    * })
    * ```
    */
-  setWebhook: (params: SetWebhookParams) => Promise<Result<boolean>>
+  set: (params: SetWebhookParams) => Promise<Result<boolean>>
 
   /**
    * Use this method to remove webhook integration. Returns `true` on success.
@@ -92,13 +94,13 @@ export type TelegramActions = {
    * @example
    * ```typescript
    * // Simple deletion
-   * const result = await kit.telegram.actions.deleteWebhook()
+   * const result = await kit.telegram.webhooks.delete()
    *
    * // Drop all pending updates
-   * const result = await kit.telegram.actions.deleteWebhook({ dropPendingUpdates: true })
+   * const result = await kit.telegram.webhooks.delete({ dropPendingUpdates: true })
    * ```
    */
-  deleteWebhook: (params?: DeleteWebhookParams) => Promise<Result<boolean>>
+  delete: (params?: DeleteWebhookParams) => Promise<Result<boolean>>
 
   /**
    * Use this method to get current webhook status.
@@ -109,17 +111,15 @@ export type TelegramActions = {
    *
    * @example
    * ```typescript
-   * const result = await kit.telegram.actions.getWebhookInfo()
+   * const result = await kit.telegram.webhooks.info()
    * if (result.data) {
    *   console.log('Webhook URL:', result.data.url)
    *   console.log('Pending updates:', result.data.pendingUpdateCount)
    * }
    * ```
    */
-  getWebhookInfo: () => Promise<Result<WebhookInfo>>
-}
+  info: () => Promise<Result<WebhookInfo>>
 
-export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
   /**
    * Parse an incoming webhook request and return the Update object.
    *
@@ -132,7 +132,7 @@ export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
    * ```typescript
    * // In your webhook handler
    * app.post('/webhook', async (request) => {
-   *   const result = await kit.telegram.handleUpdate(request)
+   *   const result = await kit.telegram.webhooks.handle(request)
    *
    *   if (result.data) {
    *     const update = result.data
@@ -148,7 +148,11 @@ export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
    * })
    * ```
    */
-  handleUpdate: (request: Request) => Promise<Result<Update>>
+  handle: (request: Request) => Promise<Result<Update>>
+}
+
+export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
+  readonly webhooks: TelegramWebhooks
 }
 
 export function telegram(config: TelegramConfig): TelegramInstance {
@@ -160,19 +164,21 @@ export function telegram(config: TelegramConfig): TelegramInstance {
     actions: {
       getMe: getMe(ctx),
       sendMessage: sendMessage(ctx),
-      setWebhook: setWebhook(ctx),
-      deleteWebhook: deleteWebhook(ctx),
-      getWebhookInfo: getWebhookInfo(ctx),
+    },
+    webhooks: {
+      set: setWebhook(ctx),
+      delete: deleteWebhook(ctx),
+      info: getWebhookInfo(ctx),
+      async handle(req: Request): Promise<Result<Update>> {
+        try {
+          const body = (await req.json()) as ApiUpdate
+          return ok(fromApi.update(body))
+        } catch (e) {
+          return fail(e)
+        }
+      },
     },
     request,
-    async handleUpdate(req: Request): Promise<Result<Update>> {
-      try {
-        const body = (await req.json()) as ApiUpdate
-        return ok(fromApi.update(body))
-      } catch (e) {
-        return fail(e)
-      }
-    },
   }
 }
 

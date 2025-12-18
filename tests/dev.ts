@@ -50,7 +50,7 @@ Bun.serve({
 
     '/webhook': {
       POST: async (request) => {
-        const result = await kit.prettyBot.handleUpdate(request)
+        const result = await kit.prettyBot.webhooks.handle(request)
 
         if (result.data) {
           const update = result.data
@@ -72,7 +72,7 @@ Bun.serve({
     },
     '/webhook/setup': {
       GET: async () => {
-        const result = await kit.prettyBot.actions.setWebhook({
+        const result = await kit.prettyBot.webhooks.set({
           url: 'https://example.com/webhook',
           secretToken: 'my-secret-token',
         })
@@ -82,14 +82,14 @@ Bun.serve({
     },
     '/webhook/info': {
       GET: async () => {
-        const result = await kit.prettyBot.actions.getWebhookInfo()
+        const result = await kit.prettyBot.webhooks.info()
 
         return Response.json(result)
       },
     },
     '/webhook/delete': {
       GET: async () => {
-        const result = await kit.prettyBot.actions.deleteWebhook()
+        const result = await kit.prettyBot.webhooks.delete()
 
         return Response.json(result)
       },
