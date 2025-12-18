@@ -3,9 +3,9 @@
 Current usage demo. Fully type-safe end to end.
 
 ```ts
-import { telegram } from '@triggerskit/telegram'
 import { triggers } from 'triggerskit'
 import { redis } from 'triggerskit/storage'
+import { telegram } from '@triggerskit/telegram'
 
 export const kit = triggers({
   providers: {
