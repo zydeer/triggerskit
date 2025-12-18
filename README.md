@@ -3,8 +3,9 @@
 Below are the concepts. Fully type-safe end to end.
 
 ```ts
-import { telegram } from '@triggerskit/telegram'
 import { triggers } from 'triggerskit'
+import { redis } from 'triggerskit/storage'
+import { logger } from 'triggerskit/plugins'
 
 export const kit = triggers({
   providers: {
@@ -12,6 +13,8 @@ export const kit = triggers({
       token: process.env.TELEGRAM_TOKEN,
     }),
   },
+  storage: redis({ url: process.env.REDIS_URL }),
+  plugins: [logger()],
 })
 
 Bun.serve({
