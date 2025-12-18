@@ -888,6 +888,23 @@ export type ChatAdministratorRights = {
 }
 
 /**
+ * Describes data sent from a Web App to the bot.
+ *
+ * @see https://core.telegram.org/bots/api#webappdata
+ */
+export type WebAppData = {
+  /**
+   * The data. Be aware that a bad client can send arbitrary data in this field.
+   */
+  data: string
+  /**
+   * Text of the web_app keyboard button from which the Web App was opened.
+   * Be aware that a bad client can send arbitrary data in this field.
+   */
+  buttonText: string
+}
+
+/**
  * This object represents a message.
  *
  * @see https://core.telegram.org/bots/api#message
@@ -949,6 +966,10 @@ export type Message = {
    */
   chat: Chat
   /**
+   * Information about the original message for forwarded messages.
+   */
+  forwardOrigin?: MessageOrigin
+  /**
    * `true` if the message is sent to a forum topic.
    */
   isTopicMessage?: boolean
@@ -957,6 +978,52 @@ export type Message = {
    * as an away or a greeting business message, or as a scheduled message.
    */
   isAutomaticForward?: boolean
+  /**
+   * For replies in the same chat and message thread, the original message.
+   *
+   * Note that the Message object in this field will not contain
+   * further `replyToMessage` fields even if it itself is a reply.
+   */
+  replyToMessage?: Message
+  /**
+   * Information about the message that is being replied to, which may come from
+   * another chat or forum topic.
+   */
+  externalReply?: ExternalReplyInfo
+  /**
+   * For replies that quote part of the original message, the quoted part of the message.
+   */
+  quote?: TextQuote
+  /**
+   * For replies to a story, the original story.
+   */
+  replyToStory?: Story
+  /**
+   * Bot through which the message was sent.
+   */
+  viaBot?: User
+  /**
+   * Date the message was last edited in Unix time.
+   */
+  editDate?: number
+  /**
+   * `true` if the message can't be forwarded.
+   */
+  hasProtectedContent?: boolean
+  /**
+   * `true` if the message was sent because of a scheduled action,
+   * or was sent from the offline send queue.
+   */
+  isFromOffline?: boolean
+  /**
+   * The unique identifier of a media message group this message belongs to.
+   */
+  mediaGroupId?: string
+  /**
+   * Signature of the post author for messages in channels,
+   * or the custom title of an anonymous group administrator.
+   */
+  authorSignature?: string
   /**
    * For text messages, the actual UTF-8 text of the message.
    */
@@ -976,21 +1043,263 @@ export type Message = {
    */
   effectId?: string
   /**
-   * The unique identifier of a media message group this message belongs to.
+   * Message is an animation, information about the animation.
+   * For backward compatibility, when this field is set, the document field will also be set.
    */
-  mediaGroupId?: string
+  animation?: Animation
   /**
-   * Signature of the post author for messages in channels,
-   * or the custom title of an anonymous group administrator.
+   * Message is an audio file, information about the file.
    */
-  authorSignature?: string
+  audio?: Audio
   /**
-   * For replies in the same chat and message thread, the original message.
-   *
-   * Note that the Message object in this field will not contain
-   * further `replyToMessage` fields even if it itself is a reply.
+   * Message is a general file, information about the file.
    */
-  replyToMessage?: Message
+  document?: Document
+  /**
+   * Message contains paid media; information about the paid media.
+   */
+  paidMedia?: PaidMediaInfo
+  /**
+   * Message is a photo, available sizes of the photo.
+   */
+  photo?: PhotoSize[]
+  /**
+   * Message is a sticker, information about the sticker.
+   */
+  sticker?: Sticker
+  /**
+   * Message is a forwarded story.
+   */
+  story?: Story
+  /**
+   * Message is a video, information about the video.
+   */
+  video?: Video
+  /**
+   * Message is a video note, information about the video message.
+   */
+  videoNote?: VideoNote
+  /**
+   * Message is a voice message, information about the file.
+   */
+  voice?: Voice
+  /**
+   * Caption for the animation, audio, document, paid media, photo, video or voice.
+   */
+  caption?: string
+  /**
+   * For messages with a caption, special entities like usernames, URLs, bot commands, etc.
+   * that appear in the caption.
+   */
+  captionEntities?: MessageEntity[]
+  /**
+   * `true` if the caption must be shown above the message media.
+   */
+  showCaptionAboveMedia?: boolean
+  /**
+   * `true` if the message media is covered by a spoiler animation.
+   */
+  hasMediaSpoiler?: boolean
+  /**
+   * Message is a shared contact, information about the contact.
+   */
+  contact?: Contact
+  /**
+   * Message is a dice with random value.
+   */
+  dice?: Dice
+  /**
+   * Message is a game, information about the game.
+   */
+  game?: Game
+  /**
+   * Message is a native poll, information about the poll.
+   */
+  poll?: Poll
+  /**
+   * Message is a venue, information about the venue.
+   * For backward compatibility, when this field is set, the location field will also be set.
+   */
+  venue?: Venue
+  /**
+   * Message is a shared location, information about the location.
+   */
+  location?: Location
+  /**
+   * New members that were added to the group or supergroup and information about them
+   * (the bot itself may be one of these members).
+   */
+  newChatMembers?: User[]
+  /**
+   * A member was removed from the group, information about them
+   * (this member may be the bot itself).
+   */
+  leftChatMember?: User
+  /**
+   * A chat title was changed to this value.
+   */
+  newChatTitle?: string
+  /**
+   * A chat photo was change to this value.
+   */
+  newChatPhoto?: PhotoSize[]
+  /**
+   * Service message: the chat photo was deleted.
+   */
+  deleteChatPhoto?: boolean
+  /**
+   * Service message: the group has been created.
+   */
+  groupChatCreated?: boolean
+  /**
+   * Service message: the supergroup has been created.
+   * This field can't be received in a message coming through updates,
+   * because bot can't be a member of a supergroup when it is created.
+   * It can only be found in replyToMessage if someone replies to a very
+   * first message in a directly created supergroup.
+   */
+  supergroupChatCreated?: boolean
+  /**
+   * Service message: the channel has been created.
+   * This field can't be received in a message coming through updates,
+   * because bot can't be a member of a channel when it is created.
+   * It can only be found in replyToMessage if someone replies to a very
+   * first message in a channel.
+   */
+  channelChatCreated?: boolean
+  /**
+   * Service message: auto-delete timer settings changed in the chat.
+   */
+  messageAutoDeleteTimerChanged?: MessageAutoDeleteTimerChanged
+  /**
+   * The group has been migrated to a supergroup with the specified identifier.
+   * This number may have more than 32 significant bits and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this identifier.
+   */
+  migrateToChatId?: number
+  /**
+   * The supergroup has been migrated from a group with the specified identifier.
+   * This number may have more than 32 significant bits and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this identifier.
+   */
+  migrateFromChatId?: number
+  /**
+   * Specified message was pinned.
+   * Note that the Message object in this field will not contain further
+   * replyToMessage fields even if it itself is a reply.
+   */
+  pinnedMessage?: Message
+  /**
+   * Message is an invoice for a payment, information about the invoice.
+   */
+  invoice?: Invoice
+  /**
+   * Message is a service message about a successful payment, information about the payment.
+   */
+  successfulPayment?: SuccessfulPayment
+  /**
+   * Message is a service message about a refunded payment, information about the payment.
+   */
+  refundedPayment?: RefundedPayment
+  /**
+   * Service message: users were shared with the bot.
+   */
+  usersShared?: UsersShared
+  /**
+   * Service message: a chat was shared with the bot.
+   */
+  chatShared?: ChatShared
+  /**
+   * The domain name of the website on which the user has logged in.
+   */
+  connectedWebsite?: string
+  /**
+   * Service message: the user allowed the bot to write messages after adding it
+   * to the attachment or side menu, launching a Web App from a link,
+   * or accepting an explicit request from a Web App sent by the method requestWriteAccess.
+   */
+  writeAccessAllowed?: WriteAccessAllowed
+  /**
+   * Service message: a user was shared with the bot.
+   */
+  proximityAlertTriggered?: ProximityAlertTriggered
+  /**
+   * Service message: user boosted the chat.
+   */
+  boostAdded?: ChatBoostAdded
+  /**
+   * Service message: chat background set.
+   */
+  chatBackgroundSet?: ChatBackground
+  /**
+   * Service message: forum topic created.
+   */
+  forumTopicCreated?: ForumTopicCreated
+  /**
+   * Service message: forum topic edited.
+   */
+  forumTopicEdited?: ForumTopicEdited
+  /**
+   * Service message: forum topic closed.
+   */
+  forumTopicClosed?: ForumTopicClosed
+  /**
+   * Service message: forum topic reopened.
+   */
+  forumTopicReopened?: ForumTopicReopened
+  /**
+   * Service message: the 'General' forum topic hidden.
+   */
+  generalForumTopicHidden?: GeneralForumTopicHidden
+  /**
+   * Service message: the 'General' forum topic unhidden.
+   */
+  generalForumTopicUnhidden?: GeneralForumTopicUnhidden
+  /**
+   * Service message: a scheduled giveaway was created.
+   */
+  giveawayCreated?: GiveawayCreated
+  /**
+   * The message is a scheduled giveaway message.
+   */
+  giveaway?: Giveaway
+  /**
+   * A giveaway with public winners was completed.
+   */
+  giveawayWinners?: GiveawayWinners
+  /**
+   * Service message: a giveaway without public winners was completed.
+   */
+  giveawayCompleted?: GiveawayCompleted
+  /**
+   * Service message: video chat scheduled.
+   */
+  videoChatScheduled?: VideoChatScheduled
+  /**
+   * Service message: video chat started.
+   */
+  videoChatStarted?: VideoChatStarted
+  /**
+   * Service message: video chat ended.
+   */
+  videoChatEnded?: VideoChatEnded
+  /**
+   * Service message: new participants invited to a video chat.
+   */
+  videoChatParticipantsInvited?: VideoChatParticipantsInvited
+  /**
+   * Service message: data sent by a Web App.
+   */
+  webAppData?: WebAppData
+  /**
+   * Inline keyboard attached to the message.
+   * login_url buttons are represented as ordinary url buttons.
+   */
+  replyMarkup?: InlineKeyboardMarkup
 }
 
 /**
@@ -1033,6 +1342,1631 @@ export type Location = {
    * For sent live locations only.
    */
   proximityAlertRadius?: number
+}
+
+/**
+ * This object represents one size of a photo or a file / sticker thumbnail.
+ *
+ * @see https://core.telegram.org/bots/api#photosize
+ */
+export type PhotoSize = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Photo width.
+   */
+  width: number
+  /**
+   * Photo height.
+   */
+  height: number
+  /**
+   * File size in bytes.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
+ *
+ * @see https://core.telegram.org/bots/api#animation
+ */
+export type Animation = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Video width as defined by the sender.
+   */
+  width: number
+  /**
+   * Video height as defined by the sender.
+   */
+  height: number
+  /**
+   * Duration of the video in seconds as defined by the sender.
+   */
+  duration: number
+  /**
+   * Animation thumbnail as defined by the sender.
+   */
+  thumbnail?: PhotoSize
+  /**
+   * Original animation filename as defined by the sender.
+   */
+  fileName?: string
+  /**
+   * MIME type of the file as defined by the sender.
+   */
+  mimeType?: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents an audio file to be treated as music by the Telegram clients.
+ *
+ * @see https://core.telegram.org/bots/api#audio
+ */
+export type Audio = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Duration of the audio in seconds as defined by the sender.
+   */
+  duration: number
+  /**
+   * Performer of the audio as defined by the sender or by audio tags.
+   */
+  performer?: string
+  /**
+   * Title of the audio as defined by the sender or by audio tags.
+   */
+  title?: string
+  /**
+   * Original filename as defined by the sender.
+   */
+  fileName?: string
+  /**
+   * MIME type of the file as defined by the sender.
+   */
+  mimeType?: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+  /**
+   * Thumbnail of the album cover to which the music file belongs.
+   */
+  thumbnail?: PhotoSize
+}
+
+/**
+ * This object represents a general file (as opposed to photos, voice messages and audio files).
+ *
+ * @see https://core.telegram.org/bots/api#document
+ */
+export type Document = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Document thumbnail as defined by the sender.
+   */
+  thumbnail?: PhotoSize
+  /**
+   * Original filename as defined by the sender.
+   */
+  fileName?: string
+  /**
+   * MIME type of the file as defined by the sender.
+   */
+  mimeType?: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents a video file.
+ *
+ * @see https://core.telegram.org/bots/api#video
+ */
+export type Video = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Video width as defined by the sender.
+   */
+  width: number
+  /**
+   * Video height as defined by the sender.
+   */
+  height: number
+  /**
+   * Duration of the video in seconds as defined by the sender.
+   */
+  duration: number
+  /**
+   * Video thumbnail.
+   */
+  thumbnail?: PhotoSize
+  /**
+   * Original filename as defined by the sender.
+   */
+  fileName?: string
+  /**
+   * MIME type of the file as defined by the sender.
+   */
+  mimeType?: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents a video message (available in Telegram apps as of v.4.0).
+ *
+ * @see https://core.telegram.org/bots/api#videonote
+ */
+export type VideoNote = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Video width and height (diameter of the video message) as defined by the sender.
+   */
+  length: number
+  /**
+   * Duration of the video in seconds as defined by the sender.
+   */
+  duration: number
+  /**
+   * Video thumbnail.
+   */
+  thumbnail?: PhotoSize
+  /**
+   * File size in bytes.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents a voice note.
+ *
+ * @see https://core.telegram.org/bots/api#voice
+ */
+export type Voice = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Duration of the audio in seconds as defined by the sender.
+   */
+  duration: number
+  /**
+   * MIME type of the file as defined by the sender.
+   */
+  mimeType?: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents a phone contact.
+ *
+ * @see https://core.telegram.org/bots/api#contact
+ */
+export type Contact = {
+  /**
+   * Contact's phone number.
+   */
+  phoneNumber: string
+  /**
+   * Contact's first name.
+   */
+  firstName: string
+  /**
+   * Contact's last name.
+   */
+  lastName?: string
+  /**
+   * Contact's user identifier in Telegram.
+   * This number may have more than 32 significant bits and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a 64-bit integer or double-precision float type are safe
+   * for storing this identifier.
+   */
+  userId?: number
+  /**
+   * Additional data about the contact in the form of a vCard.
+   *
+   * @see https://en.wikipedia.org/wiki/VCard
+   */
+  vcard?: string
+}
+
+/**
+ * This object represents an animated emoji that displays a random value.
+ *
+ * @see https://core.telegram.org/bots/api#dice
+ */
+export type Dice = {
+  /**
+   * Emoji on which the dice throw animation is based.
+   *
+   * Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰".
+   * Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽",
+   * and values 1-64 for "🎰".
+   */
+  emoji: string
+  /**
+   * Value of the dice.
+   *
+   * 1-6 for "🎲", "🎯" and "🎳" base emoji, 1-5 for "🏀" and "⚽" base emoji,
+   * 1-64 for "🎰" base emoji.
+   */
+  value: number
+}
+
+/**
+ * This object represents a venue.
+ *
+ * @see https://core.telegram.org/bots/api#venue
+ */
+export type Venue = {
+  /**
+   * Venue location. Can't be a live location.
+   */
+  location: Location
+  /**
+   * Name of the venue.
+   */
+  title: string
+  /**
+   * Address of the venue.
+   */
+  address: string
+  /**
+   * Foursquare identifier of the venue.
+   */
+  foursquareId?: string
+  /**
+   * Foursquare type of the venue.
+   * For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".
+   */
+  foursquareType?: string
+  /**
+   * Google Places identifier of the venue.
+   */
+  googlePlaceId?: string
+  /**
+   * Google Places type of the venue.
+   *
+   * @see https://developers.google.com/places/web-service/supported_types
+   */
+  googlePlaceType?: string
+}
+
+/**
+ * This object represents a story.
+ *
+ * @see https://core.telegram.org/bots/api#story
+ */
+export type Story = {
+  /**
+   * Chat that posted the story.
+   */
+  chat: Chat
+  /**
+   * Unique identifier for the story in the chat.
+   */
+  id: number
+}
+
+/**
+ * This object describes the position on faces where a mask should be placed by default.
+ *
+ * @see https://core.telegram.org/bots/api#maskposition
+ */
+export type MaskPosition = {
+  /**
+   * The part of the face relative to which the mask should be placed.
+   * One of "forehead", "eyes", "mouth", or "chin".
+   */
+  point: 'forehead' | 'eyes' | 'mouth' | 'chin'
+  /**
+   * Shift by X-axis measured in widths of the mask scaled to the face size, from left to right.
+   * For example, choosing -1.0 will place mask just to the left of the default mask position.
+   */
+  xShift: number
+  /**
+   * Shift by Y-axis measured in heights of the mask scaled to the face size, from top to bottom.
+   * For example, 1.0 will place the mask just below the default mask position.
+   */
+  yShift: number
+  /**
+   * Mask scaling coefficient. For example, 2.0 means double size.
+   */
+  scale: number
+}
+
+/**
+ * This object represents a file ready to be downloaded.
+ *
+ * @see https://core.telegram.org/bots/api#file
+ */
+export type File = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * File size in bytes. It can be bigger than 2^31 and some programming languages
+   * may have difficulty/silent defects in interpreting it. But it has at most 52
+   * significant bits, so a signed 64-bit integer or double-precision float type
+   * are safe for storing this value.
+   */
+  fileSize?: number
+  /**
+   * File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
+   */
+  filePath?: string
+}
+
+/**
+ * This object represents a sticker.
+ *
+ * @see https://core.telegram.org/bots/api#sticker
+ */
+export type Sticker = {
+  /**
+   * Identifier for this file, which can be used to download or reuse the file.
+   */
+  fileId: string
+  /**
+   * Unique identifier for this file, which is supposed to be the same over time
+   * and for different bots. Can't be used to download or reuse the file.
+   */
+  fileUniqueId: string
+  /**
+   * Type of the sticker, currently one of "regular", "mask", "custom_emoji".
+   * The type of the sticker is independent from its format, which is determined by the fields
+   * is_animated and is_video.
+   */
+  type: 'regular' | 'mask' | 'customEmoji'
+  /**
+   * Sticker width.
+   */
+  width: number
+  /**
+   * Sticker height.
+   */
+  height: number
+  /**
+   * True, if the sticker is animated.
+   */
+  isAnimated: boolean
+  /**
+   * True, if the sticker is a video sticker.
+   */
+  isVideo: boolean
+  /**
+   * Sticker thumbnail in the .WEBP or .JPG format.
+   */
+  thumbnail?: PhotoSize
+  /**
+   * Emoji associated with the sticker.
+   */
+  emoji?: string
+  /**
+   * Name of the sticker set to which the sticker belongs.
+   */
+  setName?: string
+  /**
+   * For premium regular stickers, premium animation for the sticker.
+   */
+  premiumAnimation?: File
+  /**
+   * For mask stickers, the position where the mask should be placed.
+   */
+  maskPosition?: MaskPosition
+  /**
+   * For custom emoji stickers, unique identifier of the custom emoji.
+   */
+  customEmojiId?: string
+  /**
+   * True, if the sticker must be repainted to a text color in messages,
+   * the color of the Telegram Premium badge in emoji status,
+   * white color on chat photos, or another appropriate color in other places.
+   */
+  needsRepainting?: boolean
+  /**
+   * File size in bytes.
+   */
+  fileSize?: number
+}
+
+/**
+ * This object represents a sticker set.
+ *
+ * @see https://core.telegram.org/bots/api#stickerset
+ */
+export type StickerSet = {
+  /**
+   * Sticker set name.
+   */
+  name: string
+  /**
+   * Sticker set title.
+   */
+  title: string
+  /**
+   * Type of stickers in the set, currently one of "regular", "mask", "custom_emoji".
+   */
+  stickerType: 'regular' | 'mask' | 'customEmoji'
+  /**
+   * List of all set stickers.
+   */
+  stickers: Sticker[]
+  /**
+   * Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format.
+   */
+  thumbnail?: PhotoSize
+}
+
+/**
+ * This object represents a game.
+ *
+ * Use BotFather to create and edit games, their short names will act as unique identifiers.
+ *
+ * @see https://core.telegram.org/bots/api#game
+ */
+export type Game = {
+  /**
+   * Title of the game.
+   */
+  title: string
+  /**
+   * Description of the game.
+   */
+  description: string
+  /**
+   * Photo that will be displayed in the game message in chats.
+   */
+  photo: PhotoSize[]
+  /**
+   * Brief description of the game or high scores included in the game message.
+   * Can be automatically edited to include current high scores for the game when
+   * the bot calls setGameScore, or manually edited using editMessageText.
+   * 0-4096 characters.
+   */
+  text?: string
+  /**
+   * Special entities that appear in text, such as usernames, URLs, bot commands, etc.
+   */
+  textEntities?: MessageEntity[]
+  /**
+   * Animation that will be displayed in the game message in chats.
+   * Upload via @BotFather.
+   */
+  animation?: Animation
+}
+
+/**
+ * This object represents one row of the high scores table for a game.
+ *
+ * @see https://core.telegram.org/bots/api#gamehighscore
+ */
+export type GameHighScore = {
+  /**
+   * Position in high score table for the game.
+   */
+  position: number
+  /**
+   * User.
+   */
+  user: User
+  /**
+   * Score.
+   */
+  score: number
+}
+
+/**
+ * The paid media isn't available before the payment.
+ *
+ * @see https://core.telegram.org/bots/api#paidmediapreview
+ */
+export type PaidMediaPreview = {
+  /**
+   * Type of the paid media, always "preview".
+   */
+  type: 'preview'
+  /**
+   * Media width as defined by the sender.
+   */
+  width?: number
+  /**
+   * Media height as defined by the sender.
+   */
+  height?: number
+  /**
+   * Duration of the media in seconds as defined by the sender.
+   */
+  duration?: number
+}
+
+/**
+ * The paid media is a photo.
+ *
+ * @see https://core.telegram.org/bots/api#paidmediaphoto
+ */
+export type PaidMediaPhoto = {
+  /**
+   * Type of the paid media, always "photo".
+   */
+  type: 'photo'
+  /**
+   * The photo.
+   */
+  photo: PhotoSize[]
+}
+
+/**
+ * The paid media is a video.
+ *
+ * @see https://core.telegram.org/bots/api#paidmediavideo
+ */
+export type PaidMediaVideo = {
+  /**
+   * Type of the paid media, always "video".
+   */
+  type: 'video'
+  /**
+   * The video.
+   */
+  video: Video
+}
+
+/**
+ * This object describes paid media.
+ *
+ * @see https://core.telegram.org/bots/api#paidmedia
+ */
+export type PaidMedia = PaidMediaPreview | PaidMediaPhoto | PaidMediaVideo
+
+/**
+ * Describes the paid media added to a message.
+ *
+ * @see https://core.telegram.org/bots/api#paidmediainfo
+ */
+export type PaidMediaInfo = {
+  /**
+   * The number of Telegram Stars that must be paid to buy access to the media.
+   */
+  starCount: number
+  /**
+   * Information about the paid media.
+   */
+  paidMedia: PaidMedia[]
+}
+
+/**
+ * The message was originally sent by a known user.
+ *
+ * @see https://core.telegram.org/bots/api#messageoriginuser
+ */
+export type MessageOriginUser = {
+  /**
+   * Type of the message origin, always "user".
+   */
+  type: 'user'
+  /**
+   * Date the message was sent originally in Unix time.
+   */
+  date: number
+  /**
+   * User that sent the message originally.
+   */
+  senderUser: User
+}
+
+/**
+ * The message was originally sent by an unknown user.
+ *
+ * @see https://core.telegram.org/bots/api#messageoriginhiddenuser
+ */
+export type MessageOriginHiddenUser = {
+  /**
+   * Type of the message origin, always "hidden_user".
+   */
+  type: 'hiddenUser'
+  /**
+   * Date the message was sent originally in Unix time.
+   */
+  date: number
+  /**
+   * Name of the user that sent the message originally.
+   */
+  senderUserName: string
+}
+
+/**
+ * The message was originally sent on behalf of a chat to a group chat.
+ *
+ * @see https://core.telegram.org/bots/api#messageoriginchat
+ */
+export type MessageOriginChat = {
+  /**
+   * Type of the message origin, always "chat".
+   */
+  type: 'chat'
+  /**
+   * Date the message was sent originally in Unix time.
+   */
+  date: number
+  /**
+   * Chat that sent the message originally.
+   */
+  senderChat: Chat
+  /**
+   * For messages originally sent by an anonymous chat administrator,
+   * original message author signature.
+   */
+  authorSignature?: string
+}
+
+/**
+ * The message was originally sent to a channel chat.
+ *
+ * @see https://core.telegram.org/bots/api#messageoriginchannel
+ */
+export type MessageOriginChannel = {
+  /**
+   * Type of the message origin, always "channel".
+   */
+  type: 'channel'
+  /**
+   * Date the message was sent originally in Unix time.
+   */
+  date: number
+  /**
+   * Channel chat to which the message was originally sent.
+   */
+  chat: Chat
+  /**
+   * Unique message identifier inside the chat.
+   */
+  messageId: number
+  /**
+   * Signature of the original post author.
+   */
+  authorSignature?: string
+}
+
+/**
+ * This object describes the origin of a message.
+ *
+ * @see https://core.telegram.org/bots/api#messageorigin
+ */
+export type MessageOrigin =
+  | MessageOriginUser
+  | MessageOriginHiddenUser
+  | MessageOriginChat
+  | MessageOriginChannel
+
+/**
+ * Describes reply information for the message.
+ *
+ * @see https://core.telegram.org/bots/api#textquote
+ */
+export type TextQuote = {
+  /**
+   * Text of the quoted part of a message that is replied to by the given message.
+   */
+  text: string
+  /**
+   * Special entities that appear in the quote.
+   * Currently, only bold, italic, underline, strikethrough, spoiler, and custom_emoji
+   * entities are kept in quotes.
+   */
+  entities?: MessageEntity[]
+  /**
+   * Approximate quote position in the original message in UTF-16 code units
+   * as specified by the sender.
+   */
+  position: number
+  /**
+   * True, if the quote was chosen manually by the message sender.
+   * Otherwise, the quote was added automatically by the server.
+   */
+  isManual?: boolean
+}
+
+/**
+ * This object contains information about a message that is being replied to,
+ * which may come from another chat or forum topic.
+ *
+ * @see https://core.telegram.org/bots/api#externalreplyinfo
+ */
+export type ExternalReplyInfo = {
+  /**
+   * Origin of the message replied to by the given message.
+   */
+  origin: MessageOrigin
+  /**
+   * Chat the original message belongs to. Available only if the chat is a supergroup or a channel.
+   */
+  chat?: Chat
+  /**
+   * Unique message identifier inside the original chat. Available only if the original chat is a supergroup or a channel.
+   */
+  messageId?: number
+  /**
+   * Options used for link preview generation for the original message, if it is a text message.
+   */
+  linkPreviewOptions?: LinkPreviewOptions
+  /**
+   * Message is an animation, information about the animation.
+   */
+  animation?: Animation
+  /**
+   * Message is an audio file, information about the file.
+   */
+  audio?: Audio
+  /**
+   * Message is a general file, information about the file.
+   */
+  document?: Document
+  /**
+   * Message contains paid media; information about the paid media.
+   */
+  paidMedia?: PaidMediaInfo
+  /**
+   * Message is a photo, available sizes of the photo.
+   */
+  photo?: PhotoSize[]
+  /**
+   * Message is a sticker, information about the sticker.
+   */
+  sticker?: Sticker
+  /**
+   * Message is a forwarded story.
+   */
+  story?: Story
+  /**
+   * Message is a video, information about the video.
+   */
+  video?: Video
+  /**
+   * Message is a video note, information about the video message.
+   */
+  videoNote?: VideoNote
+  /**
+   * Message is a voice message, information about the file.
+   */
+  voice?: Voice
+  /**
+   * True, if the message media is covered by a spoiler animation.
+   */
+  hasMediaSpoiler?: boolean
+  /**
+   * Message is a shared contact, information about the contact.
+   */
+  contact?: Contact
+  /**
+   * Message is a dice with random value.
+   */
+  dice?: Dice
+  /**
+   * Message is a game, information about the game.
+   */
+  game?: Game
+  /**
+   * Message is a scheduled giveaway, information about the giveaway.
+   */
+  giveaway?: Giveaway
+  /**
+   * A giveaway with public winners was completed.
+   */
+  giveawayWinners?: GiveawayWinners
+  /**
+   * Message is an invoice for a payment, information about the invoice.
+   */
+  invoice?: Invoice
+  /**
+   * Message is a shared location, information about the location.
+   */
+  location?: Location
+  /**
+   * Message is a native poll, information about the poll.
+   */
+  poll?: Poll
+  /**
+   * Message is a venue, information about the venue.
+   */
+  venue?: Venue
+}
+
+/**
+ * This object represents a service message about a change in auto-delete timer settings.
+ *
+ * @see https://core.telegram.org/bots/api#messageautodeletetimerchanged
+ */
+export type MessageAutoDeleteTimerChanged = {
+  /**
+   * New auto-delete time for messages in the chat; in seconds.
+   */
+  messageAutoDeleteTime: number
+}
+
+/**
+ * This object contains information about the users whose identifiers were shared
+ * with the bot using a KeyboardButtonRequestUsers button.
+ *
+ * @see https://core.telegram.org/bots/api#usersshared
+ */
+export type UsersShared = {
+  /**
+   * Identifier of the request.
+   */
+  requestId: number
+  /**
+   * Information about users shared with the bot.
+   */
+  users: SharedUser[]
+}
+
+/**
+ * This object contains information about a user that was shared with the bot
+ * using a KeyboardButtonRequestUsers button.
+ *
+ * @see https://core.telegram.org/bots/api#shareduser
+ */
+export type SharedUser = {
+  /**
+   * Identifier of the shared user. This number may have more than 32 significant bits
+   * and some programming languages may have difficulty/silent defects in interpreting it.
+   * But it has at most 52 significant bits, so 64-bit integers or double-precision float types
+   * are safe for storing these identifiers. The bot may not have access to the user and could
+   * be unable to use this identifier, unless the user is already known to the bot by some other means.
+   */
+  userId: number
+  /**
+   * First name of the user, if the name was requested by the bot.
+   */
+  firstName?: string
+  /**
+   * Last name of the user, if the name was requested by the bot.
+   */
+  lastName?: string
+  /**
+   * Username of the user, if the username was requested by the bot.
+   */
+  username?: string
+  /**
+   * Available sizes of the chat photo, if the photo was requested by the bot.
+   */
+  photo?: PhotoSize[]
+}
+
+/**
+ * This object contains information about a chat that was shared with the bot
+ * using a KeyboardButtonRequestChat button.
+ *
+ * @see https://core.telegram.org/bots/api#chatshared
+ */
+export type ChatShared = {
+  /**
+   * Identifier of the request.
+   */
+  requestId: number
+  /**
+   * Identifier of the shared chat. This number may have more than 32 significant bits
+   * and some programming languages may have difficulty/silent defects in interpreting it.
+   * But it has at most 52 significant bits, so a 64-bit integer or double-precision float type
+   * are safe for storing this identifier. The bot may not have access to the chat and could be
+   * unable to use this identifier, unless the chat is already known to the bot by some other means.
+   */
+  chatId: number
+  /**
+   * Title of the chat, if the title was requested by the bot.
+   */
+  title?: string
+  /**
+   * Username of the chat, if the username was requested by the bot and available.
+   */
+  username?: string
+  /**
+   * Available sizes of the chat photo, if the photo was requested by the bot.
+   */
+  photo?: PhotoSize[]
+}
+
+/**
+ * This object represents a service message about a user allowing a bot
+ * to write messages after adding it to the attachment menu, launching a Web App
+ * from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess.
+ *
+ * @see https://core.telegram.org/bots/api#writeaccessallowed
+ */
+export type WriteAccessAllowed = {
+  /**
+   * True, if the access was granted after the user accepted an explicit request from a Web App
+   * sent by the method requestWriteAccess.
+   */
+  fromRequest?: boolean
+  /**
+   * Name of the Web App, if the access was granted when the Web App was launched from a link.
+   */
+  webAppName?: string
+  /**
+   * True, if the access was granted when the bot was added to the attachment or side menu.
+   */
+  fromAttachmentMenu?: boolean
+}
+
+/**
+ * This object represents a service message about a video chat scheduled in the chat.
+ *
+ * @see https://core.telegram.org/bots/api#videochatscheduled
+ */
+export type VideoChatScheduled = {
+  /**
+   * Point in time (Unix timestamp) when the video chat is supposed to be started by a chat administrator.
+   */
+  startDate: number
+}
+
+/**
+ * This object represents a service message about a video chat started in the chat.
+ * Currently holds no information.
+ *
+ * @see https://core.telegram.org/bots/api#videochatstarted
+ */
+export type VideoChatStarted = Record<string, never>
+
+/**
+ * This object represents a service message about a video chat ended in the chat.
+ *
+ * @see https://core.telegram.org/bots/api#videochatended
+ */
+export type VideoChatEnded = {
+  /**
+   * Video chat duration in seconds.
+   */
+  duration: number
+}
+
+/**
+ * This object represents a service message about new members invited to a video chat.
+ *
+ * @see https://core.telegram.org/bots/api#videochatparticipantsinvited
+ */
+export type VideoChatParticipantsInvited = {
+  /**
+   * New members that were invited to the video chat.
+   */
+  users: User[]
+}
+
+/**
+ * This object represents a service message about a forum topic created in the chat.
+ *
+ * @see https://core.telegram.org/bots/api#forumtopiccreated
+ */
+export type ForumTopicCreated = {
+  /**
+   * Name of the topic.
+   */
+  name: string
+  /**
+   * Color of the topic icon in RGB format.
+   */
+  iconColor: number
+  /**
+   * Unique identifier of the custom emoji shown as the topic icon.
+   */
+  iconCustomEmojiId?: string
+}
+
+/**
+ * This object represents a service message about a forum topic closed in the chat.
+ * Currently holds no information.
+ *
+ * @see https://core.telegram.org/bots/api#forumtopicclosed
+ */
+export type ForumTopicClosed = Record<string, never>
+
+/**
+ * This object represents a service message about an edited forum topic.
+ *
+ * @see https://core.telegram.org/bots/api#forumtopicedited
+ */
+export type ForumTopicEdited = {
+  /**
+   * New name of the topic, if it was edited.
+   */
+  name?: string
+  /**
+   * New identifier of the custom emoji shown as the topic icon, if it was edited;
+   * an empty string if the icon was removed.
+   */
+  iconCustomEmojiId?: string
+}
+
+/**
+ * This object represents a service message about a forum topic reopened in the chat.
+ * Currently holds no information.
+ *
+ * @see https://core.telegram.org/bots/api#forumtopicreopened
+ */
+export type ForumTopicReopened = Record<string, never>
+
+/**
+ * This object represents a service message about General forum topic hidden in the chat.
+ * Currently holds no information.
+ *
+ * @see https://core.telegram.org/bots/api#generalforumtopichidden
+ */
+export type GeneralForumTopicHidden = Record<string, never>
+
+/**
+ * This object represents a service message about General forum topic unhidden in the chat.
+ * Currently holds no information.
+ *
+ * @see https://core.telegram.org/bots/api#generalforumtopicunhidden
+ */
+export type GeneralForumTopicUnhidden = Record<string, never>
+
+/**
+ * This object contains information about a user that was shared with the bot.
+ *
+ * @see https://core.telegram.org/bots/api#proximityalerttriggered
+ */
+export type ProximityAlertTriggered = {
+  /**
+   * User that triggered the alert.
+   */
+  traveler: User
+  /**
+   * User that set the alert.
+   */
+  watcher: User
+  /**
+   * The distance between the users.
+   */
+  distance: number
+}
+
+/**
+ * This object represents the content of a service message, sent whenever a user
+ * in the chat triggers a proximity alert set by another user.
+ *
+ * @see https://core.telegram.org/bots/api#chatboostadded
+ */
+export type ChatBoostAdded = {
+  /**
+   * Number of boosts added by the user.
+   */
+  boostCount: number
+}
+
+/**
+ * This object describes the way a background is filled based on the selected colors.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundfillsolid
+ */
+export type BackgroundFillSolid = {
+  /**
+   * Type of the background fill, always "solid".
+   */
+  type: 'solid'
+  /**
+   * The color of the background fill in the RGB24 format.
+   */
+  color: number
+}
+
+/**
+ * The background is a gradient fill.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundfillgradient
+ */
+export type BackgroundFillGradient = {
+  /**
+   * Type of the background fill, always "gradient".
+   */
+  type: 'gradient'
+  /**
+   * Top color of the gradient in the RGB24 format.
+   */
+  topColor: number
+  /**
+   * Bottom color of the gradient in the RGB24 format.
+   */
+  bottomColor: number
+  /**
+   * Clockwise rotation angle of the background fill in degrees; 0-359.
+   */
+  rotationAngle: number
+}
+
+/**
+ * The background is a freeform gradient that rotates after every message in the chat.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundfillfreeformgradient
+ */
+export type BackgroundFillFreeformGradient = {
+  /**
+   * Type of the background fill, always "freeform_gradient".
+   */
+  type: 'freeformGradient'
+  /**
+   * A list of the 3 or 4 base colors that are used to generate the freeform gradient
+   * in the RGB24 format.
+   */
+  colors: number[]
+}
+
+/**
+ * This object describes the way a background is filled.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundfill
+ */
+export type BackgroundFill =
+  | BackgroundFillSolid
+  | BackgroundFillGradient
+  | BackgroundFillFreeformGradient
+
+/**
+ * The background is automatically filled based on the selected colors.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundtypefill
+ */
+export type BackgroundTypeFill = {
+  /**
+   * Type of the background, always "fill".
+   */
+  type: 'fill'
+  /**
+   * The background fill.
+   */
+  fill: BackgroundFill
+  /**
+   * Dimming of the background in dark themes, as a percentage; 0-100.
+   */
+  darkThemeDimming: number
+}
+
+/**
+ * The background is a wallpaper in the JPEG format.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundtypewallpaper
+ */
+export type BackgroundTypeWallpaper = {
+  /**
+   * Type of the background, always "wallpaper".
+   */
+  type: 'wallpaper'
+  /**
+   * Document with the wallpaper.
+   */
+  document: Document
+  /**
+   * Dimming of the background in dark themes, as a percentage; 0-100.
+   */
+  darkThemeDimming: number
+  /**
+   * True, if the wallpaper is downscaled to fit in a 450x450 square and then
+   * box-blurred with radius 12.
+   */
+  isBlurred?: boolean
+  /**
+   * True, if the background moves slightly when the device is tilted.
+   */
+  isMoving?: boolean
+}
+
+/**
+ * The background is a PNG or TGV (gzipped subset of SVG with MIME type "application/x-tgwallpattern")
+ * pattern to be combined with the background fill chosen by the user.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundtypepattern
+ */
+export type BackgroundTypePattern = {
+  /**
+   * Type of the background, always "pattern".
+   */
+  type: 'pattern'
+  /**
+   * Document with the pattern.
+   */
+  document: Document
+  /**
+   * The background fill that is combined with the pattern.
+   */
+  fill: BackgroundFill
+  /**
+   * Intensity of the pattern when it is shown above the filled background; 0-100.
+   */
+  intensity: number
+  /**
+   * True, if the background fill must be applied only to the pattern itself.
+   * All other pixels are black in this case. For dark themes only.
+   */
+  isInverted?: boolean
+  /**
+   * True, if the background moves slightly when the device is tilted.
+   */
+  isMoving?: boolean
+}
+
+/**
+ * The background is taken directly from a built-in chat theme.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundtypechattheme
+ */
+export type BackgroundTypeChatTheme = {
+  /**
+   * Type of the background, always "chat_theme".
+   */
+  type: 'chatTheme'
+  /**
+   * Name of the chat theme, which is usually an emoji.
+   */
+  themeName: string
+}
+
+/**
+ * This object describes the type of a background.
+ *
+ * @see https://core.telegram.org/bots/api#backgroundtype
+ */
+export type BackgroundType =
+  | BackgroundTypeFill
+  | BackgroundTypeWallpaper
+  | BackgroundTypePattern
+  | BackgroundTypeChatTheme
+
+/**
+ * This object represents a chat background.
+ *
+ * @see https://core.telegram.org/bots/api#chatbackground
+ */
+export type ChatBackground = {
+  /**
+   * Type of the background.
+   */
+  type: BackgroundType
+}
+
+/**
+ * This object represents a service message about a new forum topic created in the chat.
+ *
+ * @see https://core.telegram.org/bots/api#giveawaycreated
+ */
+export type GiveawayCreated = {
+  /**
+   * The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only.
+   */
+  prizeStarCount?: number
+}
+
+/**
+ * This object represents a message about a scheduled giveaway.
+ *
+ * @see https://core.telegram.org/bots/api#giveaway
+ */
+export type Giveaway = {
+  /**
+   * The list of chats which the user must join to participate in the giveaway.
+   */
+  chats: Chat[]
+  /**
+   * Point in time (Unix timestamp) when winners of the giveaway will be selected.
+   */
+  winnersSelectionDate: number
+  /**
+   * The number of users which are supposed to be selected as winners of the giveaway.
+   */
+  winnerCount: number
+  /**
+   * True, if only users who join the chats after the giveaway started should be eligible to win.
+   */
+  onlyNewMembers?: boolean
+  /**
+   * True, if the list of giveaway winners will be visible to everyone.
+   */
+  hasPublicWinners?: boolean
+  /**
+   * Description of additional giveaway prize.
+   */
+  prizeDescription?: string
+  /**
+   * A list of two-letter ISO 3166-1 alpha-2 country codes indicating the countries
+   * from which eligible users for the giveaway must come.
+   * If empty, then all users can participate in the giveaway.
+   * Users with a phone number that was bought on Fragment can always participate in giveaways.
+   */
+  countryCodes?: string[]
+  /**
+   * The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only.
+   */
+  prizeStarCount?: number
+  /**
+   * The number of months the Telegram Premium subscription won from the giveaway will be active for;
+   * for Telegram Premium giveaways only.
+   */
+  premiumSubscriptionMonthCount?: number
+}
+
+/**
+ * This object represents a message about the completion of a giveaway with public winners.
+ *
+ * @see https://core.telegram.org/bots/api#giveawaywinners
+ */
+export type GiveawayWinners = {
+  /**
+   * The chat that created the giveaway.
+   */
+  chat: Chat
+  /**
+   * Identifier of the message with the giveaway in the chat.
+   */
+  giveawayMessageId: number
+  /**
+   * Point in time (Unix timestamp) when winners of the giveaway were selected.
+   */
+  winnersSelectionDate: number
+  /**
+   * Total number of winners in the giveaway.
+   */
+  winnerCount: number
+  /**
+   * List of up to 100 winners of the giveaway.
+   */
+  winners: User[]
+  /**
+   * The number of other chats the user had to join in order to be eligible for the giveaway.
+   */
+  additionalChatCount?: number
+  /**
+   * The number of Telegram Stars that were split between giveaway winners; for Telegram Star giveaways only.
+   */
+  prizeStarCount?: number
+  /**
+   * The number of months the Telegram Premium subscription won from the giveaway will be active for;
+   * for Telegram Premium giveaways only.
+   */
+  premiumSubscriptionMonthCount?: number
+  /**
+   * Number of undistributed prizes.
+   */
+  unclaimedPrizeCount?: number
+  /**
+   * True, if only users who had joined the chats after the giveaway started were eligible to win.
+   */
+  onlyNewMembers?: boolean
+  /**
+   * True, if the giveaway was canceled because the payment for it was refunded.
+   */
+  wasRefunded?: boolean
+  /**
+   * Description of additional giveaway prize.
+   */
+  prizeDescription?: string
+}
+
+/**
+ * This object represents a service message about the completion of a giveaway without public winners.
+ *
+ * @see https://core.telegram.org/bots/api#giveawaycompleted
+ */
+export type GiveawayCompleted = {
+  /**
+   * Number of winners in the giveaway.
+   */
+  winnerCount: number
+  /**
+   * Number of undistributed prizes.
+   */
+  unclaimedPrizeCount?: number
+  /**
+   * Message with the giveaway that was completed, if it wasn't deleted.
+   */
+  giveawayMessage?: Message
+  /**
+   * True, if the giveaway is a Telegram Star giveaway. Otherwise, currently,
+   * the giveaway is a Telegram Premium giveaway.
+   */
+  isStarGiveaway?: boolean
+}
+
+/**
+ * This object contains basic information about an invoice.
+ *
+ * @see https://core.telegram.org/bots/api#invoice
+ */
+export type Invoice = {
+  /**
+   * Product name.
+   */
+  title: string
+  /**
+   * Product description.
+   */
+  description: string
+  /**
+   * Unique bot deep-linking parameter that can be used to generate this invoice.
+   */
+  startParameter: string
+  /**
+   * Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars.
+   */
+  currency: string
+  /**
+   * Total price in the smallest units of the currency (integer, not float/double).
+   * For example, for a price of US$ 1.45 pass amount = 145.
+   * See the exp parameter in currencies.json, it shows the number of digits past
+   * the decimal point for each currency (2 for the majority of currencies).
+   */
+  totalAmount: number
+}
+
+/**
+ * This object contains basic information about a successful payment.
+ *
+ * @see https://core.telegram.org/bots/api#successfulpayment
+ */
+export type SuccessfulPayment = {
+  /**
+   * Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars.
+   */
+  currency: string
+  /**
+   * Total price in the smallest units of the currency (integer, not float/double).
+   * For example, for a price of US$ 1.45 pass amount = 145.
+   * See the exp parameter in currencies.json, it shows the number of digits past
+   * the decimal point for each currency (2 for the majority of currencies).
+   */
+  totalAmount: number
+  /**
+   * Bot-specified invoice payload.
+   */
+  invoicePayload: string
+  /**
+   * Expiration date of the subscription; for recurring payment only.
+   */
+  subscriptionExpirationDate?: number
+  /**
+   * True, if the payment is the first payment for a subscription.
+   */
+  isFirstRecurring?: boolean
+  /**
+   * True, if the payment is recurring; for recurring payment only.
+   */
+  isRecurring?: boolean
+  /**
+   * Identifier of the shipping option chosen by the user.
+   */
+  shippingOptionId?: string
+  /**
+   * Order information provided by the user.
+   */
+  orderInfo?: OrderInfo
+  /**
+   * Telegram payment identifier.
+   */
+  telegramPaymentChargeId: string
+  /**
+   * Provider payment identifier.
+   */
+  providerPaymentChargeId: string
+}
+
+/**
+ * This object contains information about a refunded payment.
+ *
+ * @see https://core.telegram.org/bots/api#refundedpayment
+ */
+export type RefundedPayment = {
+  /**
+   * Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars.
+   * Currently, always "XTR".
+   */
+  currency: string
+  /**
+   * Total refunded price in the smallest units of the currency (integer, not float/double).
+   * For example, for a price of US$ 1.45, total_amount = 145.
+   * See the exp parameter in currencies.json, it shows the number of digits past
+   * the decimal point for each currency (2 for the majority of currencies).
+   */
+  totalAmount: number
+  /**
+   * Bot-specified invoice payload.
+   */
+  invoicePayload: string
+  /**
+   * Telegram payment identifier.
+   */
+  telegramPaymentChargeId: string
+  /**
+   * Provider payment identifier.
+   */
+  providerPaymentChargeId?: string
 }
 
 /**
@@ -2365,6 +4299,70 @@ export type Update = {
 }
 
 /**
+ * Type of updates the bot can receive.
+ *
+ * Used to specify which types of updates you want your bot to receive in `allowedUpdates`.
+ *
+ * @see https://core.telegram.org/bots/api#update
+ * @see https://core.telegram.org/bots/api#setwebhook
+ */
+export type UpdateType =
+  | 'message'
+  | 'edited_message'
+  | 'channel_post'
+  | 'edited_channel_post'
+  | 'business_connection'
+  | 'business_message'
+  | 'edited_business_message'
+  | 'deleted_business_messages'
+  | 'message_reaction'
+  | 'message_reaction_count'
+  | 'inline_query'
+  | 'chosen_inline_result'
+  | 'callback_query'
+  | 'shipping_query'
+  | 'pre_checkout_query'
+  | 'purchased_paid_media'
+  | 'poll'
+  | 'poll_answer'
+  | 'my_chat_member'
+  | 'chat_member'
+  | 'chat_join_request'
+  | 'chat_boost'
+  | 'removed_chat_boost'
+
+/**
+ * This object describes a message that was deleted or is otherwise inaccessible to the bot.
+ *
+ * @see https://core.telegram.org/bots/api#inaccessiblemessage
+ */
+export type InaccessibleMessage = {
+  /**
+   * Chat the message belonged to.
+   */
+  chat: Chat
+  /**
+   * Unique message identifier inside the chat.
+   */
+  messageId: number
+  /**
+   * Always 0. The field can be used to differentiate regular and inaccessible messages.
+   */
+  date: 0
+}
+
+/**
+ * This object describes a message that can be inaccessible to the bot.
+ *
+ * It can be one of:
+ * - Message
+ * - InaccessibleMessage
+ *
+ * @see https://core.telegram.org/bots/api#maybeinaccessiblemessage
+ */
+export type MaybeInaccessibleMessage = Message | InaccessibleMessage
+
+/**
  * Describes the current status of a webhook.
  *
  * @see https://core.telegram.org/bots/api#webhookinfo
@@ -2404,6 +4402,8 @@ export type WebhookInfo = {
   maxConnections?: number
   /**
    * A list of update types the bot is subscribed to.
+   *
+   * @see UpdateType for type-safe values
    */
-  allowedUpdates?: string[]
+  allowedUpdates?: UpdateType[]
 }

@@ -1,7 +1,7 @@
 import type { Result } from '@triggerskit/core/types'
 import { fail, ok } from '@triggerskit/core/utils'
 import { type ApiWebhookInfo, fromApi } from '../api'
-import type { TelegramContext, WebhookInfo } from '../types'
+import type { TelegramContext, UpdateType, WebhookInfo } from '../types'
 
 /**
  * Parameters for setting a webhook.
@@ -26,7 +26,7 @@ export type SetWebhookParams = {
    *
    * @example ['message', 'callback_query']
    */
-  allowedUpdates?: string[]
+  allowedUpdates?: UpdateType[]
   /**
    * Pass `true` to drop all pending updates.
    */

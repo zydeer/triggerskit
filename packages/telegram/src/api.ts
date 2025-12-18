@@ -1,9 +1,15 @@
 import type {
+  Animation,
+  Audio,
+  BackgroundFill,
+  BackgroundType,
   BusinessConnection,
   BusinessMessagesDeleted,
   CallbackQuery,
   Chat,
+  ChatBackground,
   ChatBoost,
+  ChatBoostAdded,
   ChatBoostRemoved,
   ChatBoostSource,
   ChatBoostUpdated,
@@ -11,29 +17,72 @@ import type {
   ChatJoinRequest,
   ChatMember,
   ChatMemberUpdated,
+  ChatShared,
   ChosenInlineResult,
+  Contact,
+  Dice,
+  Document,
+  ExternalReplyInfo,
+  File,
+  ForumTopicClosed,
+  ForumTopicCreated,
+  ForumTopicEdited,
+  ForumTopicReopened,
+  Game,
+  GeneralForumTopicHidden,
+  GeneralForumTopicUnhidden,
+  Giveaway,
+  GiveawayCompleted,
+  GiveawayCreated,
+  GiveawayWinners,
+  InlineKeyboardMarkup,
   InlineQuery,
+  Invoice,
   LinkPreviewOptions,
   Location,
+  MaskPosition,
   Message,
+  MessageAutoDeleteTimerChanged,
   MessageEntity,
+  MessageOrigin,
   MessageReactionCountUpdated,
   MessageReactionUpdated,
   OrderInfo,
+  PaidMedia,
+  PaidMediaInfo,
   PaidMediaPurchased,
+  PhotoSize,
   Poll,
   PollAnswer,
   PollOption,
   PreCheckoutQuery,
+  ProximityAlertTriggered,
   ReactionCount,
   ReactionType,
+  RefundedPayment,
   ReplyMarkup,
   ReplyParameters,
+  SharedUser,
   ShippingAddress,
   ShippingQuery,
+  Sticker,
+  Story,
+  SuccessfulPayment,
+  TextQuote,
   Update,
   User,
+  UsersShared,
+  Venue,
+  Video,
+  VideoChatEnded,
+  VideoChatParticipantsInvited,
+  VideoChatScheduled,
+  VideoChatStarted,
+  VideoNote,
+  Voice,
+  WebAppData,
   WebhookInfo,
+  WriteAccessAllowed,
 } from './types'
 
 export type ApiUser = {
@@ -72,15 +121,567 @@ export type ApiMessageEntity = {
   custom_emoji_id?: string
 }
 
+export type ApiPhotoSize = {
+  file_id: string
+  file_unique_id: string
+  width: number
+  height: number
+  file_size?: number
+}
+
+export type ApiAnimation = {
+  file_id: string
+  file_unique_id: string
+  width: number
+  height: number
+  duration: number
+  thumbnail?: ApiPhotoSize
+  file_name?: string
+  mime_type?: string
+  file_size?: number
+}
+
+export type ApiAudio = {
+  file_id: string
+  file_unique_id: string
+  duration: number
+  performer?: string
+  title?: string
+  file_name?: string
+  mime_type?: string
+  file_size?: number
+  thumbnail?: ApiPhotoSize
+}
+
+export type ApiDocument = {
+  file_id: string
+  file_unique_id: string
+  thumbnail?: ApiPhotoSize
+  file_name?: string
+  mime_type?: string
+  file_size?: number
+}
+
+export type ApiVideo = {
+  file_id: string
+  file_unique_id: string
+  width: number
+  height: number
+  duration: number
+  thumbnail?: ApiPhotoSize
+  file_name?: string
+  mime_type?: string
+  file_size?: number
+}
+
+export type ApiVideoNote = {
+  file_id: string
+  file_unique_id: string
+  length: number
+  duration: number
+  thumbnail?: ApiPhotoSize
+  file_size?: number
+}
+
+export type ApiVoice = {
+  file_id: string
+  file_unique_id: string
+  duration: number
+  mime_type?: string
+  file_size?: number
+}
+
+export type ApiContact = {
+  phone_number: string
+  first_name: string
+  last_name?: string
+  user_id?: number
+  vcard?: string
+}
+
+export type ApiDice = {
+  emoji: string
+  value: number
+}
+
+export type ApiVenue = {
+  location: ApiLocation
+  title: string
+  address: string
+  foursquare_id?: string
+  foursquare_type?: string
+  google_place_id?: string
+  google_place_type?: string
+}
+
+export type ApiStory = {
+  chat: ApiChat
+  id: number
+}
+
+export type ApiFile = {
+  file_id: string
+  file_unique_id: string
+  file_size?: number
+  file_path?: string
+}
+
+export type ApiMaskPosition = {
+  point: 'forehead' | 'eyes' | 'mouth' | 'chin'
+  x_shift: number
+  y_shift: number
+  scale: number
+}
+
+export type ApiSticker = {
+  file_id: string
+  file_unique_id: string
+  type: 'regular' | 'mask' | 'custom_emoji'
+  width: number
+  height: number
+  is_animated: boolean
+  is_video: boolean
+  thumbnail?: ApiPhotoSize
+  emoji?: string
+  set_name?: string
+  premium_animation?: ApiFile
+  mask_position?: ApiMaskPosition
+  custom_emoji_id?: string
+  needs_repainting?: boolean
+  file_size?: number
+}
+
+export type ApiGame = {
+  title: string
+  description: string
+  photo: ApiPhotoSize[]
+  text?: string
+  text_entities?: ApiMessageEntity[]
+  animation?: ApiAnimation
+}
+
+export type ApiPaidMediaPreview = {
+  type: 'preview'
+  width?: number
+  height?: number
+  duration?: number
+}
+
+export type ApiPaidMediaPhoto = {
+  type: 'photo'
+  photo: ApiPhotoSize[]
+}
+
+export type ApiPaidMediaVideo = {
+  type: 'video'
+  video: ApiVideo
+}
+
+export type ApiPaidMedia =
+  | ApiPaidMediaPreview
+  | ApiPaidMediaPhoto
+  | ApiPaidMediaVideo
+
+export type ApiPaidMediaInfo = {
+  star_count: number
+  paid_media: ApiPaidMedia[]
+}
+
+export type ApiMessageOriginUser = {
+  type: 'user'
+  date: number
+  sender_user: ApiUser
+}
+
+export type ApiMessageOriginHiddenUser = {
+  type: 'hidden_user'
+  date: number
+  sender_user_name: string
+}
+
+export type ApiMessageOriginChat = {
+  type: 'chat'
+  date: number
+  sender_chat: ApiChat
+  author_signature?: string
+}
+
+export type ApiMessageOriginChannel = {
+  type: 'channel'
+  date: number
+  chat: ApiChat
+  message_id: number
+  author_signature?: string
+}
+
+export type ApiMessageOrigin =
+  | ApiMessageOriginUser
+  | ApiMessageOriginHiddenUser
+  | ApiMessageOriginChat
+  | ApiMessageOriginChannel
+
+export type ApiTextQuote = {
+  text: string
+  entities?: ApiMessageEntity[]
+  position: number
+  is_manual?: boolean
+}
+
+export type ApiExternalReplyInfo = {
+  origin: ApiMessageOrigin
+  chat?: ApiChat
+  message_id?: number
+  link_preview_options?: ApiLinkPreviewOptions
+  animation?: ApiAnimation
+  audio?: ApiAudio
+  document?: ApiDocument
+  paid_media?: ApiPaidMediaInfo
+  photo?: ApiPhotoSize[]
+  sticker?: ApiSticker
+  story?: ApiStory
+  video?: ApiVideo
+  video_note?: ApiVideoNote
+  voice?: ApiVoice
+  has_media_spoiler?: boolean
+  contact?: ApiContact
+  dice?: ApiDice
+  game?: ApiGame
+  giveaway?: ApiGiveaway
+  giveaway_winners?: ApiGiveawayWinners
+  invoice?: ApiInvoice
+  location?: ApiLocation
+  poll?: ApiPoll
+  venue?: ApiVenue
+}
+
+export type ApiLinkPreviewOptions = {
+  is_disabled?: boolean
+  url?: string
+  prefer_small_media?: boolean
+  prefer_large_media?: boolean
+  show_above_text?: boolean
+}
+
+export type ApiInvoice = {
+  title: string
+  description: string
+  start_parameter: string
+  currency: string
+  total_amount: number
+}
+
+export type ApiSuccessfulPayment = {
+  currency: string
+  total_amount: number
+  invoice_payload: string
+  subscription_expiration_date?: number
+  is_first_recurring?: boolean
+  is_recurring?: boolean
+  shipping_option_id?: string
+  order_info?: ApiOrderInfo
+  telegram_payment_charge_id: string
+  provider_payment_charge_id: string
+}
+
+export type ApiRefundedPayment = {
+  currency: string
+  total_amount: number
+  invoice_payload: string
+  telegram_payment_charge_id: string
+  provider_payment_charge_id?: string
+}
+
+export type ApiSharedUser = {
+  user_id: number
+  first_name?: string
+  last_name?: string
+  username?: string
+  photo?: ApiPhotoSize[]
+}
+
+export type ApiUsersShared = {
+  request_id: number
+  users: ApiSharedUser[]
+}
+
+export type ApiChatShared = {
+  request_id: number
+  chat_id: number
+  title?: string
+  username?: string
+  photo?: ApiPhotoSize[]
+}
+
+export type ApiWriteAccessAllowed = {
+  from_request?: boolean
+  web_app_name?: string
+  from_attachment_menu?: boolean
+}
+
+export type ApiVideoChatScheduled = {
+  start_date: number
+}
+
+export type ApiVideoChatStarted = Record<string, never>
+
+export type ApiVideoChatEnded = {
+  duration: number
+}
+
+export type ApiVideoChatParticipantsInvited = {
+  users: ApiUser[]
+}
+
+export type ApiForumTopicCreated = {
+  name: string
+  icon_color: number
+  icon_custom_emoji_id?: string
+}
+
+export type ApiForumTopicClosed = Record<string, never>
+
+export type ApiForumTopicEdited = {
+  name?: string
+  icon_custom_emoji_id?: string
+}
+
+export type ApiForumTopicReopened = Record<string, never>
+
+export type ApiGeneralForumTopicHidden = Record<string, never>
+
+export type ApiGeneralForumTopicUnhidden = Record<string, never>
+
+export type ApiProximityAlertTriggered = {
+  traveler: ApiUser
+  watcher: ApiUser
+  distance: number
+}
+
+export type ApiChatBoostAdded = {
+  boost_count: number
+}
+
+export type ApiBackgroundFillSolid = {
+  type: 'solid'
+  color: number
+}
+
+export type ApiBackgroundFillGradient = {
+  type: 'gradient'
+  top_color: number
+  bottom_color: number
+  rotation_angle: number
+}
+
+export type ApiBackgroundFillFreeformGradient = {
+  type: 'freeform_gradient'
+  colors: number[]
+}
+
+export type ApiBackgroundFill =
+  | ApiBackgroundFillSolid
+  | ApiBackgroundFillGradient
+  | ApiBackgroundFillFreeformGradient
+
+export type ApiBackgroundTypeFill = {
+  type: 'fill'
+  fill: ApiBackgroundFill
+  dark_theme_dimming: number
+}
+
+export type ApiBackgroundTypeWallpaper = {
+  type: 'wallpaper'
+  document: ApiDocument
+  dark_theme_dimming: number
+  is_blurred?: boolean
+  is_moving?: boolean
+}
+
+export type ApiBackgroundTypePattern = {
+  type: 'pattern'
+  document: ApiDocument
+  fill: ApiBackgroundFill
+  intensity: number
+  is_inverted?: boolean
+  is_moving?: boolean
+}
+
+export type ApiBackgroundTypeChatTheme = {
+  type: 'chat_theme'
+  theme_name: string
+}
+
+export type ApiBackgroundType =
+  | ApiBackgroundTypeFill
+  | ApiBackgroundTypeWallpaper
+  | ApiBackgroundTypePattern
+  | ApiBackgroundTypeChatTheme
+
+export type ApiChatBackground = {
+  type: ApiBackgroundType
+}
+
+export type ApiGiveawayCreated = {
+  prize_star_count?: number
+}
+
+export type ApiGiveaway = {
+  chats: ApiChat[]
+  winners_selection_date: number
+  winner_count: number
+  only_new_members?: boolean
+  has_public_winners?: boolean
+  prize_description?: string
+  country_codes?: string[]
+  prize_star_count?: number
+  premium_subscription_month_count?: number
+}
+
+export type ApiGiveawayWinners = {
+  chat: ApiChat
+  giveaway_message_id: number
+  winners_selection_date: number
+  winner_count: number
+  winners: ApiUser[]
+  additional_chat_count?: number
+  prize_star_count?: number
+  premium_subscription_month_count?: number
+  unclaimed_prize_count?: number
+  only_new_members?: boolean
+  was_refunded?: boolean
+  prize_description?: string
+}
+
+export type ApiGiveawayCompleted = {
+  winner_count: number
+  unclaimed_prize_count?: number
+  giveaway_message?: ApiMessage
+  is_star_giveaway?: boolean
+}
+
+export type ApiWebAppData = {
+  data: string
+  button_text: string
+}
+
+export type ApiMessageAutoDeleteTimerChanged = {
+  message_auto_delete_time: number
+}
+
+export type ApiInlineKeyboardButton = {
+  text: string
+  url?: string
+  callback_data?: string
+  web_app?: { url: string }
+  login_url?: {
+    url: string
+    forward_text?: string
+    bot_username?: string
+    request_write_access?: boolean
+  }
+  switch_inline_query?: string
+  switch_inline_query_current_chat?: string
+  switch_inline_query_chosen_chat?: {
+    query?: string
+    allow_user_chats?: boolean
+    allow_bot_chats?: boolean
+    allow_group_chats?: boolean
+    allow_channel_chats?: boolean
+  }
+  copy_text?: { text: string }
+  callback_game?: Record<string, never>
+  pay?: boolean
+}
+
+export type ApiInlineKeyboardMarkup = {
+  inline_keyboard: ApiInlineKeyboardButton[][]
+}
+
 export type ApiMessage = {
   message_id: number
   message_thread_id?: number
   from?: ApiUser
   sender_chat?: ApiChat
+  sender_boost_count?: number
+  sender_business_bot?: ApiUser
   date: number
+  business_connection_id?: string
   chat: ApiChat
+  forward_origin?: ApiMessageOrigin
+  is_topic_message?: boolean
+  is_automatic_forward?: boolean
+  reply_to_message?: ApiMessage
+  external_reply?: ApiExternalReplyInfo
+  quote?: ApiTextQuote
+  reply_to_story?: ApiStory
+  via_bot?: ApiUser
+  edit_date?: number
+  has_protected_content?: boolean
+  is_from_offline?: boolean
+  media_group_id?: string
+  author_signature?: string
   text?: string
   entities?: ApiMessageEntity[]
+  link_preview_options?: ApiLinkPreviewOptions
+  effect_id?: string
+  animation?: ApiAnimation
+  audio?: ApiAudio
+  document?: ApiDocument
+  paid_media?: ApiPaidMediaInfo
+  photo?: ApiPhotoSize[]
+  sticker?: ApiSticker
+  story?: ApiStory
+  video?: ApiVideo
+  video_note?: ApiVideoNote
+  voice?: ApiVoice
+  caption?: string
+  caption_entities?: ApiMessageEntity[]
+  show_caption_above_media?: boolean
+  has_media_spoiler?: boolean
+  contact?: ApiContact
+  dice?: ApiDice
+  game?: ApiGame
+  poll?: ApiPoll
+  venue?: ApiVenue
+  location?: ApiLocation
+  new_chat_members?: ApiUser[]
+  left_chat_member?: ApiUser
+  new_chat_title?: string
+  new_chat_photo?: ApiPhotoSize[]
+  delete_chat_photo?: boolean
+  group_chat_created?: boolean
+  supergroup_chat_created?: boolean
+  channel_chat_created?: boolean
+  message_auto_delete_timer_changed?: ApiMessageAutoDeleteTimerChanged
+  migrate_to_chat_id?: number
+  migrate_from_chat_id?: number
+  pinned_message?: ApiMessage
+  invoice?: ApiInvoice
+  successful_payment?: ApiSuccessfulPayment
+  refunded_payment?: ApiRefundedPayment
+  users_shared?: ApiUsersShared
+  chat_shared?: ApiChatShared
+  connected_website?: string
+  write_access_allowed?: ApiWriteAccessAllowed
+  proximity_alert_triggered?: ApiProximityAlertTriggered
+  boost_added?: ApiChatBoostAdded
+  chat_background_set?: ApiChatBackground
+  forum_topic_created?: ApiForumTopicCreated
+  forum_topic_edited?: ApiForumTopicEdited
+  forum_topic_closed?: ApiForumTopicClosed
+  forum_topic_reopened?: ApiForumTopicReopened
+  general_forum_topic_hidden?: ApiGeneralForumTopicHidden
+  general_forum_topic_unhidden?: ApiGeneralForumTopicUnhidden
+  giveaway_created?: ApiGiveawayCreated
+  giveaway?: ApiGiveaway
+  giveaway_winners?: ApiGiveawayWinners
+  giveaway_completed?: ApiGiveawayCompleted
+  video_chat_scheduled?: ApiVideoChatScheduled
+  video_chat_started?: ApiVideoChatStarted
+  video_chat_ended?: ApiVideoChatEnded
+  video_chat_participants_invited?: ApiVideoChatParticipantsInvited
+  web_app_data?: ApiWebAppData
+  reply_markup?: ApiInlineKeyboardMarkup
 }
 
 export type ApiCallbackQuery = {
@@ -95,36 +696,27 @@ export type ApiCallbackQuery = {
 
 export type ApiUpdate = {
   update_id: number
-  // Message updates
   message?: ApiMessage
   edited_message?: ApiMessage
   channel_post?: ApiMessage
   edited_channel_post?: ApiMessage
-  // Business updates
   business_connection?: ApiBusinessConnection
   business_message?: ApiMessage
   edited_business_message?: ApiMessage
   deleted_business_messages?: ApiBusinessMessagesDeleted
-  // Reaction updates
   message_reaction?: ApiMessageReactionUpdated
   message_reaction_count?: ApiMessageReactionCountUpdated
-  // Inline mode updates
   inline_query?: ApiInlineQuery
   chosen_inline_result?: ApiChosenInlineResult
-  // Callback query
   callback_query?: ApiCallbackQuery
-  // Payment updates
   shipping_query?: ApiShippingQuery
   pre_checkout_query?: ApiPreCheckoutQuery
   purchased_paid_media?: ApiPaidMediaPurchased
-  // Poll updates
   poll?: ApiPoll
   poll_answer?: ApiPollAnswer
-  // Chat member updates
   my_chat_member?: ApiChatMemberUpdated
   chat_member?: ApiChatMemberUpdated
   chat_join_request?: ApiChatJoinRequest
-  // Chat boost updates
   chat_boost?: ApiChatBoostUpdated
   removed_chat_boost?: ApiChatBoostRemoved
 }
@@ -545,6 +1137,751 @@ export const fromApi = {
     }
   },
 
+  photoSize(api: ApiPhotoSize): PhotoSize {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      width: api.width,
+      height: api.height,
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  animation(api: ApiAnimation): Animation {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      width: api.width,
+      height: api.height,
+      duration: api.duration,
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+      ...(api.file_name !== undefined && { fileName: api.file_name }),
+      ...(api.mime_type !== undefined && { mimeType: api.mime_type }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  audio(api: ApiAudio): Audio {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      duration: api.duration,
+      ...(api.performer !== undefined && { performer: api.performer }),
+      ...(api.title !== undefined && { title: api.title }),
+      ...(api.file_name !== undefined && { fileName: api.file_name }),
+      ...(api.mime_type !== undefined && { mimeType: api.mime_type }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+    }
+  },
+
+  document(api: ApiDocument): Document {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+      ...(api.file_name !== undefined && { fileName: api.file_name }),
+      ...(api.mime_type !== undefined && { mimeType: api.mime_type }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  video(api: ApiVideo): Video {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      width: api.width,
+      height: api.height,
+      duration: api.duration,
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+      ...(api.file_name !== undefined && { fileName: api.file_name }),
+      ...(api.mime_type !== undefined && { mimeType: api.mime_type }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  videoNote(api: ApiVideoNote): VideoNote {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      length: api.length,
+      duration: api.duration,
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  voice(api: ApiVoice): Voice {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      duration: api.duration,
+      ...(api.mime_type !== undefined && { mimeType: api.mime_type }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  contact(api: ApiContact): Contact {
+    return {
+      phoneNumber: api.phone_number,
+      firstName: api.first_name,
+      ...(api.last_name !== undefined && { lastName: api.last_name }),
+      ...(api.user_id !== undefined && { userId: api.user_id }),
+      ...(api.vcard !== undefined && { vcard: api.vcard }),
+    }
+  },
+
+  dice(api: ApiDice): Dice {
+    return {
+      emoji: api.emoji,
+      value: api.value,
+    }
+  },
+
+  venue(api: ApiVenue): Venue {
+    return {
+      location: fromApi.location(api.location),
+      title: api.title,
+      address: api.address,
+      ...(api.foursquare_id !== undefined && {
+        foursquareId: api.foursquare_id,
+      }),
+      ...(api.foursquare_type !== undefined && {
+        foursquareType: api.foursquare_type,
+      }),
+      ...(api.google_place_id !== undefined && {
+        googlePlaceId: api.google_place_id,
+      }),
+      ...(api.google_place_type !== undefined && {
+        googlePlaceType: api.google_place_type,
+      }),
+    }
+  },
+
+  story(api: ApiStory): Story {
+    return {
+      chat: fromApi.chat(api.chat),
+      id: api.id,
+    }
+  },
+
+  file(api: ApiFile): File {
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+      ...(api.file_path !== undefined && { filePath: api.file_path }),
+    }
+  },
+
+  maskPosition(api: ApiMaskPosition): MaskPosition {
+    return {
+      point: api.point,
+      xShift: api.x_shift,
+      yShift: api.y_shift,
+      scale: api.scale,
+    }
+  },
+
+  sticker(api: ApiSticker): Sticker {
+    const stickerType = api.type === 'custom_emoji' ? 'customEmoji' : api.type
+    return {
+      fileId: api.file_id,
+      fileUniqueId: api.file_unique_id,
+      type: stickerType as Sticker['type'],
+      width: api.width,
+      height: api.height,
+      isAnimated: api.is_animated,
+      isVideo: api.is_video,
+      ...(api.thumbnail !== undefined && {
+        thumbnail: fromApi.photoSize(api.thumbnail),
+      }),
+      ...(api.emoji !== undefined && { emoji: api.emoji }),
+      ...(api.set_name !== undefined && { setName: api.set_name }),
+      ...(api.premium_animation !== undefined && {
+        premiumAnimation: fromApi.file(api.premium_animation),
+      }),
+      ...(api.mask_position !== undefined && {
+        maskPosition: fromApi.maskPosition(api.mask_position),
+      }),
+      ...(api.custom_emoji_id !== undefined && {
+        customEmojiId: api.custom_emoji_id,
+      }),
+      ...(api.needs_repainting !== undefined && {
+        needsRepainting: api.needs_repainting,
+      }),
+      ...(api.file_size !== undefined && { fileSize: api.file_size }),
+    }
+  },
+
+  game(api: ApiGame): Game {
+    return {
+      title: api.title,
+      description: api.description,
+      photo: api.photo.map(fromApi.photoSize),
+      ...(api.text !== undefined && { text: api.text }),
+      ...(api.text_entities !== undefined && {
+        textEntities: api.text_entities.map(fromApi.messageEntity),
+      }),
+      ...(api.animation !== undefined && {
+        animation: fromApi.animation(api.animation),
+      }),
+    }
+  },
+
+  paidMedia(api: ApiPaidMedia): PaidMedia {
+    switch (api.type) {
+      case 'preview':
+        return {
+          type: 'preview',
+          ...(api.width !== undefined && { width: api.width }),
+          ...(api.height !== undefined && { height: api.height }),
+          ...(api.duration !== undefined && { duration: api.duration }),
+        }
+      case 'photo':
+        return {
+          type: 'photo',
+          photo: api.photo.map(fromApi.photoSize),
+        }
+      case 'video':
+        return {
+          type: 'video',
+          video: fromApi.video(api.video),
+        }
+    }
+  },
+
+  paidMediaInfo(api: ApiPaidMediaInfo): PaidMediaInfo {
+    return {
+      starCount: api.star_count,
+      paidMedia: api.paid_media.map(fromApi.paidMedia),
+    }
+  },
+
+  messageOrigin(api: ApiMessageOrigin): MessageOrigin {
+    switch (api.type) {
+      case 'user':
+        return {
+          type: 'user',
+          date: api.date,
+          senderUser: fromApi.user(api.sender_user),
+        }
+      case 'hidden_user':
+        return {
+          type: 'hiddenUser',
+          date: api.date,
+          senderUserName: api.sender_user_name,
+        }
+      case 'chat':
+        return {
+          type: 'chat',
+          date: api.date,
+          senderChat: fromApi.chat(api.sender_chat),
+          ...(api.author_signature !== undefined && {
+            authorSignature: api.author_signature,
+          }),
+        }
+      case 'channel':
+        return {
+          type: 'channel',
+          date: api.date,
+          chat: fromApi.chat(api.chat),
+          messageId: api.message_id,
+          ...(api.author_signature !== undefined && {
+            authorSignature: api.author_signature,
+          }),
+        }
+    }
+  },
+
+  textQuote(api: ApiTextQuote): TextQuote {
+    return {
+      text: api.text,
+      position: api.position,
+      ...(api.entities !== undefined && {
+        entities: api.entities.map(fromApi.messageEntity),
+      }),
+      ...(api.is_manual !== undefined && { isManual: api.is_manual }),
+    }
+  },
+
+  linkPreviewOptions(api: ApiLinkPreviewOptions): LinkPreviewOptions {
+    return {
+      ...(api.is_disabled !== undefined && { isDisabled: api.is_disabled }),
+      ...(api.url !== undefined && { url: api.url }),
+      ...(api.prefer_small_media !== undefined && {
+        preferSmallMedia: api.prefer_small_media,
+      }),
+      ...(api.prefer_large_media !== undefined && {
+        preferLargeMedia: api.prefer_large_media,
+      }),
+      ...(api.show_above_text !== undefined && {
+        showAboveText: api.show_above_text,
+      }),
+    }
+  },
+
+  invoice(api: ApiInvoice): Invoice {
+    return {
+      title: api.title,
+      description: api.description,
+      startParameter: api.start_parameter,
+      currency: api.currency,
+      totalAmount: api.total_amount,
+    }
+  },
+
+  successfulPayment(api: ApiSuccessfulPayment): SuccessfulPayment {
+    return {
+      currency: api.currency,
+      totalAmount: api.total_amount,
+      invoicePayload: api.invoice_payload,
+      telegramPaymentChargeId: api.telegram_payment_charge_id,
+      providerPaymentChargeId: api.provider_payment_charge_id,
+      ...(api.subscription_expiration_date !== undefined && {
+        subscriptionExpirationDate: api.subscription_expiration_date,
+      }),
+      ...(api.is_first_recurring !== undefined && {
+        isFirstRecurring: api.is_first_recurring,
+      }),
+      ...(api.is_recurring !== undefined && {
+        isRecurring: api.is_recurring,
+      }),
+      ...(api.shipping_option_id !== undefined && {
+        shippingOptionId: api.shipping_option_id,
+      }),
+      ...(api.order_info !== undefined && {
+        orderInfo: fromApi.orderInfo(api.order_info),
+      }),
+    }
+  },
+
+  refundedPayment(api: ApiRefundedPayment): RefundedPayment {
+    return {
+      currency: api.currency,
+      totalAmount: api.total_amount,
+      invoicePayload: api.invoice_payload,
+      telegramPaymentChargeId: api.telegram_payment_charge_id,
+      ...(api.provider_payment_charge_id !== undefined && {
+        providerPaymentChargeId: api.provider_payment_charge_id,
+      }),
+    }
+  },
+
+  sharedUser(api: ApiSharedUser): SharedUser {
+    return {
+      userId: api.user_id,
+      ...(api.first_name !== undefined && { firstName: api.first_name }),
+      ...(api.last_name !== undefined && { lastName: api.last_name }),
+      ...(api.username !== undefined && { username: api.username }),
+      ...(api.photo !== undefined && {
+        photo: api.photo.map(fromApi.photoSize),
+      }),
+    }
+  },
+
+  usersShared(api: ApiUsersShared): UsersShared {
+    return {
+      requestId: api.request_id,
+      users: api.users.map(fromApi.sharedUser),
+    }
+  },
+
+  chatShared(api: ApiChatShared): ChatShared {
+    return {
+      requestId: api.request_id,
+      chatId: api.chat_id,
+      ...(api.title !== undefined && { title: api.title }),
+      ...(api.username !== undefined && { username: api.username }),
+      ...(api.photo !== undefined && {
+        photo: api.photo.map(fromApi.photoSize),
+      }),
+    }
+  },
+
+  writeAccessAllowed(api: ApiWriteAccessAllowed): WriteAccessAllowed {
+    return {
+      ...(api.from_request !== undefined && { fromRequest: api.from_request }),
+      ...(api.web_app_name !== undefined && { webAppName: api.web_app_name }),
+      ...(api.from_attachment_menu !== undefined && {
+        fromAttachmentMenu: api.from_attachment_menu,
+      }),
+    }
+  },
+
+  videoChatScheduled(api: ApiVideoChatScheduled): VideoChatScheduled {
+    return {
+      startDate: api.start_date,
+    }
+  },
+
+  videoChatStarted(_api: ApiVideoChatStarted): VideoChatStarted {
+    return {}
+  },
+
+  videoChatEnded(api: ApiVideoChatEnded): VideoChatEnded {
+    return {
+      duration: api.duration,
+    }
+  },
+
+  videoChatParticipantsInvited(
+    api: ApiVideoChatParticipantsInvited,
+  ): VideoChatParticipantsInvited {
+    return {
+      users: api.users.map(fromApi.user),
+    }
+  },
+
+  forumTopicCreated(api: ApiForumTopicCreated): ForumTopicCreated {
+    return {
+      name: api.name,
+      iconColor: api.icon_color,
+      ...(api.icon_custom_emoji_id !== undefined && {
+        iconCustomEmojiId: api.icon_custom_emoji_id,
+      }),
+    }
+  },
+
+  forumTopicClosed(_api: ApiForumTopicClosed): ForumTopicClosed {
+    return {}
+  },
+
+  forumTopicEdited(api: ApiForumTopicEdited): ForumTopicEdited {
+    return {
+      ...(api.name !== undefined && { name: api.name }),
+      ...(api.icon_custom_emoji_id !== undefined && {
+        iconCustomEmojiId: api.icon_custom_emoji_id,
+      }),
+    }
+  },
+
+  forumTopicReopened(_api: ApiForumTopicReopened): ForumTopicReopened {
+    return {}
+  },
+
+  generalForumTopicHidden(
+    _api: ApiGeneralForumTopicHidden,
+  ): GeneralForumTopicHidden {
+    return {}
+  },
+
+  generalForumTopicUnhidden(
+    _api: ApiGeneralForumTopicUnhidden,
+  ): GeneralForumTopicUnhidden {
+    return {}
+  },
+
+  proximityAlertTriggered(
+    api: ApiProximityAlertTriggered,
+  ): ProximityAlertTriggered {
+    return {
+      traveler: fromApi.user(api.traveler),
+      watcher: fromApi.user(api.watcher),
+      distance: api.distance,
+    }
+  },
+
+  chatBoostAdded(api: ApiChatBoostAdded): ChatBoostAdded {
+    return {
+      boostCount: api.boost_count,
+    }
+  },
+
+  backgroundFill(api: ApiBackgroundFill): BackgroundFill {
+    switch (api.type) {
+      case 'solid':
+        return {
+          type: 'solid',
+          color: api.color,
+        }
+      case 'gradient':
+        return {
+          type: 'gradient',
+          topColor: api.top_color,
+          bottomColor: api.bottom_color,
+          rotationAngle: api.rotation_angle,
+        }
+      case 'freeform_gradient':
+        return {
+          type: 'freeformGradient',
+          colors: api.colors,
+        }
+    }
+  },
+
+  backgroundType(api: ApiBackgroundType): BackgroundType {
+    switch (api.type) {
+      case 'fill':
+        return {
+          type: 'fill',
+          fill: fromApi.backgroundFill(api.fill),
+          darkThemeDimming: api.dark_theme_dimming,
+        }
+      case 'wallpaper':
+        return {
+          type: 'wallpaper',
+          document: fromApi.document(api.document),
+          darkThemeDimming: api.dark_theme_dimming,
+          ...(api.is_blurred !== undefined && { isBlurred: api.is_blurred }),
+          ...(api.is_moving !== undefined && { isMoving: api.is_moving }),
+        }
+      case 'pattern':
+        return {
+          type: 'pattern',
+          document: fromApi.document(api.document),
+          fill: fromApi.backgroundFill(api.fill),
+          intensity: api.intensity,
+          ...(api.is_inverted !== undefined && { isInverted: api.is_inverted }),
+          ...(api.is_moving !== undefined && { isMoving: api.is_moving }),
+        }
+      case 'chat_theme':
+        return {
+          type: 'chatTheme',
+          themeName: api.theme_name,
+        }
+    }
+  },
+
+  chatBackground(api: ApiChatBackground): ChatBackground {
+    return {
+      type: fromApi.backgroundType(api.type),
+    }
+  },
+
+  giveawayCreated(api: ApiGiveawayCreated): GiveawayCreated {
+    return {
+      ...(api.prize_star_count !== undefined && {
+        prizeStarCount: api.prize_star_count,
+      }),
+    }
+  },
+
+  giveaway(api: ApiGiveaway): Giveaway {
+    return {
+      chats: api.chats.map(fromApi.chat),
+      winnersSelectionDate: api.winners_selection_date,
+      winnerCount: api.winner_count,
+      ...(api.only_new_members !== undefined && {
+        onlyNewMembers: api.only_new_members,
+      }),
+      ...(api.has_public_winners !== undefined && {
+        hasPublicWinners: api.has_public_winners,
+      }),
+      ...(api.prize_description !== undefined && {
+        prizeDescription: api.prize_description,
+      }),
+      ...(api.country_codes !== undefined && {
+        countryCodes: api.country_codes,
+      }),
+      ...(api.prize_star_count !== undefined && {
+        prizeStarCount: api.prize_star_count,
+      }),
+      ...(api.premium_subscription_month_count !== undefined && {
+        premiumSubscriptionMonthCount: api.premium_subscription_month_count,
+      }),
+    }
+  },
+
+  giveawayWinners(api: ApiGiveawayWinners): GiveawayWinners {
+    return {
+      chat: fromApi.chat(api.chat),
+      giveawayMessageId: api.giveaway_message_id,
+      winnersSelectionDate: api.winners_selection_date,
+      winnerCount: api.winner_count,
+      winners: api.winners.map(fromApi.user),
+      ...(api.additional_chat_count !== undefined && {
+        additionalChatCount: api.additional_chat_count,
+      }),
+      ...(api.prize_star_count !== undefined && {
+        prizeStarCount: api.prize_star_count,
+      }),
+      ...(api.premium_subscription_month_count !== undefined && {
+        premiumSubscriptionMonthCount: api.premium_subscription_month_count,
+      }),
+      ...(api.unclaimed_prize_count !== undefined && {
+        unclaimedPrizeCount: api.unclaimed_prize_count,
+      }),
+      ...(api.only_new_members !== undefined && {
+        onlyNewMembers: api.only_new_members,
+      }),
+      ...(api.was_refunded !== undefined && {
+        wasRefunded: api.was_refunded,
+      }),
+      ...(api.prize_description !== undefined && {
+        prizeDescription: api.prize_description,
+      }),
+    }
+  },
+
+  giveawayCompleted(api: ApiGiveawayCompleted): GiveawayCompleted {
+    return {
+      winnerCount: api.winner_count,
+      ...(api.unclaimed_prize_count !== undefined && {
+        unclaimedPrizeCount: api.unclaimed_prize_count,
+      }),
+      ...(api.giveaway_message !== undefined && {
+        giveawayMessage: fromApi.message(api.giveaway_message),
+      }),
+      ...(api.is_star_giveaway !== undefined && {
+        isStarGiveaway: api.is_star_giveaway,
+      }),
+    }
+  },
+
+  webAppData(api: ApiWebAppData): WebAppData {
+    return {
+      data: api.data,
+      buttonText: api.button_text,
+    }
+  },
+
+  messageAutoDeleteTimerChanged(
+    api: ApiMessageAutoDeleteTimerChanged,
+  ): MessageAutoDeleteTimerChanged {
+    return {
+      messageAutoDeleteTime: api.message_auto_delete_time,
+    }
+  },
+
+  inlineKeyboardMarkup(api: ApiInlineKeyboardMarkup): InlineKeyboardMarkup {
+    return {
+      inlineKeyboard: api.inline_keyboard.map((row) =>
+        row.map((button) => ({
+          text: button.text,
+          ...(button.url !== undefined && { url: button.url }),
+          ...(button.callback_data !== undefined && {
+            callbackData: button.callback_data,
+          }),
+          ...(button.web_app !== undefined && { webApp: button.web_app }),
+          ...(button.login_url !== undefined && {
+            loginUrl: {
+              url: button.login_url.url,
+              ...(button.login_url.forward_text !== undefined && {
+                forwardText: button.login_url.forward_text,
+              }),
+              ...(button.login_url.bot_username !== undefined && {
+                botUsername: button.login_url.bot_username,
+              }),
+              ...(button.login_url.request_write_access !== undefined && {
+                requestWriteAccess: button.login_url.request_write_access,
+              }),
+            },
+          }),
+          ...(button.switch_inline_query !== undefined && {
+            switchInlineQuery: button.switch_inline_query,
+          }),
+          ...(button.switch_inline_query_current_chat !== undefined && {
+            switchInlineQueryCurrentChat:
+              button.switch_inline_query_current_chat,
+          }),
+          ...(button.switch_inline_query_chosen_chat !== undefined && {
+            switchInlineQueryChosenChat: {
+              ...(button.switch_inline_query_chosen_chat.query !==
+                undefined && {
+                query: button.switch_inline_query_chosen_chat.query,
+              }),
+              ...(button.switch_inline_query_chosen_chat.allow_user_chats !==
+                undefined && {
+                allowUserChats:
+                  button.switch_inline_query_chosen_chat.allow_user_chats,
+              }),
+              ...(button.switch_inline_query_chosen_chat.allow_bot_chats !==
+                undefined && {
+                allowBotChats:
+                  button.switch_inline_query_chosen_chat.allow_bot_chats,
+              }),
+              ...(button.switch_inline_query_chosen_chat.allow_group_chats !==
+                undefined && {
+                allowGroupChats:
+                  button.switch_inline_query_chosen_chat.allow_group_chats,
+              }),
+              ...(button.switch_inline_query_chosen_chat.allow_channel_chats !==
+                undefined && {
+                allowChannelChats:
+                  button.switch_inline_query_chosen_chat.allow_channel_chats,
+              }),
+            },
+          }),
+          ...(button.copy_text !== undefined && {
+            copyText: { text: button.copy_text.text },
+          }),
+          ...(button.callback_game !== undefined && {
+            callbackGame: button.callback_game,
+          }),
+          ...(button.pay !== undefined && { pay: button.pay }),
+        })),
+      ),
+    }
+  },
+
+  externalReplyInfo(api: ApiExternalReplyInfo): ExternalReplyInfo {
+    return {
+      origin: fromApi.messageOrigin(api.origin),
+      ...(api.chat !== undefined && { chat: fromApi.chat(api.chat) }),
+      ...(api.message_id !== undefined && { messageId: api.message_id }),
+      ...(api.link_preview_options !== undefined && {
+        linkPreviewOptions: fromApi.linkPreviewOptions(
+          api.link_preview_options,
+        ),
+      }),
+      ...(api.animation !== undefined && {
+        animation: fromApi.animation(api.animation),
+      }),
+      ...(api.audio !== undefined && { audio: fromApi.audio(api.audio) }),
+      ...(api.document !== undefined && {
+        document: fromApi.document(api.document),
+      }),
+      ...(api.paid_media !== undefined && {
+        paidMedia: fromApi.paidMediaInfo(api.paid_media),
+      }),
+      ...(api.photo !== undefined && {
+        photo: api.photo.map(fromApi.photoSize),
+      }),
+      ...(api.sticker !== undefined && {
+        sticker: fromApi.sticker(api.sticker),
+      }),
+      ...(api.story !== undefined && { story: fromApi.story(api.story) }),
+      ...(api.video !== undefined && { video: fromApi.video(api.video) }),
+      ...(api.video_note !== undefined && {
+        videoNote: fromApi.videoNote(api.video_note),
+      }),
+      ...(api.voice !== undefined && { voice: fromApi.voice(api.voice) }),
+      ...(api.has_media_spoiler !== undefined && {
+        hasMediaSpoiler: api.has_media_spoiler,
+      }),
+      ...(api.contact !== undefined && {
+        contact: fromApi.contact(api.contact),
+      }),
+      ...(api.dice !== undefined && { dice: fromApi.dice(api.dice) }),
+      ...(api.game !== undefined && { game: fromApi.game(api.game) }),
+      ...(api.giveaway !== undefined && {
+        giveaway: fromApi.giveaway(api.giveaway),
+      }),
+      ...(api.giveaway_winners !== undefined && {
+        giveawayWinners: fromApi.giveawayWinners(api.giveaway_winners),
+      }),
+      ...(api.invoice !== undefined && {
+        invoice: fromApi.invoice(api.invoice),
+      }),
+      ...(api.location !== undefined && {
+        location: fromApi.location(api.location),
+      }),
+      ...(api.poll !== undefined && { poll: fromApi.poll(api.poll) }),
+      ...(api.venue !== undefined && { venue: fromApi.venue(api.venue) }),
+    }
+  },
+
   message(api: ApiMessage): Message {
     return {
       messageId: api.message_id,
@@ -557,9 +1894,231 @@ export const fromApi = {
       ...(api.sender_chat !== undefined && {
         senderChat: fromApi.chat(api.sender_chat),
       }),
+      ...(api.sender_boost_count !== undefined && {
+        senderBoostCount: api.sender_boost_count,
+      }),
+      ...(api.sender_business_bot !== undefined && {
+        senderBusinessBot: fromApi.user(api.sender_business_bot),
+      }),
+      ...(api.business_connection_id !== undefined && {
+        businessConnectionId: api.business_connection_id,
+      }),
+      ...(api.forward_origin !== undefined && {
+        forwardOrigin: fromApi.messageOrigin(api.forward_origin),
+      }),
+      ...(api.is_topic_message !== undefined && {
+        isTopicMessage: api.is_topic_message,
+      }),
+      ...(api.is_automatic_forward !== undefined && {
+        isAutomaticForward: api.is_automatic_forward,
+      }),
+      ...(api.reply_to_message !== undefined && {
+        replyToMessage: fromApi.message(api.reply_to_message),
+      }),
+      ...(api.external_reply !== undefined && {
+        externalReply: fromApi.externalReplyInfo(api.external_reply),
+      }),
+      ...(api.quote !== undefined && {
+        quote: fromApi.textQuote(api.quote),
+      }),
+      ...(api.reply_to_story !== undefined && {
+        replyToStory: fromApi.story(api.reply_to_story),
+      }),
+      ...(api.via_bot !== undefined && { viaBot: fromApi.user(api.via_bot) }),
+      ...(api.edit_date !== undefined && { editDate: api.edit_date }),
+      ...(api.has_protected_content !== undefined && {
+        hasProtectedContent: api.has_protected_content,
+      }),
+      ...(api.is_from_offline !== undefined && {
+        isFromOffline: api.is_from_offline,
+      }),
+      ...(api.media_group_id !== undefined && {
+        mediaGroupId: api.media_group_id,
+      }),
+      ...(api.author_signature !== undefined && {
+        authorSignature: api.author_signature,
+      }),
       ...(api.text !== undefined && { text: api.text }),
       ...(api.entities !== undefined && {
         entities: api.entities.map(fromApi.messageEntity),
+      }),
+      ...(api.link_preview_options !== undefined && {
+        linkPreviewOptions: fromApi.linkPreviewOptions(
+          api.link_preview_options,
+        ),
+      }),
+      ...(api.effect_id !== undefined && { effectId: api.effect_id }),
+      ...(api.animation !== undefined && {
+        animation: fromApi.animation(api.animation),
+      }),
+      ...(api.audio !== undefined && { audio: fromApi.audio(api.audio) }),
+      ...(api.document !== undefined && {
+        document: fromApi.document(api.document),
+      }),
+      ...(api.paid_media !== undefined && {
+        paidMedia: fromApi.paidMediaInfo(api.paid_media),
+      }),
+      ...(api.photo !== undefined && {
+        photo: api.photo.map(fromApi.photoSize),
+      }),
+      ...(api.sticker !== undefined && {
+        sticker: fromApi.sticker(api.sticker),
+      }),
+      ...(api.story !== undefined && { story: fromApi.story(api.story) }),
+      ...(api.video !== undefined && { video: fromApi.video(api.video) }),
+      ...(api.video_note !== undefined && {
+        videoNote: fromApi.videoNote(api.video_note),
+      }),
+      ...(api.voice !== undefined && { voice: fromApi.voice(api.voice) }),
+      ...(api.caption !== undefined && { caption: api.caption }),
+      ...(api.caption_entities !== undefined && {
+        captionEntities: api.caption_entities.map(fromApi.messageEntity),
+      }),
+      ...(api.show_caption_above_media !== undefined && {
+        showCaptionAboveMedia: api.show_caption_above_media,
+      }),
+      ...(api.has_media_spoiler !== undefined && {
+        hasMediaSpoiler: api.has_media_spoiler,
+      }),
+      ...(api.contact !== undefined && {
+        contact: fromApi.contact(api.contact),
+      }),
+      ...(api.dice !== undefined && { dice: fromApi.dice(api.dice) }),
+      ...(api.game !== undefined && { game: fromApi.game(api.game) }),
+      ...(api.poll !== undefined && { poll: fromApi.poll(api.poll) }),
+      ...(api.venue !== undefined && { venue: fromApi.venue(api.venue) }),
+      ...(api.location !== undefined && {
+        location: fromApi.location(api.location),
+      }),
+      ...(api.new_chat_members !== undefined && {
+        newChatMembers: api.new_chat_members.map(fromApi.user),
+      }),
+      ...(api.left_chat_member !== undefined && {
+        leftChatMember: fromApi.user(api.left_chat_member),
+      }),
+      ...(api.new_chat_title !== undefined && {
+        newChatTitle: api.new_chat_title,
+      }),
+      ...(api.new_chat_photo !== undefined && {
+        newChatPhoto: api.new_chat_photo.map(fromApi.photoSize),
+      }),
+      ...(api.delete_chat_photo !== undefined && {
+        deleteChatPhoto: api.delete_chat_photo,
+      }),
+      ...(api.group_chat_created !== undefined && {
+        groupChatCreated: api.group_chat_created,
+      }),
+      ...(api.supergroup_chat_created !== undefined && {
+        supergroupChatCreated: api.supergroup_chat_created,
+      }),
+      ...(api.channel_chat_created !== undefined && {
+        channelChatCreated: api.channel_chat_created,
+      }),
+      ...(api.message_auto_delete_timer_changed !== undefined && {
+        messageAutoDeleteTimerChanged: fromApi.messageAutoDeleteTimerChanged(
+          api.message_auto_delete_timer_changed,
+        ),
+      }),
+      ...(api.migrate_to_chat_id !== undefined && {
+        migrateToChatId: api.migrate_to_chat_id,
+      }),
+      ...(api.migrate_from_chat_id !== undefined && {
+        migrateFromChatId: api.migrate_from_chat_id,
+      }),
+      ...(api.pinned_message !== undefined && {
+        pinnedMessage: fromApi.message(api.pinned_message),
+      }),
+      ...(api.invoice !== undefined && {
+        invoice: fromApi.invoice(api.invoice),
+      }),
+      ...(api.successful_payment !== undefined && {
+        successfulPayment: fromApi.successfulPayment(api.successful_payment),
+      }),
+      ...(api.refunded_payment !== undefined && {
+        refundedPayment: fromApi.refundedPayment(api.refunded_payment),
+      }),
+      ...(api.users_shared !== undefined && {
+        usersShared: fromApi.usersShared(api.users_shared),
+      }),
+      ...(api.chat_shared !== undefined && {
+        chatShared: fromApi.chatShared(api.chat_shared),
+      }),
+      ...(api.connected_website !== undefined && {
+        connectedWebsite: api.connected_website,
+      }),
+      ...(api.write_access_allowed !== undefined && {
+        writeAccessAllowed: fromApi.writeAccessAllowed(
+          api.write_access_allowed,
+        ),
+      }),
+      ...(api.proximity_alert_triggered !== undefined && {
+        proximityAlertTriggered: fromApi.proximityAlertTriggered(
+          api.proximity_alert_triggered,
+        ),
+      }),
+      ...(api.boost_added !== undefined && {
+        boostAdded: fromApi.chatBoostAdded(api.boost_added),
+      }),
+      ...(api.chat_background_set !== undefined && {
+        chatBackgroundSet: fromApi.chatBackground(api.chat_background_set),
+      }),
+      ...(api.forum_topic_created !== undefined && {
+        forumTopicCreated: fromApi.forumTopicCreated(api.forum_topic_created),
+      }),
+      ...(api.forum_topic_edited !== undefined && {
+        forumTopicEdited: fromApi.forumTopicEdited(api.forum_topic_edited),
+      }),
+      ...(api.forum_topic_closed !== undefined && {
+        forumTopicClosed: fromApi.forumTopicClosed(api.forum_topic_closed),
+      }),
+      ...(api.forum_topic_reopened !== undefined && {
+        forumTopicReopened: fromApi.forumTopicReopened(
+          api.forum_topic_reopened,
+        ),
+      }),
+      ...(api.general_forum_topic_hidden !== undefined && {
+        generalForumTopicHidden: fromApi.generalForumTopicHidden(
+          api.general_forum_topic_hidden,
+        ),
+      }),
+      ...(api.general_forum_topic_unhidden !== undefined && {
+        generalForumTopicUnhidden: fromApi.generalForumTopicUnhidden(
+          api.general_forum_topic_unhidden,
+        ),
+      }),
+      ...(api.giveaway_created !== undefined && {
+        giveawayCreated: fromApi.giveawayCreated(api.giveaway_created),
+      }),
+      ...(api.giveaway !== undefined && {
+        giveaway: fromApi.giveaway(api.giveaway),
+      }),
+      ...(api.giveaway_winners !== undefined && {
+        giveawayWinners: fromApi.giveawayWinners(api.giveaway_winners),
+      }),
+      ...(api.giveaway_completed !== undefined && {
+        giveawayCompleted: fromApi.giveawayCompleted(api.giveaway_completed),
+      }),
+      ...(api.video_chat_scheduled !== undefined && {
+        videoChatScheduled: fromApi.videoChatScheduled(
+          api.video_chat_scheduled,
+        ),
+      }),
+      ...(api.video_chat_started !== undefined && {
+        videoChatStarted: fromApi.videoChatStarted(api.video_chat_started),
+      }),
+      ...(api.video_chat_ended !== undefined && {
+        videoChatEnded: fromApi.videoChatEnded(api.video_chat_ended),
+      }),
+      ...(api.video_chat_participants_invited !== undefined && {
+        videoChatParticipantsInvited: fromApi.videoChatParticipantsInvited(
+          api.video_chat_participants_invited,
+        ),
+      }),
+      ...(api.web_app_data !== undefined && {
+        webAppData: fromApi.webAppData(api.web_app_data),
+      }),
+      ...(api.reply_markup !== undefined && {
+        replyMarkup: fromApi.inlineKeyboardMarkup(api.reply_markup),
       }),
     }
   },
@@ -979,7 +2538,6 @@ export const fromApi = {
   update(api: ApiUpdate): Update {
     return {
       updateId: api.update_id,
-      // Message updates
       ...(api.message !== undefined && {
         message: fromApi.message(api.message),
       }),
@@ -992,7 +2550,6 @@ export const fromApi = {
       ...(api.edited_channel_post !== undefined && {
         editedChannelPost: fromApi.message(api.edited_channel_post),
       }),
-      // Business updates
       ...(api.business_connection !== undefined && {
         businessConnection: fromApi.businessConnection(api.business_connection),
       }),
@@ -1007,7 +2564,6 @@ export const fromApi = {
           api.deleted_business_messages,
         ),
       }),
-      // Reaction updates
       ...(api.message_reaction !== undefined && {
         messageReaction: fromApi.messageReactionUpdated(api.message_reaction),
       }),
@@ -1016,7 +2572,6 @@ export const fromApi = {
           api.message_reaction_count,
         ),
       }),
-      // Inline mode updates
       ...(api.inline_query !== undefined && {
         inlineQuery: fromApi.inlineQuery(api.inline_query),
       }),
@@ -1025,11 +2580,9 @@ export const fromApi = {
           api.chosen_inline_result,
         ),
       }),
-      // Callback query
       ...(api.callback_query !== undefined && {
         callbackQuery: fromApi.callbackQuery(api.callback_query),
       }),
-      // Payment updates
       ...(api.shipping_query !== undefined && {
         shippingQuery: fromApi.shippingQuery(api.shipping_query),
       }),
@@ -1041,14 +2594,12 @@ export const fromApi = {
           api.purchased_paid_media,
         ),
       }),
-      // Poll updates
       ...(api.poll !== undefined && {
         poll: fromApi.poll(api.poll),
       }),
       ...(api.poll_answer !== undefined && {
         pollAnswer: fromApi.pollAnswer(api.poll_answer),
       }),
-      // Chat member updates
       ...(api.my_chat_member !== undefined && {
         myChatMember: fromApi.chatMemberUpdated(api.my_chat_member),
       }),
@@ -1058,7 +2609,6 @@ export const fromApi = {
       ...(api.chat_join_request !== undefined && {
         chatJoinRequest: fromApi.chatJoinRequest(api.chat_join_request),
       }),
-      // Chat boost updates
       ...(api.chat_boost !== undefined && {
         chatBoost: fromApi.chatBoostUpdated(api.chat_boost),
       }),
@@ -1087,7 +2637,7 @@ export const fromApi = {
         maxConnections: api.max_connections,
       }),
       ...(api.allowed_updates !== undefined && {
-        allowedUpdates: api.allowed_updates,
+        allowedUpdates: api.allowed_updates as WebhookInfo['allowedUpdates'],
       }),
     }
   },

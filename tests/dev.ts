@@ -15,10 +15,6 @@ Bun.serve({
         const result = await kit.bot.actions.sendMessage({
           chatId: 8432550641,
           text: 'Replying to specific text',
-          replyParameters: {
-            messageId: 42,
-            quote: 'the specific text to quote',
-          },
         })
 
         if (result.data) {
@@ -58,7 +54,7 @@ Bun.serve({
           const update = result.data
 
           if (update.message) {
-            console.log('New message:', update.message.text)
+            console.log('New message:', update.message.animation)
             await kit.bot.actions.sendMessage({
               chatId: update.message.chat.id,
               text: `You said: ${update.message.text}`,
