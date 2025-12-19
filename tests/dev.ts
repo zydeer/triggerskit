@@ -13,7 +13,7 @@ kit.prettyBot.on('message', async (message) => {
   console.log('New message:', message.text)
 
   await kit.prettyBot.actions.sendMessage({
-    chatId: message.chat.id,
+    chat_id: message.chat.id,
     text: `You said: ${message.text}`,
   })
 })
@@ -24,7 +24,7 @@ Bun.serve({
     '/': {
       GET: async () => {
         const result = await kit.prettyBot.actions.sendMessage({
-          chatId: 8432550641,
+          chat_id: 8432550641,
           text: 'Replying to specific text',
         })
 
@@ -63,7 +63,7 @@ Bun.serve({
       GET: async () => {
         const result = await kit.prettyBot.webhooks.set({
           url: 'https://example.com/webhook',
-          secretToken: 'my-secret-token',
+          secret_token: 'my-secret-token',
         })
 
         return Response.json(result)

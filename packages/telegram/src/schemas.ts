@@ -3877,18 +3877,7 @@ export const CallbackQuerySchema = z
 
 export type CallbackQuery = z.infer<typeof CallbackQuerySchema>
 
-/**
- * This object represents a message.
- *
- * @see https://core.telegram.org/bots/api#message
- */
-interface MessageType {
-  message_id: number
-  reply_to_message?: MessageType
-  pinned_message?: MessageType
-}
-
-export const MessageSchema: z.ZodType<MessageType> = z
+export const MessageSchema = z
   .object({
     message_id: z.number().int().nonnegative().meta({
       description:
