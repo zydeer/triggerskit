@@ -21,6 +21,7 @@ export default defineWorkspace(
   {
     exports: true,
     unused: true,
+    splitting: false,
     dts: {
       inferTypes: true,
       tsgo: true,
