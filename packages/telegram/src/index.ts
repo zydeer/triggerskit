@@ -4,6 +4,8 @@ import type {
   ProviderInstance,
   Result,
   Unsubscribe,
+  WebhookContext,
+  WebhookDetector,
 } from '@triggerskit/core/types'
 import { createEvents } from '@triggerskit/core/types'
 import { fail, ok, safeParse } from '@triggerskit/core/utils'
@@ -24,6 +26,21 @@ import {
 import type { TelegramEvent, TelegramEventMap } from './events'
 import { createRequest } from './request'
 import { type Update, UpdateSchema } from './schemas'
+
+function isTelegramWebhook(ctx: WebhookContext): boolean {
+  if (ctx.headers.has('x-telegram-bot-api-secret-token')) {
+    return true
+  }
+  if (
+    typeof ctx.body === 'object' &&
+    ctx.body !== null &&
+    'update_id' in ctx.body
+  ) {
+    return true
+  }
+
+  return false
+}
 
 export type TelegramErrorDetails = { errorCode: number }
 
@@ -185,12 +202,17 @@ export type TelegramWebhooks = {
   handle: (request: Request) => Promise<Result<Update>>
 }
 
-export type TelegramInstance = ProviderInstance<'telegram', TelegramActions> & {
+export type TelegramInstance = ProviderInstance<
+  'telegram',
+  TelegramActions,
+  Update
+> & {
   readonly webhooks: TelegramWebhooks
+  readonly detector: WebhookDetector<Update>
   /**
    * Subscribe to Telegram events.
    *
-   * Events are emitted when processing updates via `webhooks.handle()`.
+   * Events are emitted when processing updates via `webhooks.handle()` or `kit.handle()`.
    *
    * @param event - The event name to listen for
    * @param handler - The handler function called when the event occurs
@@ -219,6 +241,30 @@ export function telegram(config: TelegramConfig): TelegramInstance {
   const ctx = { request }
   const events = createEvents<TelegramEventMap>()
 
+  async function handleWebhook(req: Request): Promise<Result<Update>> {
+    try {
+      const body = await req.json()
+      const result = safeParse(UpdateSchema, body)
+
+      if (result.error) {
+        return result
+      }
+
+      const update = result.data
+
+      if (update.message) events.emit('message', update.message)
+
+      return ok(update)
+    } catch (e) {
+      return fail(e)
+    }
+  }
+
+  const detector: WebhookDetector<Update> = {
+    detect: isTelegramWebhook,
+    handleWebhook,
+  }
+
   return {
     provider: 'telegram' as const,
     actions: {
@@ -229,25 +275,9 @@ export function telegram(config: TelegramConfig): TelegramInstance {
       set: setWebhook(ctx),
       delete: deleteWebhook(ctx),
       info: getWebhookInfo(ctx),
-      async handle(req: Request): Promise<Result<Update>> {
-        try {
-          const body = await req.json()
-          const result = safeParse(UpdateSchema, body)
-
-          if (result.error) {
-            return result
-          }
-
-          const update = result.data
-
-          if (update.message) events.emit('message', update.message)
-
-          return ok(update)
-        } catch (e) {
-          return fail(e)
-        }
-      },
+      handle: handleWebhook,
     },
+    detector,
     on: events.on,
     request,
   }

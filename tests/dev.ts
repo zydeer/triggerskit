@@ -52,8 +52,22 @@ Bun.serve({
         return Response.json(result)
       },
     },
-
     '/webhook': {
+      POST: async (request) => {
+        const result = await kit.handle(request)
+
+        if (result.data) {
+          console.log(`Webhook handled by: ${result.data.provider}`)
+        }
+
+        if (result.error) {
+          console.error('Webhook error:', result.error.message)
+        }
+
+        return new Response('OK')
+      },
+    },
+    '/webhook/telegram': {
       POST: async (request) => {
         await kit.prettyBot.webhooks.handle(request)
         return new Response('OK')
