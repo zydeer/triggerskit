@@ -24,6 +24,9 @@
     "packages/core": {
       "name": "@triggerskit/core",
       "version": "0.1.15",
+      "dependencies": {
+        "zod": "^4.2.1",
+      },
     },
     "packages/telegram": {
       "name": "@triggerskit/telegram",

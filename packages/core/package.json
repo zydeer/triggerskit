@@ -26,5 +26,8 @@
     "url": "git+https://github.com/zydeer/triggerskit.git"
   },
   "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
 }

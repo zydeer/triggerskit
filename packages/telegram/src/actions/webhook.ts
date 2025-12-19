@@ -1,76 +1,30 @@
 import type { Result } from '@triggerskit/core/types'
-import { fail, ok } from '@triggerskit/core/utils'
+import { fail, ok, safeParse } from '@triggerskit/core/utils'
 import type { TelegramContext } from '..'
-import { type ApiWebhookInfo, fromApi } from '../api'
-import type { UpdateType, WebhookInfo } from '../types'
-
-/**
- * Parameters for setting a webhook.
- *
- * @see https://core.telegram.org/bots/api#setwebhook
- */
-export type SetWebhookParams = {
-  /**
-   * HTTPS URL to send updates to. Use an empty string to remove webhook integration.
-   */
-  url: string
-  /**
-   * The fixed IP address which will be used to send webhook requests instead of the IP address resolved through DNS.
-   */
-  ipAddress?: string
-  /**
-   * The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40.
-   */
-  maxConnections?: number
-  /**
-   * A list of the update types you want your bot to receive.
-   *
-   * @example ['message', 'callback_query']
-   */
-  allowedUpdates?: UpdateType[]
-  /**
-   * Pass `true` to drop all pending updates.
-   */
-  dropPendingUpdates?: boolean
-  /**
-   * A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters.
-   */
-  secretToken?: string
-}
-
-/**
- * Parameters for deleting a webhook.
- *
- * @see https://core.telegram.org/bots/api#deletewebhook
- */
-export type DeleteWebhookParams = {
-  /**
-   * Pass `true` to drop all pending updates.
-   */
-  dropPendingUpdates?: boolean
-}
+import {
+  type DeleteWebhookParams,
+  DeleteWebhookParamsSchema,
+  type SetWebhookParams,
+  SetWebhookParamsSchema,
+  type WebhookInfo,
+  WebhookInfoSchema,
+} from '../schemas'
 
 type BooleanResponse = { ok: boolean; result: boolean }
-type WebhookInfoResponse = { ok: boolean; result: ApiWebhookInfo }
+type WebhookInfoResponse = { ok: boolean; result: unknown }
 
 export function setWebhook(ctx: TelegramContext) {
   return async (params: SetWebhookParams): Promise<Result<boolean>> => {
     try {
-      const body: Record<string, unknown> = { url: params.url }
+      const paramsResult = safeParse(SetWebhookParamsSchema, params)
 
-      if (params.ipAddress !== undefined) body.ip_address = params.ipAddress
-      if (params.maxConnections !== undefined)
-        body.max_connections = params.maxConnections
-      if (params.allowedUpdates !== undefined)
-        body.allowed_updates = params.allowedUpdates
-      if (params.dropPendingUpdates !== undefined)
-        body.drop_pending_updates = params.dropPendingUpdates
-      if (params.secretToken !== undefined)
-        body.secret_token = params.secretToken
+      if (paramsResult.error) {
+        return paramsResult
+      }
 
       const response = await ctx.request<BooleanResponse>('/setWebhook', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify(paramsResult.data),
       })
 
       return ok(response.result)
@@ -83,14 +37,17 @@ export function setWebhook(ctx: TelegramContext) {
 export function deleteWebhook(ctx: TelegramContext) {
   return async (params?: DeleteWebhookParams): Promise<Result<boolean>> => {
     try {
-      const body: Record<string, unknown> = {}
-
-      if (params?.dropPendingUpdates !== undefined)
-        body.drop_pending_updates = params.dropPendingUpdates
+      if (params) {
+        const paramsResult = safeParse(DeleteWebhookParamsSchema, params)
+        if (paramsResult.error) {
+          return paramsResult
+        }
+        params = paramsResult.data
+      }
 
       const response = await ctx.request<BooleanResponse>('/deleteWebhook', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify(params || {}),
       })
 
       return ok(response.result)
@@ -105,9 +62,11 @@ export function getWebhookInfo(ctx: TelegramContext) {
     try {
       const response = await ctx.request<WebhookInfoResponse>('/getWebhookInfo')
 
-      return ok(fromApi.webhookInfo(response.result))
+      return safeParse(WebhookInfoSchema, response.result)
     } catch (e) {
       return fail(e)
     }
   }
 }
+
+export type { DeleteWebhookParams, SetWebhookParams, WebhookInfo }

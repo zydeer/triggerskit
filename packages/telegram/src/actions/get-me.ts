@@ -1,20 +1,11 @@
 import type { Result } from '@triggerskit/core/types'
-import { fail, ok } from '@triggerskit/core/utils'
+import { fail, safeParse } from '@triggerskit/core/utils'
 import type { TelegramContext } from '..'
-import { type ApiUser, fromApi } from '../api'
-import type { User } from '../types'
-
-/**
- * Response data returned from the getMe method.
- *
- * @see https://core.telegram.org/bots/api#getme
- * @see https://core.telegram.org/bots/api#user
- */
-export type GetMeData = User
+import { type GetMeData, GetMeDataSchema } from '../schemas'
 
 type TelegramApiResponse = {
   ok: boolean
-  result: ApiUser
+  result: unknown
 }
 
 export function getMe(ctx: TelegramContext) {
@@ -24,9 +15,11 @@ export function getMe(ctx: TelegramContext) {
         method: 'GET',
       })
 
-      return ok(fromApi.user(response.result))
+      return safeParse(GetMeDataSchema, response.result)
     } catch (e) {
       return fail(e)
     }
   }
 }
+
+export type { GetMeData }

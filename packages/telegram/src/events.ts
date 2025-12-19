@@ -1,4 +1,4 @@
-import type { Message } from './types'
+import type { Message } from './schemas'
 
 export type TelegramEventMap = {
   /** New incoming message */

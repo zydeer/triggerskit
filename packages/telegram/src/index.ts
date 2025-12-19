@@ -6,7 +6,7 @@ import type {
   Unsubscribe,
 } from '@triggerskit/core/types'
 import { createEvents } from '@triggerskit/core/types'
-import { fail, ok } from '@triggerskit/core/utils'
+import { fail, ok, safeParse } from '@triggerskit/core/utils'
 import { type GetMeData, getMe } from './actions/get-me'
 import {
   type SendMessageData,
@@ -19,11 +19,11 @@ import {
   getWebhookInfo,
   type SetWebhookParams,
   setWebhook,
+  type WebhookInfo,
 } from './actions/webhook'
-import { type ApiUpdate, fromApi } from './api'
 import type { TelegramEvent, TelegramEventMap } from './events'
 import { createRequest } from './request'
-import type { Update, WebhookInfo } from './types'
+import { type Update, UpdateSchema } from './schemas'
 
 export type TelegramErrorDetails = { errorCode: number }
 
@@ -83,15 +83,15 @@ export type TelegramActions = {
    * ```typescript
    * // Simple message
    * const result = await kit.telegram.actions.sendMessage({
-   *   chatId: 123456789,
+   *   chat_id: 123456789,
    *   text: 'Hello, World!'
    * })
    *
    * // With formatting
    * const result = await kit.telegram.actions.sendMessage({
-   *   chatId: '@channel',
+   *   chat_id: '@channel',
    *   text: '<b>Bold</b> text',
-   *   parseMode: 'HTML'
+   *   parse_mode: 'HTML'
    * })
    * ```
    */
@@ -111,7 +111,7 @@ export type TelegramWebhooks = {
    * ```typescript
    * const result = await kit.telegram.webhooks.set({
    *   url: 'https://example.com/webhook',
-   *   secretToken: 'my-secret-token'
+   *   secret_token: 'my-secret-token'
    * })
    * ```
    */
@@ -131,7 +131,7 @@ export type TelegramWebhooks = {
    * const result = await kit.telegram.webhooks.delete()
    *
    * // Drop all pending updates
-   * const result = await kit.telegram.webhooks.delete({ dropPendingUpdates: true })
+   * const result = await kit.telegram.webhooks.delete({ drop_pending_updates: true })
    * ```
    */
   delete: (params?: DeleteWebhookParams) => Promise<Result<boolean>>
@@ -148,7 +148,7 @@ export type TelegramWebhooks = {
    * const result = await kit.telegram.webhooks.info()
    * if (result.data) {
    *   console.log('Webhook URL:', result.data.url)
-   *   console.log('Pending updates:', result.data.pendingUpdateCount)
+   *   console.log('Pending updates:', result.data.pending_update_count)
    * }
    * ```
    */
@@ -231,8 +231,14 @@ export function telegram(config: TelegramConfig): TelegramInstance {
       info: getWebhookInfo(ctx),
       async handle(req: Request): Promise<Result<Update>> {
         try {
-          const body = (await req.json()) as ApiUpdate
-          const update = fromApi.update(body)
+          const body = await req.json()
+          const result = safeParse(UpdateSchema, body)
+
+          if (result.error) {
+            return result
+          }
+
+          const update = result.data
 
           if (update.message) events.emit('message', update.message)
 
@@ -249,7 +255,11 @@ export function telegram(config: TelegramConfig): TelegramInstance {
 
 export type { GetMeData } from './actions/get-me'
 export type { SendMessageData, SendMessageParams } from './actions/send-message'
-export type { DeleteWebhookParams, SetWebhookParams } from './actions/webhook'
+export type {
+  DeleteWebhookParams,
+  SetWebhookParams,
+  WebhookInfo,
+} from './actions/webhook'
 
 export type {
   Animation,
@@ -380,6 +390,5 @@ export type {
   Voice,
   WebAppData,
   WebAppInfo,
-  WebhookInfo,
   WriteAccessAllowed,
-} from './types'
+} from './schemas'
