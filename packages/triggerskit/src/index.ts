@@ -16,6 +16,34 @@ export type TriggersKit<TProviders extends Record<string, ProviderInstance>> =
     handle: WebhookHandler<ExtractProviderNames<TProviders>>
   }
 
+/**
+ * Creates a TriggersKit instance with unified provider management.
+ *
+ * @template TProviders - Record of provider instances
+ * @param config - Configuration with provider instances
+ * @returns TriggersKit instance with all providers and unified webhook handler
+ *
+ * @example
+ * ```typescript
+ * import { triggers } from 'triggerskit'
+ * import { telegram } from '@triggerskit/telegram'
+ *
+ * const kit = triggers({
+ *   providers: {
+ *     telegram: telegram({ token: 'BOT_TOKEN' }),
+ *   },
+ * })
+ *
+ * // Access providers
+ * await kit.telegram.actions.sendMessage({ chat_id: 123, text: 'Hello!' })
+ *
+ * // Unified webhook handling
+ * const result = await kit.handle(request)
+ * if (result.data) {
+ *   console.log(`Handled by: ${result.data.provider}`)
+ * }
+ * ```
+ */
 export function triggers<
   TProviders extends Record<string, ProviderInstance>,
 >(config: { providers: TProviders }): TriggersKit<TProviders> {

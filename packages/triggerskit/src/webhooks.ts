@@ -33,8 +33,6 @@ export function createWebhookHandler<TProviderName extends string>(
       TProviderName,
       ProviderInstance,
     ][]) {
-      if (!provider.detector) continue
-
       const isMatch = await provider.detector.detect(context)
       if (!isMatch) continue
 
