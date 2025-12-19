@@ -1,31 +1,3 @@
-import type { ActionContext } from '@triggerskit/core/types'
-
-export type TelegramErrorDetails = { errorCode: number }
-
-/**
- * Configuration options for the Telegram provider.
- *
- * @see https://core.telegram.org/bots/api#authorizing-your-bot
- */
-export type TelegramConfig = {
-  /**
-   * Bot token obtained from @BotFather on Telegram.
-   *
-   * @see https://core.telegram.org/bots#how-do-i-create-a-bot
-   */
-  token: string
-  /**
-   * Base URL for Telegram API. Defaults to 'https://api.telegram.org'.
-   */
-  baseUrl?: string
-  /**
-   * Request timeout in milliseconds. Defaults to 30000 (30 seconds).
-   */
-  timeout?: number
-}
-
-export type TelegramContext = ActionContext
-
 /**
  * This object represents a Telegram user or bot.
  *

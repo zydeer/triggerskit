@@ -1,6 +1,6 @@
 import { type RequestFn, TriggersError } from '@triggerskit/core/types'
 import { capitalize, fetchWithTimeout } from '@triggerskit/core/utils'
-import type { TelegramConfig, TelegramErrorDetails } from './types'
+import type { TelegramConfig, TelegramErrorDetails } from '.'
 
 export function createRequest(config: TelegramConfig): RequestFn {
   const baseUrl = config.baseUrl ?? 'https://api.telegram.org'

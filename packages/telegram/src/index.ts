@@ -1,4 +1,5 @@
 import type {
+  ActionContext,
   EventHandler,
   ProviderInstance,
   Result,
@@ -22,7 +23,33 @@ import {
 import { type ApiUpdate, fromApi } from './api'
 import type { TelegramEvent, TelegramEventMap } from './events'
 import { createRequest } from './request'
-import type { TelegramConfig, Update, WebhookInfo } from './types'
+import type { Update, WebhookInfo } from './types'
+
+export type TelegramErrorDetails = { errorCode: number }
+
+/**
+ * Configuration options for the Telegram provider.
+ *
+ * @see https://core.telegram.org/bots/api#authorizing-your-bot
+ */
+export type TelegramConfig = {
+  /**
+   * Bot token obtained from @BotFather on Telegram.
+   *
+   * @see https://core.telegram.org/bots#how-do-i-create-a-bot
+   */
+  token: string
+  /**
+   * Base URL for Telegram API. Defaults to 'https://api.telegram.org'.
+   */
+  baseUrl?: string
+  /**
+   * Request timeout in milliseconds. Defaults to 30000 (30 seconds).
+   */
+  timeout?: number
+}
+
+export type TelegramContext = ActionContext
 
 export type TelegramActions = {
   /**
@@ -338,9 +365,6 @@ export type {
   Story,
   SuccessfulPayment,
   SwitchInlineQueryChosenChat,
-  TelegramConfig,
-  TelegramContext,
-  TelegramErrorDetails,
   TextQuote,
   Update,
   UpdateType,

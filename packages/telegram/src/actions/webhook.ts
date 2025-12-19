@@ -1,7 +1,8 @@
 import type { Result } from '@triggerskit/core/types'
 import { fail, ok } from '@triggerskit/core/utils'
+import type { TelegramContext } from '..'
 import { type ApiWebhookInfo, fromApi } from '../api'
-import type { TelegramContext, UpdateType, WebhookInfo } from '../types'
+import type { UpdateType, WebhookInfo } from '../types'
 
 /**
  * Parameters for setting a webhook.

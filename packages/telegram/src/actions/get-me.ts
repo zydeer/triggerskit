@@ -1,7 +1,8 @@
 import type { Result } from '@triggerskit/core/types'
 import { fail, ok } from '@triggerskit/core/utils'
+import type { TelegramContext } from '..'
 import { type ApiUser, fromApi } from '../api'
-import type { TelegramContext, User } from '../types'
+import type { User } from '../types'
 
 /**
  * Response data returned from the getMe method.

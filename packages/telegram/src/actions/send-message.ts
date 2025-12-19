@@ -1,5 +1,6 @@
 import type { Result } from '@triggerskit/core/types'
 import { fail, ok } from '@triggerskit/core/utils'
+import type { TelegramContext } from '..'
 import { type ApiMessage, fromApi, toApi } from '../api'
 import type {
   LinkPreviewOptions,
@@ -8,7 +9,6 @@ import type {
   ParseMode,
   ReplyMarkup,
   ReplyParameters,
-  TelegramContext,
 } from '../types'
 
 /**
