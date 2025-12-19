@@ -44,11 +44,6 @@ function isTelegramWebhook(ctx: WebhookContext): boolean {
 
 export type TelegramErrorDetails = { errorCode: number }
 
-/**
- * Configuration options for the Telegram provider.
- *
- * @see https://core.telegram.org/bots/api#authorizing-your-bot
- */
 export type TelegramConfig = {
   /**
    * Bot token obtained from @BotFather on Telegram.

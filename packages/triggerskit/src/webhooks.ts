@@ -1,14 +1,20 @@
-import {
-  type ProviderInstance,
-  TriggersError,
-  type WebhookContext,
-  type WebhookHandleResult,
+import type {
+  ProviderInstance,
+  WebhookContext,
+  WebhookHandleResult,
 } from '@triggerskit/core/types'
+import { TriggersError } from '@triggerskit/core/types'
 
-export async function handleWebhook(
-  providers: Record<string, ProviderInstance>,
-): Promise<WebhookHandleResult> {
-  return async (request: Request) => {
+export type WebhookHandler<TProvider extends string = string> = (
+  request: Request,
+) => Promise<WebhookHandleResult<TProvider>>
+
+export function createWebhookHandler<TProviderName extends string>(
+  providers: Record<TProviderName, ProviderInstance>,
+): WebhookHandler<TProviderName> {
+  return async (
+    request: Request,
+  ): Promise<WebhookHandleResult<TProviderName>> => {
     const clonedRequest = request.clone()
 
     let body: unknown = null
@@ -23,22 +29,29 @@ export async function handleWebhook(
       request: request.clone(),
     }
 
-    for (const [name, provider] of Object.entries(providers)) {
+    for (const [name, provider] of Object.entries(providers) as [
+      TProviderName,
+      ProviderInstance,
+    ][]) {
       if (!provider.detector) continue
 
       const isMatch = await provider.detector.detect(context)
-      if (isMatch) {
-        const result = await provider.detector.handleWebhook(request)
+      if (!isMatch) continue
 
-        return {
-          provider: name,
-          data: result.data,
-          error: result.error,
-        }
+      const result = await provider.detector.handleWebhook(request)
+
+      if (result.error) {
+        return { data: null, error: result.error }
+      }
+
+      return {
+        data: { provider: name, data: result.data },
+        error: null,
       }
     }
 
     return {
+      data: null,
       error: new TriggersError('No matching provider found for this webhook'),
     }
   }

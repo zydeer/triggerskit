@@ -1,15 +1,30 @@
-import type { TriggersConfig, TriggersKit } from '@triggerskit/core/types'
-import { handleWebhook } from './webhooks'
+import type { ProviderInstance } from '@triggerskit/core/types'
+import { createWebhookHandler, type WebhookHandler } from './webhooks'
 
-export function triggers<TConfig extends TriggersConfig>(
-  config: TConfig,
-): TriggersKit<TConfig> {
-  const providers = config.providers
+export type ExtractProviderNames<
+  TProviders extends Record<string, ProviderInstance>,
+> = keyof TProviders & string
+
+export type TriggersKit<TProviders extends Record<string, ProviderInstance>> =
+  TProviders & {
+    /**
+     * Unified webhook handler that auto-detects the provider and routes the request.
+     *
+     * @param request - Incoming webhook request
+     * @returns Result with provider name and parsed data, or error if no match
+     */
+    handle: WebhookHandler<ExtractProviderNames<TProviders>>
+  }
+
+export function triggers<
+  TProviders extends Record<string, ProviderInstance>,
+>(config: { providers: TProviders }): TriggersKit<TProviders> {
+  const { providers } = config
 
   return {
     ...providers,
-    handleWebhook: handleWebhook(providers),
-  } as TriggersKit<TConfig>
+    handle: createWebhookHandler(providers),
+  } as TriggersKit<TProviders>
 }
 
 export default triggers
