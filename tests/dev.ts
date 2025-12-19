@@ -56,8 +56,10 @@ Bun.serve({
       POST: async (request) => {
         const result = await kit.handle(request)
 
-        if (result.data?.provider === 'prettyBot') {
-          console.log(`Webhook handled by: ${result.data}`)
+        if (result.data) {
+          if (result.data.provider === 'prettyBot') {
+            console.log(`Webhook handled by: ${result.data.payload}`)
+          }
         }
 
         if (result.error) {

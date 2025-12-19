@@ -43,7 +43,7 @@ export function createWebhookHandler<TProviderName extends string>(
       }
 
       return {
-        data: { provider: name, data: result.data },
+        data: { provider: name, payload: result.data },
         error: null,
       }
     }

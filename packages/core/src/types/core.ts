@@ -40,7 +40,7 @@ export type WebhookHandleData<
   TData = unknown,
 > = {
   provider: TProvider
-  data: TData
+  payload: TData
 }
 
 export type WebhookHandleResult<
