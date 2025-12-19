@@ -19,6 +19,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -49,10 +55,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update npm
-        run: bunx npm install -g npm@latest
+        run: npm install -g npm@latest
 
       - name: Publish packages to npm
         run: |
           for dir in packages/*/; do
-            (cd "$dir" && bun pm pack && bunx npm publish ./*.tgz --access public)
+            (cd "$dir" && bun pm pack && npm publish ./*.tgz --access public)
           done
