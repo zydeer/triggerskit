@@ -35,17 +35,18 @@ export type ProviderInstance<
   readonly detector: WebhookDetector<TWebhookData>
 }
 
-export type WebhookHandleData<
-  TProvider extends string = string,
-  TData = unknown,
-> = {
-  provider: TProvider
-  payload: TData
-}
+export type ExtractWebhookData<T> =
+  // biome-ignore lint/suspicious/noExplicitAny: needed for type extraction
+  T extends ProviderInstance<string, any, infer TData, any, any>
+    ? TData
+    : unknown
 
-export type WebhookHandleResult<
-  TProvider extends string = string,
-  TData = unknown,
-> = Result<WebhookHandleData<TProvider, TData>>
+export type WebhookResult<TProviders extends Record<string, ProviderInstance>> =
+  {
+    [K in keyof TProviders & string]: {
+      provider: K
+      payload: ExtractWebhookData<TProviders[K]>
+    }
+  }[keyof TProviders & string]
 
 export type { WebhookContext }

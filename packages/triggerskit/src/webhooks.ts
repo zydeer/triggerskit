@@ -1,20 +1,20 @@
 import type {
   ProviderInstance,
   WebhookContext,
-  WebhookHandleResult,
+  WebhookResult,
 } from '@triggerskit/core/types'
-import { TriggersError } from '@triggerskit/core/types'
+import { type Result, TriggersError } from '@triggerskit/core/types'
 
-export type WebhookHandler<TProvider extends string = string> = (
-  request: Request,
-) => Promise<WebhookHandleResult<TProvider>>
+export type WebhookHandler<
+  TProviders extends Record<string, ProviderInstance>,
+> = (request: Request) => Promise<Result<WebhookResult<TProviders>>>
 
-export function createWebhookHandler<TProviderName extends string>(
-  providers: Record<TProviderName, ProviderInstance>,
-): WebhookHandler<TProviderName> {
+export function createWebhookHandler<
+  TProviders extends Record<string, ProviderInstance>,
+>(providers: TProviders): WebhookHandler<TProviders> {
   return async (
     request: Request,
-  ): Promise<WebhookHandleResult<TProviderName>> => {
+  ): Promise<Result<WebhookResult<TProviders>>> => {
     const clonedRequest = request.clone()
 
     let body: unknown = null
@@ -30,7 +30,7 @@ export function createWebhookHandler<TProviderName extends string>(
     }
 
     for (const [name, provider] of Object.entries(providers) as [
-      TProviderName,
+      keyof TProviders & string,
       ProviderInstance,
     ][]) {
       const isMatch = await provider.detector.detect(context)
@@ -45,7 +45,7 @@ export function createWebhookHandler<TProviderName extends string>(
       return {
         data: { provider: name, payload: result.data },
         error: null,
-      }
+      } as Result<WebhookResult<TProviders>>
     }
 
     return {
