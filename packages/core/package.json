@@ -1,7 +1,7 @@
 {
   "name": "@triggerskit/core",
   "description": "Shared utilities and functions for TriggersKit",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "type": "module",
   "files": [
     "dist"
