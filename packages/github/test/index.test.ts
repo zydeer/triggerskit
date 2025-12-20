@@ -1,5 +1,7 @@
-import { expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 
-test('true should be true', () => {
-  expect(true).toBe(true)
+describe('github', () => {
+  it('true should be true', async () => {
+    expect(true).toBe(true)
+  })
 })

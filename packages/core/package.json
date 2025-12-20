@@ -19,6 +19,12 @@
         "default": "./dist/types/index.js"
       }
     },
+    "./oauth": {
+      "import": {
+        "types": "./dist/oauth/index.d.ts",
+        "default": "./dist/oauth/index.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "repository": {

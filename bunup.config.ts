@@ -6,7 +6,11 @@ export default defineWorkspace(
       name: 'core',
       root: 'packages/core',
       config: {
-        entry: ['src/types/index.ts', 'src/utils/index.ts'],
+        entry: [
+          'src/types/index.ts',
+          'src/utils/index.ts',
+          'src/oauth/index.ts',
+        ],
       },
     },
     {
