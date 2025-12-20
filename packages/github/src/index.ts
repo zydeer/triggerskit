@@ -1,25 +1,27 @@
+import type { OAuthStorage } from '@triggerskit/core/oauth'
 import {
-  createOAuth,
-  type OAuthHandler,
-  type OAuthStorage,
-} from '@triggerskit/core/oauth'
+  createEvents,
+  createProviderOAuth,
+  createRequest,
+  createTokenGetter,
+  fail,
+  type ProviderOAuth,
+  type Result,
+  safeParse,
+  setupOAuth,
+  type WebhookContext,
+  type WebhookDetector,
+} from '@triggerskit/core/provider'
 import type {
-  ActionContext,
   ProviderInstance,
   ProviderWebhooks,
-  Result,
-  WebhookContext,
-  WebhookDetector,
 } from '@triggerskit/core/types'
-import { createEvents } from '@triggerskit/core/types'
-import { fail, ok, safeParse } from '@triggerskit/core/utils'
 import { type CreateCommentData, createComment } from './actions/create-comment'
 import { type CreateIssueData, createIssue } from './actions/create-issue'
 import { type GetRepoData, getRepo } from './actions/get-repo'
 import { type GetUserData, getUser } from './actions/get-user'
 import { type ListReposData, listRepos } from './actions/list-repos'
 import type { GitHubEventMap } from './events'
-import { createRequest } from './request'
 import type {
   CreateCommentParams,
   CreateIssueParams,
@@ -40,33 +42,26 @@ import {
 // === Configuration ===
 
 export type GitHubConfig = {
-  /** Personal access token for authentication (for simple use cases) */
+  /** Personal access token (for simple use cases) */
   token?: string
-  /** OAuth configuration (for OAuth flow) */
+  /** OAuth configuration */
   oauth?: {
     clientId: string
     clientSecret: string
     redirectUri: string
     scopes?: string[]
   }
-  /** Storage adapter for OAuth tokens (required when using OAuth) */
+  /** Storage adapter for OAuth tokens */
   storage?: OAuthStorage
   /** Key to store/retrieve OAuth tokens (default: 'default') */
   tokenKey?: string
-  /** Custom base URL for GitHub API (default: 'https://api.github.com') */
+  /** Custom base URL (default: 'https://api.github.com') */
   baseUrl?: string
   /** Request timeout in milliseconds */
   timeout?: number
 }
 
 // === Types ===
-
-export type GitHubErrorDetails = {
-  status: number
-  errors?: Array<{ resource: string; field: string; code: string }>
-}
-
-export type GitHubContext = ActionContext
 
 export type GitHubActions = {
   /** Get the authenticated user */
@@ -83,51 +78,28 @@ export type GitHubActions = {
   ) => Promise<Result<CreateCommentData>>
 }
 
-export type GitHubOAuth = {
-  /** Get authorization URL for OAuth flow */
-  getAuthorizationUrl: (options?: {
-    state?: string
-    scopes?: string[]
-  }) => Promise<{ url: string; state: string }>
-  /** Handle OAuth callback - exchange code for tokens */
-  handleCallback: (
-    code: string,
-    state: string,
-  ) => Promise<Result<{ success: true }>>
-  /** Check if OAuth tokens are available and valid */
-  isAuthenticated: () => Promise<boolean>
-  /** Revoke/delete stored tokens */
-  revokeTokens: () => Promise<void>
-}
-
-export type GitHubWebhooks = ProviderWebhooks<WebhookEvent>
-
 export type GitHubInstance = ProviderInstance<
   'github',
   GitHubActions,
   WebhookEvent,
   GitHubEventMap,
-  GitHubWebhooks
+  ProviderWebhooks<WebhookEvent>
 > & {
-  /** OAuth utilities (available when OAuth is configured) */
-  oauth?: GitHubOAuth
+  /** OAuth utilities (when OAuth is configured) */
+  oauth?: ProviderOAuth
 }
 
-// === Provider ===
+// === Constants ===
 
 const GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize'
 const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
+// === Provider ===
+
 function isGitHubWebhook(ctx: WebhookContext): boolean {
-  // GitHub webhooks have X-GitHub-Event header
-  if (ctx.headers.has('x-github-event')) {
-    return true
-  }
-  // Check for GitHub webhook signature
-  if (ctx.headers.has('x-hub-signature-256')) {
-    return true
-  }
-  return false
+  return (
+    ctx.headers.has('x-github-event') || ctx.headers.has('x-hub-signature-256')
+  )
 }
 
 /**
@@ -135,38 +107,35 @@ function isGitHubWebhook(ctx: WebhookContext): boolean {
  */
 export function github(config: GitHubConfig): GitHubInstance {
   const tokenKey = config.tokenKey ?? 'default'
+  const baseUrl = config.baseUrl ?? 'https://api.github.com'
 
-  // Setup OAuth handler if configured
-  let oauthHandler: OAuthHandler | undefined
-  if (config.oauth && config.storage) {
-    oauthHandler = createOAuth(
-      {
-        authorizationUrl: GITHUB_AUTH_URL,
-        tokenUrl: GITHUB_TOKEN_URL,
-        clientId: config.oauth.clientId,
-        clientSecret: config.oauth.clientSecret,
-        redirectUri: config.oauth.redirectUri,
-        scopes: config.oauth.scopes,
-        authMethod: 'body',
-      },
-      config.storage,
-      'github',
-    )
-  }
-
-  const request = createRequest({
-    config: { ...config, tokenKey },
-    oauth: oauthHandler,
+  // Setup OAuth if configured
+  const oauthHandler = setupOAuth(config.oauth, config.storage, 'github', {
+    authorizationUrl: GITHUB_AUTH_URL,
+    tokenUrl: GITHUB_TOKEN_URL,
+    authMethod: 'body',
   })
-  const ctx: GitHubContext = { request }
+
+  // Create request function
+  const request = createRequest({
+    baseUrl,
+    timeout: config.timeout,
+    getToken: createTokenGetter(config.token, oauthHandler, tokenKey),
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  })
+
+  const ctx = { request }
   const events = createEvents<GitHubEventMap>()
 
+  // Webhook handler
   async function handleWebhook(req: Request): Promise<Result<WebhookEvent>> {
     try {
       const body = await req.json()
       const eventType = req.headers.get('x-github-event')
 
-      // Parse based on event type
       switch (eventType) {
         case 'push': {
           const result = safeParse(PushEventSchema, body)
@@ -200,29 +169,7 @@ export function github(config: GitHubConfig): GitHubInstance {
     handleWebhook,
   }
 
-  // Build OAuth utilities if configured
-  let oauth: GitHubOAuth | undefined
-  if (oauthHandler) {
-    oauth = {
-      getAuthorizationUrl: oauthHandler.getAuthorizationUrl,
-      async handleCallback(
-        code: string,
-        state: string,
-      ): Promise<Result<{ success: true }>> {
-        try {
-          const tokens = await oauthHandler.exchangeCode(code, state)
-          await oauthHandler.storeTokens(tokenKey, tokens)
-          return ok({ success: true })
-        } catch (e) {
-          return fail(e)
-        }
-      },
-      isAuthenticated: () => oauthHandler.hasValidTokens(tokenKey),
-      revokeTokens: () => oauthHandler.deleteTokens(tokenKey),
-    }
-  }
-
-  const instance: GitHubInstance = {
+  return {
     provider: 'github',
     actions: {
       getUser: getUser(ctx),
@@ -231,19 +178,12 @@ export function github(config: GitHubConfig): GitHubInstance {
       createIssue: createIssue(ctx),
       createComment: createComment(ctx),
     },
-    webhooks: {
-      handle: handleWebhook,
-    },
+    webhooks: { handle: handleWebhook },
     on: events.on,
     request,
     detector,
+    ...(oauthHandler && { oauth: createProviderOAuth(oauthHandler, tokenKey) }),
   }
-
-  if (oauth) {
-    instance.oauth = oauth
-  }
-
-  return instance
 }
 
 // === Exports ===

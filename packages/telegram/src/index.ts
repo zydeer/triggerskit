@@ -26,24 +26,32 @@ import type { TelegramEventMap } from './events'
 import { createRequest } from './request'
 import { type Update, UpdateSchema } from './schemas'
 
+// === Configuration ===
+
 export type TelegramConfig = {
+  /** Bot token from @BotFather */
   token: string
+  /** Custom base URL (default: 'https://api.telegram.org') */
   baseUrl?: string
+  /** Request timeout in milliseconds */
   timeout?: number
 }
 
-export type TelegramErrorDetails = { errorCode: number }
-
-export type TelegramContext = ActionContext
+// === Types ===
 
 export type TelegramActions = {
+  /** Get information about the bot */
   getMe: () => Promise<Result<GetMeData>>
+  /** Send a text message */
   sendMessage: (params: SendMessageParams) => Promise<Result<SendMessageData>>
 }
 
 export type TelegramWebhooks = ProviderWebhooks<Update> & {
+  /** Set webhook URL */
   set: (params: SetWebhookParams) => Promise<Result<boolean>>
+  /** Delete webhook */
   delete: (params?: DeleteWebhookParams) => Promise<Result<boolean>>
+  /** Get webhook info */
   info: () => Promise<Result<WebhookInfo>>
 }
 
@@ -55,39 +63,34 @@ export type TelegramInstance = ProviderInstance<
   TelegramWebhooks
 >
 
+// === Provider ===
+
 function isTelegramWebhook(ctx: WebhookContext): boolean {
-  if (ctx.headers.has('x-telegram-bot-api-secret-token')) {
-    return true
-  }
-  if (
-    typeof ctx.body === 'object' &&
-    ctx.body !== null &&
-    'update_id' in ctx.body
-  ) {
-    return true
-  }
-  return false
+  return (
+    ctx.headers.has('x-telegram-bot-api-secret-token') ||
+    (typeof ctx.body === 'object' &&
+      ctx.body !== null &&
+      'update_id' in ctx.body)
+  )
 }
 
+/**
+ * Create a Telegram bot provider instance
+ */
 export function telegram(config: TelegramConfig): TelegramInstance {
   const request = createRequest(config)
-  const ctx = { request }
+  const ctx: ActionContext = { request }
   const events = createEvents<TelegramEventMap>()
 
   async function handleWebhook(req: Request): Promise<Result<Update>> {
     try {
       const body = await req.json()
       const result = safeParse(UpdateSchema, body)
+      if (result.error) return result
 
-      if (result.error) {
-        return result
-      }
+      if (result.data.message) events.emit('message', result.data.message)
 
-      const update = result.data
-
-      if (update.message) events.emit('message', update.message)
-
-      return ok(update)
+      return ok(result.data)
     } catch (e) {
       return fail(e)
     }
@@ -115,6 +118,8 @@ export function telegram(config: TelegramConfig): TelegramInstance {
     detector,
   }
 }
+
+// === Exports ===
 
 export type { GetMeData } from './actions/get-me'
 export type { SendMessageData, SendMessageParams } from './actions/send-message'

@@ -1,20 +1,14 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
-import type { TelegramContext } from '..'
 import { type GetMeData, GetMeDataSchema } from '../schemas'
 
-type TelegramApiResponse = {
-  ok: boolean
-  result: unknown
-}
+type ApiResponse = { ok: boolean; result: unknown }
 
-export function getMe(ctx: TelegramContext) {
+/** Get information about the bot */
+export function getMe(ctx: ActionContext) {
   return async (): Promise<Result<GetMeData>> => {
     try {
-      const response = await ctx.request<TelegramApiResponse>('/getMe', {
-        method: 'GET',
-      })
-
+      const response = await ctx.request<ApiResponse>('/getMe')
       return safeParse(GetMeDataSchema, response.result)
     } catch (e) {
       return fail(e)

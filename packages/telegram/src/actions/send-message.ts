@@ -1,6 +1,5 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
-import type { TelegramContext } from '..'
 import {
   type SendMessageData,
   SendMessageDataSchema,
@@ -8,25 +7,20 @@ import {
   SendMessageParamsSchema,
 } from '../schemas'
 
-type TelegramApiResponse = {
-  ok: boolean
-  result: unknown
-}
+type ApiResponse = { ok: boolean; result: unknown }
 
-export function sendMessage(ctx: TelegramContext) {
+/** Send a text message */
+export function sendMessage(ctx: ActionContext) {
   return async (
     params: SendMessageParams,
   ): Promise<Result<SendMessageData>> => {
     try {
-      const paramsResult = safeParse(SendMessageParamsSchema, params)
+      const validated = safeParse(SendMessageParamsSchema, params)
+      if (validated.error) return validated
 
-      if (paramsResult.error) {
-        return paramsResult
-      }
-
-      const response = await ctx.request<TelegramApiResponse>('/sendMessage', {
+      const response = await ctx.request<ApiResponse>('/sendMessage', {
         method: 'POST',
-        body: JSON.stringify(paramsResult.data),
+        body: JSON.stringify(validated.data),
       })
 
       return safeParse(SendMessageDataSchema, response.result)

@@ -7,22 +7,28 @@
     "dist"
   ],
   "exports": {
-    "./utils": {
-      "import": {
-        "types": "./dist/utils/index.d.ts",
-        "default": "./dist/utils/index.js"
-      }
-    },
     "./types": {
       "import": {
         "types": "./dist/types/index.d.ts",
         "default": "./dist/types/index.js"
       }
     },
+    "./utils": {
+      "import": {
+        "types": "./dist/utils/index.d.ts",
+        "default": "./dist/utils/index.js"
+      }
+    },
     "./oauth": {
       "import": {
         "types": "./dist/oauth/index.d.ts",
         "default": "./dist/oauth/index.js"
+      }
+    },
+    "./provider": {
+      "import": {
+        "types": "./dist/provider/index.d.ts",
+        "default": "./dist/provider/index.js"
       }
     },
     "./package.json": "./package.json"

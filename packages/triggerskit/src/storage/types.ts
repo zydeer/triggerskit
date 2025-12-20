@@ -1,6 +1,6 @@
 /**
  * Storage adapter interface
- * Minimal, composable interface for persisting provider state (tokens, etc.)
+ * Minimal interface for persisting provider state (tokens, etc.)
  */
 export type StorageAdapter = {
   /** Get a value by key */
@@ -13,17 +13,12 @@ export type StorageAdapter = {
   has: (key: string) => Promise<boolean>
 }
 
-/**
- * Scoped storage - namespaces keys under a provider prefix
- */
+/** Scoped storage - namespaces keys under a prefix */
 export type ScopedStorage = StorageAdapter & {
-  /** The namespace prefix for this storage */
   readonly namespace: string
 }
 
-/**
- * Creates a scoped storage adapter that namespaces all keys
- */
+/** Creates a scoped storage adapter that namespaces all keys */
 export function scopedStorage(
   adapter: StorageAdapter,
   namespace: string,
@@ -32,8 +27,8 @@ export function scopedStorage(
 
   return {
     namespace,
-    get: <T = unknown>(key: string) => adapter.get<T>(prefix(key)),
-    set: <T = unknown>(key: string, value: T, ttl?: number) =>
+    get: <T>(key: string) => adapter.get<T>(prefix(key)),
+    set: <T>(key: string, value: T, ttl?: number) =>
       adapter.set(prefix(key), value, ttl),
     delete: (key: string) => adapter.delete(prefix(key)),
     has: (key: string) => adapter.has(prefix(key)),

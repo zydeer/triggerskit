@@ -1,6 +1,5 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, ok, safeParse } from '@triggerskit/core/utils'
-import type { TelegramContext } from '..'
 import {
   type DeleteWebhookParams,
   DeleteWebhookParamsSchema,
@@ -10,21 +9,19 @@ import {
   WebhookInfoSchema,
 } from '../schemas'
 
-type BooleanResponse = { ok: boolean; result: boolean }
-type WebhookInfoResponse = { ok: boolean; result: unknown }
+type BoolResponse = { ok: boolean; result: boolean }
+type InfoResponse = { ok: boolean; result: unknown }
 
-export function setWebhook(ctx: TelegramContext) {
+/** Set webhook URL */
+export function setWebhook(ctx: ActionContext) {
   return async (params: SetWebhookParams): Promise<Result<boolean>> => {
     try {
-      const paramsResult = safeParse(SetWebhookParamsSchema, params)
+      const validated = safeParse(SetWebhookParamsSchema, params)
+      if (validated.error) return validated
 
-      if (paramsResult.error) {
-        return paramsResult
-      }
-
-      const response = await ctx.request<BooleanResponse>('/setWebhook', {
+      const response = await ctx.request<BoolResponse>('/setWebhook', {
         method: 'POST',
-        body: JSON.stringify(paramsResult.data),
+        body: JSON.stringify(validated.data),
       })
 
       return ok(response.result)
@@ -34,20 +31,18 @@ export function setWebhook(ctx: TelegramContext) {
   }
 }
 
-export function deleteWebhook(ctx: TelegramContext) {
+/** Delete webhook */
+export function deleteWebhook(ctx: ActionContext) {
   return async (params?: DeleteWebhookParams): Promise<Result<boolean>> => {
     try {
       if (params) {
-        const paramsResult = safeParse(DeleteWebhookParamsSchema, params)
-        if (paramsResult.error) {
-          return paramsResult
-        }
-        params = paramsResult.data
+        const validated = safeParse(DeleteWebhookParamsSchema, params)
+        if (validated.error) return validated
       }
 
-      const response = await ctx.request<BooleanResponse>('/deleteWebhook', {
+      const response = await ctx.request<BoolResponse>('/deleteWebhook', {
         method: 'POST',
-        body: JSON.stringify(params || {}),
+        body: JSON.stringify(params ?? {}),
       })
 
       return ok(response.result)
@@ -57,11 +52,11 @@ export function deleteWebhook(ctx: TelegramContext) {
   }
 }
 
-export function getWebhookInfo(ctx: TelegramContext) {
+/** Get webhook info */
+export function getWebhookInfo(ctx: ActionContext) {
   return async (): Promise<Result<WebhookInfo>> => {
     try {
-      const response = await ctx.request<WebhookInfoResponse>('/getWebhookInfo')
-
+      const response = await ctx.request<InfoResponse>('/getWebhookInfo')
       return safeParse(WebhookInfoSchema, response.result)
     } catch (e) {
       return fail(e)

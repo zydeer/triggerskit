@@ -14,21 +14,18 @@ export type RedisClient = {
 export type RedisStorageConfig = {
   /** Redis client instance (from 'redis', 'ioredis', or compatible) */
   client: RedisClient
-  /** Optional key prefix for all storage keys */
+  /** Key prefix (default: 'triggerskit') */
   prefix?: string
 }
 
-/**
- * Redis storage adapter
- * Works with any Redis client that implements the basic interface (redis, ioredis, etc.)
- */
+/** Redis storage adapter - works with any compatible Redis client */
 export function redis(config: RedisStorageConfig): StorageAdapter {
   const { client, prefix = 'triggerskit' } = config
-  const prefixKey = (key: string) => `${prefix}:${key}`
+  const key = (k: string) => `${prefix}:${k}`
 
   return {
-    async get<T = unknown>(key: string): Promise<T | null> {
-      const data = await client.get(prefixKey(key))
+    async get<T>(k: string): Promise<T | null> {
+      const data = await client.get(key(k))
       if (data === null) return null
       try {
         return JSON.parse(data) as T
@@ -37,22 +34,19 @@ export function redis(config: RedisStorageConfig): StorageAdapter {
       }
     },
 
-    async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
+    async set<T>(k: string, value: T, ttl?: number): Promise<void> {
       const data = JSON.stringify(value)
-      if (ttl) {
-        await client.set(prefixKey(key), data, { EX: ttl })
-      } else {
-        await client.set(prefixKey(key), data)
-      }
+      await (ttl
+        ? client.set(key(k), data, { EX: ttl })
+        : client.set(key(k), data))
     },
 
-    async delete(key: string): Promise<void> {
-      await client.del(prefixKey(key))
+    async delete(k: string): Promise<void> {
+      await client.del(key(k))
     },
 
-    async has(key: string): Promise<boolean> {
-      const exists = await client.exists(prefixKey(key))
-      return exists > 0
+    async has(k: string): Promise<boolean> {
+      return (await client.exists(key(k))) > 0
     },
   }
 }

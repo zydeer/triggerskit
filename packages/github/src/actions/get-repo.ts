@@ -1,6 +1,5 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
-import type { GitHubContext } from '..'
 import {
   type GetRepoParams,
   GetRepoParamsSchema,
@@ -10,18 +9,18 @@ import {
 
 export type GetRepoData = Repository
 
-/**
- * Get a repository by owner and repo name
- */
-export function getRepo(ctx: GitHubContext) {
+/** Get a repository by owner and repo name */
+export function getRepo(ctx: ActionContext) {
   return async (params: GetRepoParams): Promise<Result<GetRepoData>> => {
     try {
-      const paramsResult = safeParse(GetRepoParamsSchema, params)
-      if (paramsResult.error) return paramsResult
+      const validated = safeParse(GetRepoParamsSchema, params)
+      if (validated.error) return validated
 
-      const { owner, repo } = paramsResult.data
-      const response = await ctx.request<unknown>(`/repos/${owner}/${repo}`)
-      return safeParse(RepositorySchema, response)
+      const { owner, repo } = validated.data
+      return safeParse(
+        RepositorySchema,
+        await ctx.request(`/repos/${owner}/${repo}`),
+      )
     } catch (e) {
       return fail(e)
     }

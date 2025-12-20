@@ -26,25 +26,19 @@ export function createEvents<TEvents extends EventMap>(): Events<TEvents> {
       event: K,
       handler: EventHandler<TEvents[K]>,
     ): Unsubscribe {
-      let eventHandlers = handlers.get(event)
-      if (!eventHandlers) {
-        eventHandlers = new Set()
-        handlers.set(event, eventHandlers)
+      let set = handlers.get(event)
+      if (!set) {
+        set = new Set()
+        handlers.set(event, set)
       }
-      eventHandlers.add(handler as EventHandler<unknown>)
-
-      return () => {
-        handlers.get(event)?.delete(handler as EventHandler<unknown>)
-      }
+      set.add(handler as EventHandler<unknown>)
+      return () => handlers.get(event)?.delete(handler as EventHandler<unknown>)
     },
 
     emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void {
-      const eventHandlers = handlers.get(event)
-      if (eventHandlers) {
-        for (const handler of eventHandlers) {
-          handler(payload)
-        }
-      }
+      handlers.get(event)?.forEach((h) => {
+        h(payload)
+      })
     },
   }
 }

@@ -1,6 +1,5 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
-import type { GitHubContext } from '..'
 import {
   type CreateIssueParams,
   CreateIssueParamsSchema,
@@ -10,27 +9,23 @@ import {
 
 export type CreateIssueData = Issue
 
-/**
- * Create an issue in a repository
- */
-export function createIssue(ctx: GitHubContext) {
+/** Create an issue in a repository */
+export function createIssue(ctx: ActionContext) {
   return async (
     params: CreateIssueParams,
   ): Promise<Result<CreateIssueData>> => {
     try {
-      const paramsResult = safeParse(CreateIssueParamsSchema, params)
-      if (paramsResult.error) return paramsResult
+      const validated = safeParse(CreateIssueParamsSchema, params)
+      if (validated.error) return validated
 
-      const { owner, repo, ...body } = paramsResult.data
-      const response = await ctx.request<unknown>(
-        `/repos/${owner}/${repo}/issues`,
-        {
+      const { owner, repo, ...body } = validated.data
+      return safeParse(
+        IssueSchema,
+        await ctx.request(`/repos/${owner}/${repo}/issues`, {
           method: 'POST',
           body: JSON.stringify(body),
-        },
+        }),
       )
-
-      return safeParse(IssueSchema, response)
     } catch (e) {
       return fail(e)
     }

@@ -1,7 +1,6 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
 import { z } from 'zod'
-import type { GitHubContext } from '..'
 import {
   type ListReposParams,
   ListReposParamsSchema,
@@ -11,15 +10,13 @@ import {
 
 export type ListReposData = Repository[]
 
-/**
- * List repositories for the authenticated user
- */
-export function listRepos(ctx: GitHubContext) {
+/** List repositories for the authenticated user */
+export function listRepos(ctx: ActionContext) {
   return async (params?: ListReposParams): Promise<Result<ListReposData>> => {
     try {
       if (params) {
-        const paramsResult = safeParse(ListReposParamsSchema, params)
-        if (paramsResult.error) return paramsResult
+        const validated = safeParse(ListReposParamsSchema, params)
+        if (validated.error) return validated
       }
 
       const query = params
@@ -27,11 +24,13 @@ export function listRepos(ctx: GitHubContext) {
             Object.entries(params)
               .filter(([, v]) => v !== undefined)
               .map(([k, v]) => [k, String(v)]),
-          ).toString()}`
+          )}`
         : ''
 
-      const response = await ctx.request<unknown>(`/user/repos${query}`)
-      return safeParse(z.array(RepositorySchema), response)
+      return safeParse(
+        z.array(RepositorySchema),
+        await ctx.request(`/user/repos${query}`),
+      )
     } catch (e) {
       return fail(e)
     }

@@ -10,6 +10,7 @@ export default defineWorkspace(
           'src/types/index.ts',
           'src/utils/index.ts',
           'src/oauth/index.ts',
+          'src/provider/index.ts',
         ],
       },
     },

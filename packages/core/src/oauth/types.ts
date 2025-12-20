@@ -26,12 +26,12 @@ export type OAuthProviderConfig = {
   redirectUri: string
   /** OAuth scopes */
   scopes?: string[]
-  /** How to send client credentials: 'body' or 'header' (default: 'body') */
+  /** How to send client credentials: 'body' | 'header' (default: 'body') */
   authMethod?: 'body' | 'header'
 }
 
 /**
- * Storage adapter interface (subset for OAuth)
+ * Minimal storage interface for OAuth (compatible with StorageAdapter)
  */
 export type OAuthStorage = {
   get: <T = unknown>(key: string) => Promise<T | null>
@@ -57,30 +57,16 @@ export type OAuthHandler = {
     state?: string
     scopes?: string[]
   }) => Promise<{ url: string; state: string }>
-
   /** Exchange authorization code for tokens */
   exchangeCode: (code: string, state: string) => Promise<OAuthTokens>
-
   /** Refresh access token using refresh token */
   refreshAccessToken: (refreshToken: string) => Promise<OAuthTokens>
-
   /** Get stored tokens (auto-refreshes if expired) */
   getTokens: (key: string) => Promise<OAuthTokens | null>
-
   /** Store tokens */
   storeTokens: (key: string, tokens: OAuthTokens, ttl?: number) => Promise<void>
-
   /** Delete stored tokens */
   deleteTokens: (key: string) => Promise<void>
-
   /** Check if tokens exist and are valid */
   hasValidTokens: (key: string) => Promise<boolean>
-}
-
-/**
- * OAuth callback handler result
- */
-export type OAuthCallbackResult = {
-  tokens: OAuthTokens
-  state: string
 }

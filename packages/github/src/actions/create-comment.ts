@@ -1,6 +1,5 @@
-import type { Result } from '@triggerskit/core/types'
+import type { ActionContext, Result } from '@triggerskit/core/types'
 import { fail, safeParse } from '@triggerskit/core/utils'
-import type { GitHubContext } from '..'
 import {
   type Comment,
   CommentSchema,
@@ -10,27 +9,26 @@ import {
 
 export type CreateCommentData = Comment
 
-/**
- * Create a comment on an issue
- */
-export function createComment(ctx: GitHubContext) {
+/** Create a comment on an issue */
+export function createComment(ctx: ActionContext) {
   return async (
     params: CreateCommentParams,
   ): Promise<Result<CreateCommentData>> => {
     try {
-      const paramsResult = safeParse(CreateCommentParamsSchema, params)
-      if (paramsResult.error) return paramsResult
+      const validated = safeParse(CreateCommentParamsSchema, params)
+      if (validated.error) return validated
 
-      const { owner, repo, issue_number, body } = paramsResult.data
-      const response = await ctx.request<unknown>(
-        `/repos/${owner}/${repo}/issues/${issue_number}/comments`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ body }),
-        },
+      const { owner, repo, issue_number, body } = validated.data
+      return safeParse(
+        CommentSchema,
+        await ctx.request(
+          `/repos/${owner}/${repo}/issues/${issue_number}/comments`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ body }),
+          },
+        ),
       )
-
-      return safeParse(CommentSchema, response)
     } catch (e) {
       return fail(e)
     }
