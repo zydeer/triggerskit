@@ -93,7 +93,6 @@ async function requestTokens(
   return normalizeTokens(await response.json())
 }
 
-/** Create an OAuth 2.0 client */
 export function createOAuthClient(
   config: OAuthConfig,
   storage: Storage,
