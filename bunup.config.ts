@@ -12,10 +12,17 @@ export default defineWorkspace(
     {
       name: 'triggerskit',
       root: 'packages/triggerskit',
+      config: {
+        entry: ['src/index.ts', 'src/storage/index.ts'],
+      },
     },
     {
       name: 'telegram',
       root: 'packages/telegram',
+    },
+    {
+      name: 'github',
+      root: 'packages/github',
     },
   ],
   {
