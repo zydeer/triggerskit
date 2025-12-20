@@ -6,14 +6,21 @@ Below are the concepts. Fully type-safe end to end.
 import { triggers } from 'triggerskit'
 import { redis } from 'triggerskit/storage'
 import { logger } from 'triggerskit/plugins'
+import { telegram } from '@triggerskit/telegram'
+import { github } from '@triggerskit/github'
+
+const storage = redis({ url: process.env.REDIS_URL })
 
 export const kit = triggers({
   providers: {
     prettyBot: telegram({
       token: process.env.TELEGRAM_TOKEN,
     }),
+    gh: github({
+      token: process.env.GITHUB_TOKEN,
+      storage,
+    }),
   },
-  storage: redis({ url: process.env.REDIS_URL }),
   plugins: [logger()],
 })
 
