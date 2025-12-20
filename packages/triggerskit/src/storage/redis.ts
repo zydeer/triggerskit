@@ -1,26 +1,38 @@
-import type { StorageAdapter } from './types'
+import type { Storage } from '@triggerskit/core'
 
-export type RedisClient = {
-  get: (key: string) => Promise<string | null>
-  set: (
-    key: string,
-    value: string,
-    options?: { EX?: number },
-  ) => Promise<unknown>
-  del: (key: string) => Promise<number>
-  exists: (key: string) => Promise<number>
+/** Minimal Redis client interface - works with 'redis', 'ioredis', or compatible clients */
+export interface RedisClient {
+  get(key: string): Promise<string | null>
+  set(key: string, value: string, options?: { EX?: number }): Promise<unknown>
+  del(key: string): Promise<number>
+  exists(key: string): Promise<number>
 }
 
-export type RedisStorageConfig = {
-  /** Redis client instance (from 'redis', 'ioredis', or compatible) */
+export interface RedisStorageOptions {
   client: RedisClient
-  /** Key prefix (default: 'triggerskit') */
   prefix?: string
 }
 
-/** Redis storage adapter - works with any compatible Redis client */
-export function redis(config: RedisStorageConfig): StorageAdapter {
-  const { client, prefix = 'triggerskit' } = config
+/**
+ * Redis storage adapter for production use.
+ *
+ * @example
+ * ```ts
+ * import { createClient } from 'redis'
+ *
+ * const client = createClient()
+ * await client.connect()
+ *
+ * const storage = redis({ client })
+ *
+ * const gh = github({
+ *   oauth: { clientId: '...', clientSecret: '...', redirectUri: '...' },
+ *   storage,
+ * })
+ * ```
+ */
+export function redis(options: RedisStorageOptions): Storage {
+  const { client, prefix = 'triggerskit' } = options
   const key = (k: string) => `${prefix}:${k}`
 
   return {
@@ -36,9 +48,11 @@ export function redis(config: RedisStorageConfig): StorageAdapter {
 
     async set<T>(k: string, value: T, ttl?: number): Promise<void> {
       const data = JSON.stringify(value)
-      await (ttl
-        ? client.set(key(k), data, { EX: ttl })
-        : client.set(key(k), data))
+      if (ttl) {
+        await client.set(key(k), data, { EX: ttl })
+      } else {
+        await client.set(key(k), data)
+      }
     },
 
     async delete(k: string): Promise<void> {

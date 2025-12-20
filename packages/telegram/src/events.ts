@@ -1,8 +1,7 @@
+import type { EventMap } from '@triggerskit/core'
 import type { Message } from './schemas'
 
-export type TelegramEventMap = {
+export interface TelegramEvents extends EventMap {
   /** New incoming message */
   message: Message
 }
-
-export type TelegramEvent = keyof TelegramEventMap

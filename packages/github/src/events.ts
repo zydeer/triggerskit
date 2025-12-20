@@ -1,3 +1,4 @@
+import type { EventMap } from '@triggerskit/core'
 import type {
   IssuesEvent,
   PullRequestEvent,
@@ -5,7 +6,7 @@ import type {
   WebhookEvent,
 } from './schemas'
 
-export type GitHubEventMap = {
+export interface GitHubEvents extends EventMap {
   /** Push event - commits pushed to a repository */
   push: PushEvent
   /** Issues event - issue opened, closed, edited, etc. */
@@ -15,5 +16,3 @@ export type GitHubEventMap = {
   /** Generic webhook event for unhandled types */
   webhook: WebhookEvent
 }
-
-export type GitHubEvent = keyof GitHubEventMap

@@ -1,34 +1,18 @@
 {
   "name": "@triggerskit/core",
-  "description": "Shared utilities and functions for TriggersKit",
+  "description": "Core utilities for TriggersKit providers",
   "version": "0.1.15",
   "type": "module",
   "files": [
     "dist"
   ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "./types": {
+    ".": {
       "import": {
-        "types": "./dist/types/index.d.ts",
-        "default": "./dist/types/index.js"
-      }
-    },
-    "./utils": {
-      "import": {
-        "types": "./dist/utils/index.d.ts",
-        "default": "./dist/utils/index.js"
-      }
-    },
-    "./oauth": {
-      "import": {
-        "types": "./dist/oauth/index.d.ts",
-        "default": "./dist/oauth/index.js"
-      }
-    },
-    "./provider": {
-      "import": {
-        "types": "./dist/provider/index.d.ts",
-        "default": "./dist/provider/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./package.json": "./package.json"
@@ -37,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/zydeer/triggerskit.git"
   },
-  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
+  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/core#readme",
   "license": "MIT",
   "dependencies": {
     "zod": "^4.2.1"

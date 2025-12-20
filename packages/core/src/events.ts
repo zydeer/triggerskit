@@ -1,24 +1,26 @@
-export type EventMap = Record<string, unknown>
+/** Map of event names to their payload types */
+export type EventMap = { [key: string]: unknown }
 
+/** Event handler function */
 export type EventHandler<T> = (payload: T) => void | Promise<void>
 
+/** Unsubscribe function returned when registering an event handler */
 export type Unsubscribe = () => void
 
-export type EventEmitter<TEvents extends EventMap> = {
-  emit: <K extends keyof TEvents>(event: K, payload: TEvents[K]) => void
-}
-
-export type EventListener<TEvents extends EventMap> = {
-  on: <K extends keyof TEvents>(
+export interface EventEmitter<TEvents extends EventMap> {
+  /** Subscribe to an event */
+  on<K extends keyof TEvents>(
     event: K,
     handler: EventHandler<TEvents[K]>,
-  ) => Unsubscribe
+  ): Unsubscribe
+  /** Emit an event to all subscribers */
+  emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void
 }
 
-export type Events<TEvents extends EventMap> = EventEmitter<TEvents> &
-  EventListener<TEvents>
-
-export function createEvents<TEvents extends EventMap>(): Events<TEvents> {
+/** Create a typed event emitter */
+export function createEmitter<
+  TEvents extends EventMap,
+>(): EventEmitter<TEvents> {
   const handlers = new Map<keyof TEvents, Set<EventHandler<unknown>>>()
 
   return {
@@ -32,7 +34,7 @@ export function createEvents<TEvents extends EventMap>(): Events<TEvents> {
         handlers.set(event, set)
       }
       set.add(handler as EventHandler<unknown>)
-      return () => handlers.get(event)?.delete(handler as EventHandler<unknown>)
+      return () => set?.delete(handler as EventHandler<unknown>)
     },
 
     emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void {

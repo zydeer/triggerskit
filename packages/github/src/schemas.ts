@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-// === User ===
 export const UserSchema = z.object({
   login: z.string(),
   id: z.number(),
@@ -27,7 +26,6 @@ export const UserSchema = z.object({
 })
 export type User = z.infer<typeof UserSchema>
 
-// === Repository ===
 export const RepositorySchema = z.object({
   id: z.number(),
   node_id: z.string(),
@@ -57,7 +55,6 @@ export const RepositorySchema = z.object({
 })
 export type Repository = z.infer<typeof RepositorySchema>
 
-// === Issue ===
 export const LabelSchema = z.object({
   id: z.number(),
   node_id: z.string(),
@@ -105,7 +102,6 @@ export const IssueSchema = z.object({
 })
 export type Issue = z.infer<typeof IssueSchema>
 
-// === Pull Request ===
 export const PullRequestSchema = z.object({
   id: z.number(),
   node_id: z.string(),
@@ -135,7 +131,6 @@ export const PullRequestSchema = z.object({
 })
 export type PullRequest = z.infer<typeof PullRequestSchema>
 
-// === Webhook Events ===
 export const WebhookEventSchema = z.object({
   action: z.string().optional(),
   sender: UserSchema.optional(),
@@ -223,7 +218,6 @@ export const PullRequestEventSchema = WebhookEventSchema.extend({
 })
 export type PullRequestEvent = z.infer<typeof PullRequestEventSchema>
 
-// Action Params
 export const CreateIssueParamsSchema = z.object({
   owner: z.string(),
   repo: z.string(),

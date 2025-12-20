@@ -1,3 +1,3 @@
-export { memory } from './memory'
-export { type RedisClient, type RedisStorageConfig, redis } from './redis'
-export { type ScopedStorage, type StorageAdapter, scopedStorage } from './types'
+export { type MemoryStorageOptions, memory } from './memory'
+export { type RedisClient, type RedisStorageOptions, redis } from './redis'
+export { type NamespacedStorage, type Storage, withNamespace } from './types'

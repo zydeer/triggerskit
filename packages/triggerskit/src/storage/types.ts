@@ -1,36 +1,25 @@
-/**
- * Storage adapter interface
- * Minimal interface for persisting provider state (tokens, etc.)
- */
-export type StorageAdapter = {
-  /** Get a value by key */
-  get: <T = unknown>(key: string) => Promise<T | null>
-  /** Set a value with optional TTL in seconds */
-  set: <T = unknown>(key: string, value: T, ttl?: number) => Promise<void>
-  /** Delete a value by key */
-  delete: (key: string) => Promise<void>
-  /** Check if a key exists */
-  has: (key: string) => Promise<boolean>
-}
+import type { Storage } from '@triggerskit/core'
 
-/** Scoped storage - namespaces keys under a prefix */
-export type ScopedStorage = StorageAdapter & {
+export type { Storage }
+
+/** Storage with a namespace prefix for all keys */
+export type NamespacedStorage = Storage & {
   readonly namespace: string
 }
 
-/** Creates a scoped storage adapter that namespaces all keys */
-export function scopedStorage(
-  adapter: StorageAdapter,
+/** Create a namespaced storage that prefixes all keys */
+export function withNamespace(
+  storage: Storage,
   namespace: string,
-): ScopedStorage {
+): NamespacedStorage {
   const prefix = (key: string) => `${namespace}:${key}`
 
   return {
     namespace,
-    get: <T>(key: string) => adapter.get<T>(prefix(key)),
+    get: <T>(key: string) => storage.get<T>(prefix(key)),
     set: <T>(key: string, value: T, ttl?: number) =>
-      adapter.set(prefix(key), value, ttl),
-    delete: (key: string) => adapter.delete(prefix(key)),
-    has: (key: string) => adapter.has(prefix(key)),
+      storage.set(prefix(key), value, ttl),
+    delete: (key: string) => storage.delete(prefix(key)),
+    has: (key: string) => storage.has(prefix(key)),
   }
 }

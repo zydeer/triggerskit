@@ -1,29 +1,46 @@
-import type { StorageAdapter } from './types'
+import type { Storage } from '@triggerskit/core'
 
-type Entry = { value: unknown; expiresAt: number | null }
+interface Entry {
+  value: unknown
+  expiresAt: number | null
+}
 
-export type MemoryStorageConfig = {
-  /** Cleanup interval in ms (default: 60000) */
+export interface MemoryStorageOptions {
   cleanupInterval?: number
 }
 
-/** In-memory storage adapter for development and testing */
-export function memory(config: MemoryStorageConfig = {}): StorageAdapter {
+/**
+ * In-memory storage adapter for development and testing.
+ *
+ * @example
+ * ```ts
+ * const storage = memory()
+ *
+ * const gh = github({
+ *   oauth: { clientId: '...', clientSecret: '...', redirectUri: '...' },
+ *   storage,
+ * })
+ * ```
+ */
+export function memory(options: MemoryStorageOptions = {}): Storage {
   const store = new Map<string, Entry>()
-  const { cleanupInterval = 60000 } = config
+  const { cleanupInterval = 60000 } = options
 
-  // Periodic cleanup
   const interval = setInterval(() => {
     const now = Date.now()
     for (const [key, entry] of store) {
-      if (entry.expiresAt !== null && entry.expiresAt <= now) store.delete(key)
+      if (entry.expiresAt !== null && entry.expiresAt <= now) {
+        store.delete(key)
+      }
     }
   }, cleanupInterval)
 
-  if (typeof interval.unref === 'function') interval.unref()
+  if (typeof interval.unref === 'function') {
+    interval.unref()
+  }
 
-  const isExpired = (e: Entry) =>
-    e.expiresAt !== null && e.expiresAt <= Date.now()
+  const isExpired = (entry: Entry) =>
+    entry.expiresAt !== null && entry.expiresAt <= Date.now()
 
   return {
     async get<T>(key: string): Promise<T | null> {
@@ -36,7 +53,10 @@ export function memory(config: MemoryStorageConfig = {}): StorageAdapter {
     },
 
     async set<T>(key: string, value: T, ttl?: number): Promise<void> {
-      store.set(key, { value, expiresAt: ttl ? Date.now() + ttl * 1000 : null })
+      store.set(key, {
+        value,
+        expiresAt: ttl ? Date.now() + ttl * 1000 : null,
+      })
     },
 
     async delete(key: string): Promise<void> {
