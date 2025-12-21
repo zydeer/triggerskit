@@ -1,7 +1,6 @@
 import { fail, type OAuthClient, ok, type Result } from '@triggerskit/core'
 import type { GitHubOAuth } from './types'
 
-/** Create GitHub OAuth utilities from core OAuth client */
 export function createGitHubOAuth(
   client: OAuthClient,
   tokenKey: string,

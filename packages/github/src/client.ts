@@ -11,7 +11,6 @@ export interface GitHubClientOptions {
   oauthClient?: OAuthClient
 }
 
-/** Create a configured HTTP client for GitHub API */
 export function createGitHubClient(options: GitHubClientOptions): HttpClient {
   const { config, tokenKey, oauthClient } = options
   const baseUrl = config.baseUrl ?? 'https://api.github.com'

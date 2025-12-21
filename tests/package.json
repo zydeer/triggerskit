@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "triggerskit": "workspace:*",
-    "@triggerskit/telegram": "workspace:*"
+    "@triggerskit/telegram": "workspace:*",
+    "@triggerskit/github": "workspace:*"
   }
 }

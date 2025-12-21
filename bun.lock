@@ -54,6 +54,7 @@
     "tests": {
       "name": "test",
       "dependencies": {
+        "@triggerskit/github": "workspace:*",
         "@triggerskit/telegram": "workspace:*",
         "triggerskit": "workspace:*",
       },

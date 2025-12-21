@@ -9,33 +9,6 @@ import { createWebhookHandler, detectGitHub } from './webhook'
 const GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize'
 const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
-/**
- * Create a GitHub provider instance.
- *
- * @example
- * ```ts
- * // With personal access token
- * const gh = github({ token: 'ghp_xxxx' })
- *
- * // With OAuth
- * const gh = github({
- *   oauth: {
- *     clientId: 'xxx',
- *     clientSecret: 'xxx',
- *     redirectUri: 'https://example.com/callback',
- *   },
- *   storage: memory(),
- * })
- *
- * // Get user info
- * const user = await gh.actions.getUser()
- *
- * // Listen for push events
- * gh.on('push', (event) => {
- *   console.log('New push:', event.commits.length, 'commits')
- * })
- * ```
- */
 export function github(config: GitHubConfig): GitHubProvider {
   const tokenKey = config.tokenKey ?? 'default'
 

@@ -11,26 +11,61 @@ export const kit = triggers({
       token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
     }),
     gh: github({
-      token: '',
+      oauth: {
+        clientId: 'Ov23liiPYTB16I9Yfwxe',
+        clientSecret: '36affd5a5e7b12b06626d337d5a8b4516f01d4d8',
+        redirectUri: 'http://localhost:3000/auth/callback',
+      },
       storage,
     }),
   },
 })
 
-Bun.serve({
+const result = Bun.serve({
   routes: {
     '/': {
       GET: async () => {
         const result = await kit.gh.actions.getRepo({
-          owner: 'bunup',
-          repo: 'bunup',
+          owner: 'arshad-yaseen',
+          repo: 'yuku',
         })
 
         if (!result.ok) {
           return new Response(result.error.message)
         }
 
-        return Response.json(result.data)
+        return Response.json(result.data.language)
+      },
+    },
+    '/auth': {
+      GET: async () => {
+        const result = await kit.gh.oauth?.getAuthUrl({
+          scopes: ['repo'],
+          state: 'random_state',
+        })
+
+        if (!result) {
+          return new Response('Failed to generate auth URL')
+        }
+
+        return Response.redirect(result.url)
+      },
+    },
+    '/auth/callback': {
+      GET: async (request) => {
+        const { code } = Object.fromEntries(new URL(request.url).searchParams)
+
+        const result = await kit.gh.oauth?.handleCallback(code, 'random_state')
+
+        if (!result) {
+          return new Response('Failed to handle callback')
+        }
+
+        if (!result.ok) {
+          return new Response(result.error.message)
+        }
+
+        return Response.redirect('/')
       },
     },
     '/me': {
@@ -98,4 +133,4 @@ Bun.serve({
   },
 })
 
-console.log('Test server is running on http://localhost:4000')
+console.log(`Test server is running on http://localhost:${result.port}`)
