@@ -58,14 +58,12 @@ const result = Bun.serve({
       GET: async (request) => {
         const { code } = Object.fromEntries(new URL(request.url).searchParams)
 
-        const result = await kit.gh.oauth.handleCallback(code, 'random_state')
+        const state = request.cookies.get('auth_state')!
+
+        const result = await kit.gh.oauth.handleCallback(code, state)
 
         if (!result.ok) {
           return new Response(result.error.message)
-        }
-
-        if (!result.data.success) {
-          return new Response('Failed to authenticate')
         }
 
         return Response.redirect('/')

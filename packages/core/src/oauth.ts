@@ -3,26 +3,41 @@ import { err, ok } from './result'
 import type { Storage } from './storage'
 
 export interface OAuthTokens {
+  /** The access token for API requests */
   accessToken: string
+  /** Optional refresh token for obtaining new access tokens */
   refreshToken?: string
+  /** Token expiration time in seconds */
   expiresIn?: number
+  /** Absolute timestamp (ms) when the token expires */
   expiresAt?: number
+  /** Token type (usually 'Bearer') */
   tokenType?: string
+  /** Space-delimited list of granted scopes */
   scope?: string
-  [key: string]: unknown
 }
 
 /**
  * Defines how to perform OAuth for a specific provider.
  */
 export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
-  /** Build the authorization URL users will be redirected to. */
+  /**
+   * Build the authorization URL users will be redirected to.
+   * @param state - The state parameter for CSRF protection
+   * @param scopes - Optional array of OAuth scopes to request
+   */
   getAuthorizationUrl(state: string, scopes?: string[]): string
 
-  /** Exchange the authorization code for tokens. */
+  /**
+   * Exchange the authorization code for tokens.
+   * @param code - The authorization code from the OAuth callback
+   */
   exchangeCode(code: string): Promise<TTokens>
 
-  /** Refresh an expired token. Optional - not all providers support refresh. */
+  /**
+   * Refresh an expired token. Optional - not all providers support refresh.
+   * @param refreshToken - The refresh token to use
+   */
   refreshToken?(refreshToken: string): Promise<TTokens>
 }
 
@@ -30,13 +45,27 @@ export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
  * OAuth interface returned by createOAuth.
  */
 export interface OAuth<TTokens extends OAuthTokens = OAuthTokens> {
-  /** Get the authorization URL to redirect users to. */
+  /**
+   * Get the authorization URL to redirect users to.
+   *
+   * @param options - Optional configuration
+   * @param options.state - Custom state value for CSRF protection. Auto-generated if not provided.
+   * @param options.scopes - OAuth scopes to request. Provider-specific.
+   * @returns Object containing:
+   *   - `url`: The full authorization URL to redirect the user to
+   *   - `state`: The state value to verify on callback
+   */
   getAuthUrl(options?: {
     state?: string
     scopes?: string[]
   }): Promise<{ url: string; state: string }>
 
-  /** Handle the OAuth callback. Call this when the user returns with a code. */
+  /**
+   * Handle the OAuth callback. Call this when the user returns with a code.
+   * @param code - The authorization code from the OAuth provider
+   * @param state - The state value to verify against stored state
+   * @returns Result indicating success or error with message
+   */
   handleCallback(
     code: string,
     state: string,
@@ -54,14 +83,21 @@ export interface OAuth<TTokens extends OAuthTokens = OAuthTokens> {
   /** Get all stored tokens. */
   getTokens(): Promise<TTokens | null>
 
-  /** Store tokens manually. */
+  /**
+   * Store tokens manually.
+   * @param tokens - The OAuth tokens to store
+   */
   storeTokens(tokens: TTokens): Promise<void>
 }
 
 export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
+  /** The OAuth flow implementation for the provider */
   flow: OAuthFlow<TTokens>
+  /** Storage backend for tokens and state */
   storage: Storage
+  /** Namespace for storage keys to avoid collisions */
   namespace: string
+  /** Custom key for storing tokens (defaults to 'default') */
   tokenKey?: string
 }
 
@@ -163,11 +199,17 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
 }
 
 interface StandardOAuthConfig {
+  /** OAuth client ID from the provider */
   clientId: string
+  /** OAuth client secret from the provider */
   clientSecret: string
+  /** Redirect URI registered with the provider */
   redirectUri: string
+  /** Provider's authorization endpoint URL */
   authUrl: string
+  /** Provider's token exchange endpoint URL */
   tokenUrl: string
+  /** Default scopes to request */
   scopes?: string[]
 }
 
