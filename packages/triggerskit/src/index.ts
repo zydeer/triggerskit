@@ -6,10 +6,8 @@ import {
   type WebhookPayload,
 } from '@triggerskit/core'
 
-/** Map of provider name to provider instance */
 export type Providers = Record<string, Provider>
 
-/** Webhook result with provider identification */
 export type WebhookResult<T extends Providers> = {
   [K in keyof T & string]: {
     provider: K
@@ -64,33 +62,6 @@ function createWebhookHandler<T extends Providers>(providers: T) {
   }
 }
 
-/**
- * Create a unified TriggersKit instance from multiple providers.
- *
- * @example
- * ```ts
- * import { triggers } from 'triggerskit'
- * import { telegram } from '@triggerskit/telegram'
- * import { github } from '@triggerskit/github'
- *
- * const kit = triggers({
- *   providers: {
- *     telegram: telegram({ token: 'BOT_TOKEN' }),
- *     github: github({ token: 'ghp_xxxx' }),
- *   }
- * })
- *
- * // Access providers directly
- * await kit.telegram.actions.sendMessage({ chat_id: 123, text: 'Hi!' })
- * await kit.github.actions.getUser()
- *
- * // Handle webhooks from any provider
- * const result = await kit.handle(request)
- * if (result.ok) {
- *   console.log(`Received webhook from ${result.data.provider}`)
- * }
- * ```
- */
 export function triggers<T extends Providers>(config: {
   providers: T
 }): TriggersKit<T> {

@@ -1,7 +1,3 @@
-/**
- * Minimal storage interface for persisting state (tokens, sessions, etc.)
- * Compatible with Redis, memory stores, or any key-value storage.
- */
 export interface Storage {
   get<T = unknown>(key: string): Promise<T | null>
   set<T = unknown>(key: string, value: T, ttl?: number): Promise<void>

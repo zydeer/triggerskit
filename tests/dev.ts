@@ -1,10 +1,18 @@
+import { github } from '@triggerskit/github'
 import { telegram } from '@triggerskit/telegram'
 import { triggers } from 'triggerskit'
+import { memory } from 'triggerskit/storage'
+
+const storage = memory()
 
 export const kit = triggers({
   providers: {
     prettyBot: telegram({
       token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
+    }),
+    gh: github({
+      token: process.env.GITHUB_TOKEN,
+      storage,
     }),
   },
 })

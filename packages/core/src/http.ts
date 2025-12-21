@@ -15,7 +15,6 @@ export type HttpClient = <T = unknown>(
   init?: RequestInit,
 ) => Promise<T>
 
-/** Throwable error that wraps TKError for HTTP operations */
 export class HttpError extends Error {
   readonly error: TKError
 
@@ -26,7 +25,6 @@ export class HttpError extends Error {
   }
 }
 
-/** Create an HTTP client with configured defaults */
 export function createHttpClient(config: HttpClientConfig): HttpClient {
   const {
     baseUrl,

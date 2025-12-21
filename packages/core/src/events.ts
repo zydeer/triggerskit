@@ -1,10 +1,7 @@
-/** Map of event names to their payload types */
 export type EventMap = { [key: string]: unknown }
 
-/** Event handler function */
 export type EventHandler<T> = (payload: T) => void | Promise<void>
 
-/** Unsubscribe function returned when registering an event handler */
 export type Unsubscribe = () => void
 
 export interface EventEmitter<TEvents extends EventMap> {
@@ -17,7 +14,6 @@ export interface EventEmitter<TEvents extends EventMap> {
   emit<K extends keyof TEvents>(event: K, payload: TEvents[K]): void
 }
 
-/** Create a typed event emitter */
 export function createEmitter<
   TEvents extends EventMap,
 >(): EventEmitter<TEvents> {

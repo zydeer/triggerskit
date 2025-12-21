@@ -2,7 +2,6 @@ import type { EventHandler, EventMap, Unsubscribe } from './events'
 import type { HttpClient } from './http'
 import type { Result } from './result'
 
-/** Context passed to webhook detection */
 export interface WebhookContext {
   headers: Headers
   body: unknown
