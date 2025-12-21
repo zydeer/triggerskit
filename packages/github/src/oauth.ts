@@ -11,7 +11,7 @@ export type GitHubOAuth = OAuth
 export function createGitHubOAuth(
   config: GitHubOAuthConfig,
   storage: Storage,
-  tokenKey = 'default',
+  userId: string,
 ): GitHubOAuth {
   return createOAuth({
     flow: standardOAuthFlow({
@@ -24,6 +24,6 @@ export function createGitHubOAuth(
     }),
     storage,
     namespace: 'github',
-    tokenKey,
+    tokenKey: userId,
   })
 }

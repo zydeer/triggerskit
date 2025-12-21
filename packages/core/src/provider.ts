@@ -19,7 +19,7 @@ export type ActionsMap = {
 }
 
 /**
- * Base provider interface for all integrations.
+ * Base provider interface (token-based auth).
  */
 export interface Provider<
   TName extends string = string,
@@ -41,7 +41,8 @@ export interface Provider<
 }
 
 /**
- * Provider with OAuth support.
+ * Provider with OAuth support (multi-user).
+ * Use forUser(userId) to get authenticated actions - root-level actions/http are not available.
  */
 export interface OAuthProvider<
   TName extends string = string,
@@ -52,8 +53,31 @@ export interface OAuthProvider<
     ProviderWebhooks<TWebhookPayload> = ProviderWebhooks<TWebhookPayload>,
   TTokens extends OAuthTokens = OAuthTokens,
   TOAuth extends OAuth<TTokens> = OAuth<TTokens>,
-> extends Provider<TName, TActions, TEvents, TWebhookPayload, TWebhooks> {
-  readonly oauth: TOAuth
+> {
+  readonly name: TName
+  readonly webhooks: TWebhooks
+  readonly on: <K extends keyof TEvents>(
+    event: K,
+    handler: EventHandler<TEvents[K]>,
+  ) => Unsubscribe
+  detect(ctx: WebhookContext): boolean | Promise<boolean>
+
+  /**
+   * Get a user-scoped client with OAuth tokens.
+   *
+   * @example
+   * ```ts
+   * const user = kit.gh.forUser(session.userId)
+   * if (await user.oauth.isAuthenticated()) {
+   *   const repos = await user.actions.listRepos()
+   * }
+   * ```
+   */
+  forUser(userId: string): {
+    readonly actions: TActions
+    readonly oauth: TOAuth
+    readonly http: HttpClient
+  }
 }
 
 export type WebhookPayload<T> =

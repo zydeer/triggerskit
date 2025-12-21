@@ -102,13 +102,13 @@ export interface SlackOAuth extends OAuth<SlackTokens> {
 export function createSlackOAuth(
   config: SlackOAuthConfig,
   storage: Storage,
-  tokenKey = 'default',
+  userId: string,
 ): SlackOAuth {
   const oauth = createOAuth<SlackTokens>({
     flow: slackOAuthFlow(config),
     storage,
     namespace: 'slack',
-    tokenKey,
+    tokenKey: userId,
   })
 
   return {

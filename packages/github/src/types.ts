@@ -80,5 +80,3 @@ export type GitHubProviderWithToken = Provider<
   WebhookEvent,
   ProviderWebhooks<WebhookEvent>
 >
-
-export type GitHubProvider = GitHubProviderWithOAuth | GitHubProviderWithToken

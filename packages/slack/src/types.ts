@@ -84,5 +84,3 @@ export type SlackProviderWithToken = Provider<
   SlackEvent,
   ProviderWebhooks<SlackEvent>
 >
-
-export type SlackProvider = SlackProviderWithOAuth | SlackProviderWithToken

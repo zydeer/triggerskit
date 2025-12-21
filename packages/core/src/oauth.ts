@@ -95,17 +95,16 @@ export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
   flow: OAuthFlow<TTokens>
   /** Storage backend for tokens and state */
   storage: Storage
-  /** Namespace for storage keys to avoid collisions */
+  /** Namespace for storage keys (e.g., 'github', 'slack') */
   namespace: string
-  /** Custom key for storing tokens (defaults to 'default') */
-  tokenKey?: string
+  /** User ID for storing tokens (each user gets isolated tokens) */
+  tokenKey: string
 }
 
+/** Base configuration for OAuth providers */
 export interface BaseOAuthConfig {
   /** Storage backend for tokens */
   storage: Storage
-  /** Custom key for storing tokens (default varies by provider) */
-  tokenKey?: string
 }
 
 const STATE_TTL = 600
@@ -118,13 +117,10 @@ function generateState(): string {
   return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-/**
- * Create an OAuth handler from a flow definition.
- */
 export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
   options: OAuthOptions<TTokens>,
 ): OAuth<TTokens> {
-  const { flow, storage, namespace, tokenKey = 'default' } = options
+  const { flow, storage, namespace, tokenKey } = options
 
   const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
   const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
