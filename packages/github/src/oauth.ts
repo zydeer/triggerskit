@@ -14,17 +14,11 @@ export interface GitHubOAuthConfig {
 
 export type GitHubOAuth = OAuth
 
-export interface CreateGitHubOAuthOptions {
-  config: GitHubOAuthConfig
-  storage: Storage
-  tokenKey?: string
-}
-
 export function createGitHubOAuth(
-  options: CreateGitHubOAuthOptions,
+  config: GitHubOAuthConfig,
+  storage: Storage,
+  tokenKey = 'default',
 ): GitHubOAuth {
-  const { config, storage, tokenKey = 'default' } = options
-
   return createOAuth({
     flow: standardOAuthFlow({
       clientId: config.clientId,

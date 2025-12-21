@@ -5,14 +5,7 @@ import {
   type OAuthTokens,
   type Storage,
 } from '@triggerskit/core'
-
-export interface SlackOAuthConfig {
-  clientId: string
-  clientSecret: string
-  redirectUri: string
-  scopes?: string[]
-  userScopes?: string[]
-}
+import type { SlackOAuthConfig } from './types'
 
 export interface SlackTokens extends OAuthTokens {
   team?: { id: string; name: string }
@@ -106,15 +99,11 @@ export interface SlackOAuth extends OAuth<SlackTokens> {
   getUserToken(): Promise<string | null>
 }
 
-export interface CreateSlackOAuthOptions {
-  config: SlackOAuthConfig
-  storage: Storage
-  tokenKey?: string
-}
-
-export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
-  const { config, storage, tokenKey = 'default' } = options
-
+export function createSlackOAuth(
+  config: SlackOAuthConfig,
+  storage: Storage,
+  tokenKey = 'default',
+): SlackOAuth {
   const oauth = createOAuth<SlackTokens>({
     flow: slackOAuthFlow(config),
     storage,

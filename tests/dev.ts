@@ -45,7 +45,6 @@ const result = Bun.serve({
       GET: async () => {
         const result = await kit.gh.oauth.getAuthUrl({
           scopes: ['repo'],
-          state: 'random_state',
         })
 
         if (!result) {
@@ -59,14 +58,14 @@ const result = Bun.serve({
       GET: async (request) => {
         const { code } = Object.fromEntries(new URL(request.url).searchParams)
 
-        const result = await kit.gh.oauth?.handleCallback(code, 'random_state')
-
-        if (!result) {
-          return new Response('Failed to handle callback')
-        }
+        const result = await kit.gh.oauth.handleCallback(code, 'random_state')
 
         if (!result.ok) {
           return new Response(result.error.message)
+        }
+
+        if (!result.data.success) {
+          return new Response('Failed to authenticate')
         }
 
         return Response.redirect('/')

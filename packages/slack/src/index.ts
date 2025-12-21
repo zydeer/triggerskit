@@ -29,18 +29,18 @@ export function slack(
   }
 
   if ('oauth' in config && config.oauth && !config.storage) {
-    throw new TriggersError('OAuth config requires storage')
+    throw new TriggersError('Slack oauth config requires storage')
   }
 
   const emitter = createEmitter<SlackEvents>()
   const handleWebhook = createWebhookHandler(emitter, config.signingSecret)
 
   if ('oauth' in config && config.oauth && config.storage) {
-    const oauth = createSlackOAuth({
-      config: config.oauth,
-      storage: config.storage,
-      tokenKey: config.tokenKey,
-    })
+    const oauth = createSlackOAuth(
+      config.oauth,
+      config.storage,
+      config.tokenKey,
+    )
 
     const http = createSlackClient({ config, oauth })
 

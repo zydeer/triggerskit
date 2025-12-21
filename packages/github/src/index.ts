@@ -29,18 +29,18 @@ export function github(
   }
 
   if ('oauth' in config && config.oauth && !config.storage) {
-    throw new TriggersError('OAuth config requires storage')
+    throw new TriggersError('GitHub oauth config requires storage')
   }
 
   const emitter = createEmitter<GitHubEvents>()
   const handleWebhook = createWebhookHandler(emitter)
 
   if ('oauth' in config && config.oauth && config.storage) {
-    const oauth = createGitHubOAuth({
-      config: config.oauth,
-      storage: config.storage,
-      tokenKey: config.tokenKey,
-    })
+    const oauth = createGitHubOAuth(
+      config.oauth,
+      config.storage,
+      config.tokenKey,
+    )
 
     const http = createGitHubClient({
       config,
