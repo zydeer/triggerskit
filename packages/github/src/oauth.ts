@@ -4,13 +4,7 @@ import {
   type Storage,
   standardOAuthFlow,
 } from '@triggerskit/core'
-
-export interface GitHubOAuthConfig {
-  clientId: string
-  clientSecret: string
-  redirectUri: string
-  scopes?: string[]
-}
+import type { GitHubOAuthConfig } from './types'
 
 export type GitHubOAuth = OAuth
 
