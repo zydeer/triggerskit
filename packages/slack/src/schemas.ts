@@ -361,7 +361,7 @@ export const SlackEventSchema = z
         ReactionAddedEventSchema,
         ReactionRemovedEventSchema,
         MemberJoinedChannelEventSchema,
-        z.object({ type: z.string() }).passthrough(),
+        z.object({ type: z.string() }).loose(),
       ])
       .meta({ description: 'The actual event data.' }),
     type: z
@@ -448,6 +448,7 @@ export const PostMessageParamsSchema = z
   .object({
     channel: z
       .string()
+      .min(1)
       .meta({ description: 'Channel ID or name to post message to.' }),
     text: z
       .string()
@@ -486,7 +487,10 @@ export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>
  */
 export const GetUserInfoParamsSchema = z
   .object({
-    user: z.string().meta({ description: 'User ID to get information for.' }),
+    user: z
+      .string()
+      .min(1)
+      .meta({ description: 'User ID to get information for.' }),
   })
   .meta({
     description: 'Parameters for getting user information.',
@@ -508,7 +512,7 @@ export const ListConversationsParamsSchema = z
     exclude_archived: z.boolean().optional().meta({
       description: 'Whether to exclude archived channels (default: false).',
     }),
-    limit: z.number().optional().meta({
+    limit: z.number().min(1).max(1000).optional().meta({
       description:
         'Maximum number of results to return (default: 100, max: 1000).',
     }),
@@ -516,10 +520,13 @@ export const ListConversationsParamsSchema = z
       .string()
       .optional()
       .meta({ description: 'Team ID (for Enterprise Grid).' }),
-    types: z.string().optional().meta({
-      description:
-        'Comma-separated list of channel types (public_channel, private_channel, mpim, im).',
-    }),
+    types: z
+      .array(z.enum(['public_channel', 'private_channel', 'mpim', 'im']))
+      .optional()
+      .meta({
+        description:
+          'Array of channel types to include (public_channel, private_channel, mpim, im).',
+      }),
   })
   .meta({
     description: 'Parameters for listing conversations (channels).',

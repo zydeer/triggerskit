@@ -57,7 +57,13 @@ export function createActions(http: HttpClient): SlackActions {
         ? `?${new URLSearchParams(
             Object.entries(params).reduce(
               (acc, [key, value]) => {
-                if (value !== undefined) acc[key] = String(value)
+                if (value !== undefined) {
+                  if (key === 'types' && Array.isArray(value)) {
+                    acc[key] = value.join(',')
+                  } else {
+                    acc[key] = String(value)
+                  }
+                }
                 return acc
               },
               {} as Record<string, string>,

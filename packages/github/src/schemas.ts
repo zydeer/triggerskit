@@ -551,9 +551,10 @@ export const CreateIssueParamsSchema = z
   .object({
     owner: z
       .string()
+      .min(1)
       .meta({ description: 'Repository owner (username or organization).' }),
-    repo: z.string().meta({ description: 'Repository name.' }),
-    title: z.string().meta({ description: 'Issue title.' }),
+    repo: z.string().min(1).meta({ description: 'Repository name.' }),
+    title: z.string().min(1).meta({ description: 'Issue title.' }),
     body: z.string().optional().meta({ description: 'Issue body content.' }),
     assignees: z
       .array(z.string())
@@ -565,6 +566,7 @@ export const CreateIssueParamsSchema = z
       .meta({ description: 'Labels to apply to the issue.' }),
     milestone: z
       .number()
+      .positive()
       .optional()
       .meta({ description: 'Milestone number to associate with the issue.' }),
   })
@@ -619,8 +621,9 @@ export const GetRepoParamsSchema = z
   .object({
     owner: z
       .string()
+      .min(1)
       .meta({ description: 'Repository owner (username or organization).' }),
-    repo: z.string().meta({ description: 'Repository name.' }),
+    repo: z.string().min(1).meta({ description: 'Repository name.' }),
   })
   .meta({
     description: 'Parameters for getting a specific repository.',
@@ -637,12 +640,14 @@ export const CreateCommentParamsSchema = z
   .object({
     owner: z
       .string()
+      .min(1)
       .meta({ description: 'Repository owner (username or organization).' }),
-    repo: z.string().meta({ description: 'Repository name.' }),
+    repo: z.string().min(1).meta({ description: 'Repository name.' }),
     issue_number: z
       .number()
+      .positive()
       .meta({ description: 'Issue or pull request number.' }),
-    body: z.string().meta({ description: 'Comment body content.' }),
+    body: z.string().min(1).meta({ description: 'Comment body content.' }),
   })
   .meta({
     description:
