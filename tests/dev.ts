@@ -54,7 +54,12 @@ const result = Bun.serve({
       return Response.redirect(result.url)
     },
     '/auth/callback': async (req) => {
-      const { code } = Object.fromEntries(new URL(req.url).searchParams)
+      const url = new URL(req.url)
+      const code = url.searchParams.get('code')
+
+      if (!code) {
+        return new Response('Missing code', { status: 400 })
+      }
 
       const userGithub = kit.gh.forUser(USER_ID)
 
