@@ -1,11 +1,12 @@
 import type {
+  OAuthProvider,
   Provider,
   Result,
   WebhookContext,
   WebhookPayload,
 } from '@triggerskit/core'
 
-export type Providers = Record<string, Provider>
+export type Providers = Record<string, Provider | OAuthProvider>
 
 export type WebhookResult<T extends Providers> = {
   [K in keyof T & string]: {

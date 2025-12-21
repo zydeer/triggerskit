@@ -81,7 +81,11 @@ export interface OAuthProvider<
 }
 
 export type WebhookPayload<T> =
-  T extends Provider<string, any, EventMap, infer P> ? P : unknown
+  T extends Provider<string, any, EventMap, infer P>
+    ? P
+    : T extends OAuthProvider<string, any, EventMap, infer P>
+      ? P
+      : unknown
 
 export type ProviderActions<T> =
   T extends Provider<string, infer A, any> ? A : never
