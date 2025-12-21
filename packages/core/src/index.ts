@@ -9,10 +9,16 @@ export type {
 export { createEmitter } from './events'
 export type { HttpClient, HttpClientConfig, HttpMethod } from './http'
 export { createHttpClient, HttpError } from './http'
-export type { OAuthClient, OAuthConfig, OAuthTokens } from './oauth'
-export { createOAuthClient } from './oauth'
+export type {
+  BaseOAuth,
+  OAuthClient,
+  OAuthConfig,
+  OAuthTokens,
+} from './oauth'
+export { createOAuthClient, createProviderOAuth } from './oauth'
 export type {
   ActionsMap,
+  OAuthProvider,
   Provider,
   ProviderActions,
   ProviderEvents,

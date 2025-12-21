@@ -1,5 +1,6 @@
 import type { EventHandler, EventMap, Unsubscribe } from './events'
 import type { HttpClient } from './http'
+import type { BaseOAuth } from './oauth'
 import type { Result } from './result'
 
 export interface WebhookContext {
@@ -34,6 +35,18 @@ export interface Provider<
   ) => Unsubscribe
   readonly http: HttpClient
   detect(ctx: WebhookContext): boolean | Promise<boolean>
+}
+
+export interface OAuthProvider<
+  TName extends string = string,
+  TActions extends ActionsMap = ActionsMap,
+  TEvents extends EventMap = EventMap,
+  TWebhookPayload = unknown,
+  TWebhooks extends
+    ProviderWebhooks<TWebhookPayload> = ProviderWebhooks<TWebhookPayload>,
+  TOAuth extends BaseOAuth = BaseOAuth,
+> extends Provider<TName, TActions, TEvents, TWebhookPayload, TWebhooks> {
+  readonly oauth: TOAuth
 }
 
 export type WebhookPayload<T> =

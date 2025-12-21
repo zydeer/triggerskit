@@ -1,5 +1,7 @@
 import type {
   ActionsMap,
+  BaseOAuth,
+  OAuthProvider,
   Provider,
   ProviderWebhooks,
   Result,
@@ -51,30 +53,22 @@ export interface GitHubActions extends ActionsMap {
   createComment(params: CreateCommentParams): Promise<Result<Comment>>
 }
 
-export interface GitHubOAuth {
-  /** Get authorization URL for OAuth flow */
-  getAuthUrl(options?: {
-    state?: string
-    scopes?: string[]
-  }): Promise<{ url: string; state: string }>
-  /** Handle OAuth callback - exchange code for tokens */
-  handleCallback(
-    code: string,
-    state: string,
-  ): Promise<Result<{ success: true }>>
-  /** Check if OAuth tokens are available and valid */
-  isAuthenticated(): Promise<boolean>
-  /** Revoke/delete stored tokens */
-  revokeTokens(): Promise<void>
-}
+export type GitHubOAuth = BaseOAuth
 
-export type GitHubProvider = Provider<
-  'github',
-  GitHubActions,
-  GitHubEvents,
-  WebhookEvent,
-  ProviderWebhooks<WebhookEvent>
-> & {
-  /** OAuth utilities (when OAuth is configured) */
-  oauth?: GitHubOAuth
-}
+// GitHub can be used with or without OAuth
+export type GitHubProvider =
+  | OAuthProvider<
+      'github',
+      GitHubActions,
+      GitHubEvents,
+      WebhookEvent,
+      ProviderWebhooks<WebhookEvent>,
+      GitHubOAuth
+    >
+  | Provider<
+      'github',
+      GitHubActions,
+      GitHubEvents,
+      WebhookEvent,
+      ProviderWebhooks<WebhookEvent>
+    >
