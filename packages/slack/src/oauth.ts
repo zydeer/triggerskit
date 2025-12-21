@@ -96,9 +96,6 @@ function normalizeSlackTokens(data: any): SlackTokens {
   }
 }
 
-/**
- * Extended Slack OAuth with bot and user token access.
- */
 export interface SlackOAuth extends OAuth {
   /** Get the bot access token. */
   getBotToken(): Promise<string | null>
@@ -116,26 +113,6 @@ export interface CreateSlackOAuthOptions {
   tokenKey?: string
 }
 
-/**
- * Create a Slack OAuth handler.
- *
- * @example
- * ```ts
- * const oauth = createSlackOAuth({
- *   config: {
- *     clientId: 'xxx',
- *     clientSecret: 'xxx',
- *     redirectUri: 'https://app.com/callback',
- *     scopes: ['chat:write'],
- *   },
- *   storage: memoryStorage(),
- * })
- *
- * const { url } = await oauth.getAuthUrl()
- * await oauth.handleCallback(code, state)
- * const token = await oauth.getBotToken()
- * ```
- */
 export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
   const { config, storage, tokenKey = 'default' } = options
 

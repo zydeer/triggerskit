@@ -85,9 +85,6 @@ function generateState(): string {
   return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-/**
- * Normalize a snake_case token response to camelCase OAuthTokens.
- */
 export function normalizeTokens(data: any): OAuthTokens {
   const expiresIn =
     typeof data.expires_in === 'number' ? data.expires_in : undefined
@@ -194,19 +191,7 @@ export function createOAuth(options: OAuthOptions): OAuth {
 }
 
 /**
- * Create a standard OAuth 2.0 flow. Works for most providers.
- *
- * @example
- * ```ts
- * const flow = standardOAuthFlow({
- *   clientId: 'xxx',
- *   clientSecret: 'xxx',
- *   redirectUri: 'https://app.com/callback',
- *   authUrl: 'https://github.com/login/oauth/authorize',
- *   tokenUrl: 'https://github.com/login/oauth/access_token',
- *   scopes: ['repo', 'user'],
- * })
- * ```
+ * Create a standard OAuth 2.0 flow.
  */
 export function standardOAuthFlow(config: StandardOAuthConfig): OAuthFlow {
   const { clientId, clientSecret, redirectUri, authUrl, tokenUrl, scopes } =
