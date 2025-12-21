@@ -98,14 +98,3 @@ export function slack(
     detect: detectSlack,
   }
 }
-
-export type {
-  AppMentionEvent,
-  MemberJoinedChannelEvent,
-  Message,
-  MessageEvent,
-  ReactionAddedEvent,
-  ReactionRemovedEvent,
-  SlackEvent,
-  User,
-} from './schemas'

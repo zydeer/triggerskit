@@ -8,19 +8,13 @@ export { createEmitter } from './events'
 export type { HttpClient, HttpClientConfig, HttpMethod } from './http'
 export { createHttpClient } from './http'
 export type {
-  BaseOAuth,
+  OAuth,
   OAuthFlow,
   OAuthOptions,
   OAuthTokens,
-  OAuthWithTokens,
   StandardOAuthConfig,
 } from './oauth'
-export {
-  createOAuth,
-  createOAuthWithTokens,
-  normalizeTokens,
-  standardOAuthFlow,
-} from './oauth'
+export { createOAuth, normalizeTokens, standardOAuthFlow } from './oauth'
 export type {
   ActionsMap,
   OAuthProvider,

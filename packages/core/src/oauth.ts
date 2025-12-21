@@ -28,9 +28,9 @@ export interface OAuthFlow {
 }
 
 /**
- * Standard OAuth interface returned by createOAuth.
+ * OAuth interface returned by createOAuth.
  */
-export interface BaseOAuth {
+export interface OAuth {
   /** Get the authorization URL to redirect users to. */
   getAuthUrl(options?: {
     state?: string
@@ -48,12 +48,7 @@ export interface BaseOAuth {
 
   /** Delete stored tokens. */
   revokeTokens(): Promise<void>
-}
 
-/**
- * Extended OAuth interface with direct token access.
- */
-export interface OAuthWithTokens extends BaseOAuth {
   /** Get the current access token. Automatically refreshes if expired. */
   getAccessToken(): Promise<string | null>
 
@@ -120,85 +115,14 @@ export function normalizeTokens(data: Record<string, unknown>): OAuthTokens {
  *
  * const { url } = await oauth.getAuthUrl()
  * await oauth.handleCallback(code, state)
+ * const token = await oauth.getAccessToken()
  * ```
  */
-export function createOAuth(options: OAuthOptions): BaseOAuth {
+export function createOAuth(options: OAuthOptions): OAuth {
   const { flow, storage, namespace, tokenKey = 'default' } = options
 
   const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
   const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
-
-  return {
-    async getAuthUrl(options) {
-      const state = options?.state ?? generateState()
-      await storage.set(stateKey(state), { state, ts: Date.now() }, STATE_TTL)
-      const url = flow.getAuthorizationUrl(state, options?.scopes)
-      return { url, state }
-    },
-
-    async handleCallback(code, state) {
-      try {
-        const stored = await storage.get<{ state: string }>(stateKey(state))
-        if (!stored) {
-          return err({ message: 'Invalid or expired OAuth state' })
-        }
-
-        await storage.delete(stateKey(state))
-        const tokens = await flow.exchangeCode(code)
-        await storage.set(tokensKey(), tokens)
-
-        return ok({ success: true })
-      } catch (e) {
-        return fail(e)
-      }
-    },
-
-    async isAuthenticated() {
-      const tokens = await storage.get<OAuthTokens>(tokensKey())
-      if (!tokens) return false
-
-      if (tokens.expiresAt && tokens.expiresAt <= Date.now()) {
-        if (tokens.refreshToken && flow.refreshToken) {
-          try {
-            const newTokens = await flow.refreshToken(tokens.refreshToken)
-            await storage.set(tokensKey(), newTokens)
-            return true
-          } catch {
-            await storage.delete(tokensKey())
-            return false
-          }
-        }
-        await storage.delete(tokensKey())
-        return false
-      }
-
-      return true
-    },
-
-    async revokeTokens() {
-      await storage.delete(tokensKey())
-    },
-  }
-}
-
-/**
- * Create an OAuth handler with direct token access methods.
- *
- * @example
- * ```ts
- * const oauth = createOAuthWithTokens({
- *   flow: standardOAuthFlow({ ... }),
- *   storage: memoryStorage(),
- *   namespace: 'github',
- * })
- *
- * const token = await oauth.getAccessToken()
- * ```
- */
-export function createOAuthWithTokens(options: OAuthOptions): OAuthWithTokens {
-  const { flow, storage, namespace, tokenKey = 'default' } = options
-  const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
-  const baseOAuth = createOAuth(options)
 
   const getTokens = async (): Promise<OAuthTokens | null> => {
     const tokens = await storage.get<OAuthTokens>(tokensKey())
@@ -223,7 +147,38 @@ export function createOAuthWithTokens(options: OAuthOptions): OAuthWithTokens {
   }
 
   return {
-    ...baseOAuth,
+    async getAuthUrl(opts) {
+      const state = opts?.state ?? generateState()
+      await storage.set(stateKey(state), { state, ts: Date.now() }, STATE_TTL)
+      const url = flow.getAuthorizationUrl(state, opts?.scopes)
+      return { url, state }
+    },
+
+    async handleCallback(code, state) {
+      try {
+        const stored = await storage.get<{ state: string }>(stateKey(state))
+        if (!stored) {
+          return err({ message: 'Invalid or expired OAuth state' })
+        }
+
+        await storage.delete(stateKey(state))
+        const tokens = await flow.exchangeCode(code)
+        await storage.set(tokensKey(), tokens)
+
+        return ok({ success: true })
+      } catch (e) {
+        return fail(e)
+      }
+    },
+
+    async isAuthenticated() {
+      const tokens = await getTokens()
+      return tokens !== null
+    },
+
+    async revokeTokens() {
+      await storage.delete(tokensKey())
+    },
 
     async getAccessToken() {
       const tokens = await getTokens()

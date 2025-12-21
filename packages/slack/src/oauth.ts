@@ -1,7 +1,7 @@
 import {
-  type BaseOAuth,
-  createOAuthWithTokens,
+  createOAuth,
   normalizeTokens,
+  type OAuth,
   type OAuthFlow,
   type OAuthTokens,
   type Storage,
@@ -101,7 +101,7 @@ function normalizeSlackTokens(data: Record<string, unknown>): SlackTokens {
 /**
  * Extended Slack OAuth with bot and user token access.
  */
-export interface SlackOAuth extends BaseOAuth {
+export interface SlackOAuth extends OAuth {
   /** Get the bot access token. */
   getBotToken(): Promise<string | null>
 
@@ -140,29 +140,28 @@ export interface CreateSlackOAuthOptions {
  */
 export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
   const { config, storage, tokenKey = 'default' } = options
-  const flow = slackOAuthFlow(config)
 
-  const oauthWithTokens = createOAuthWithTokens({
-    flow,
+  const oauth = createOAuth({
+    flow: slackOAuthFlow(config),
     storage,
     namespace: 'slack',
     tokenKey,
   })
 
   return {
-    ...oauthWithTokens,
+    ...oauth,
 
     async getBotToken() {
-      return oauthWithTokens.getAccessToken()
+      return oauth.getAccessToken()
     },
 
     async getUserToken() {
-      const tokens = (await oauthWithTokens.getTokens()) as SlackTokens | null
+      const tokens = (await oauth.getTokens()) as SlackTokens | null
       return tokens?.authedUser?.accessToken ?? null
     },
 
     async getSlackTokens() {
-      return (await oauthWithTokens.getTokens()) as SlackTokens | null
+      return (await oauth.getTokens()) as SlackTokens | null
     },
   }
 }

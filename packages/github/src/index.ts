@@ -1,12 +1,8 @@
-import {
-  createEmitter,
-  createOAuthWithTokens,
-  TriggersError,
-} from '@triggerskit/core'
+import { createEmitter, TriggersError } from '@triggerskit/core'
 import { createActions } from './actions'
 import { createGitHubClient } from './client'
 import type { GitHubEvents } from './events'
-import { createGitHubOAuth, githubOAuthFlow } from './oauth'
+import { createGitHubOAuth } from './oauth'
 import type {
   GitHubConfig,
   GitHubConfigWithOAuth,
@@ -57,16 +53,15 @@ export function github(
   const handleWebhook = createWebhookHandler(emitter)
 
   if ('oauth' in config && config.oauth && config.storage) {
-    const oauthWithTokens = createOAuthWithTokens({
-      flow: githubOAuthFlow(config.oauth),
+    const oauth = createGitHubOAuth({
+      config: config.oauth,
       storage: config.storage,
-      namespace: 'github',
       tokenKey: config.tokenKey,
     })
 
     const http = createGitHubClient({
       config,
-      getToken: () => oauthWithTokens.getAccessToken(),
+      getToken: () => oauth.getAccessToken(),
     })
 
     return {
@@ -76,11 +71,7 @@ export function github(
       on: emitter.on,
       http,
       detect: detectGitHub,
-      oauth: createGitHubOAuth({
-        config: config.oauth,
-        storage: config.storage,
-        tokenKey: config.tokenKey,
-      }),
+      oauth,
     }
   }
 
@@ -96,21 +87,3 @@ export function github(
     detect: detectGitHub,
   }
 }
-
-export type {
-  Comment,
-  CreateCommentParams,
-  CreateIssueParams,
-  GetRepoParams,
-  Issue,
-  IssuesEvent,
-  Label,
-  ListReposParams,
-  Milestone,
-  PullRequest,
-  PullRequestEvent,
-  PushEvent,
-  Repository,
-  User,
-  WebhookEvent,
-} from './schemas'
