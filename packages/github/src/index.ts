@@ -18,23 +18,6 @@ export function github(config: GitHubConfigWithToken): GitHubProviderWithToken
 
 /**
  * Create a GitHub provider.
- *
- * @example
- * ```ts
- * // With OAuth
- * const gh = github({
- *   oauth: {
- *     clientId: 'xxx',
- *     clientSecret: 'xxx',
- *     redirectUri: 'https://app.com/callback',
- *     scopes: ['repo', 'user'],
- *   },
- *   storage: memory(),
- * })
- *
- * // With personal access token
- * const gh = github({ token: 'ghp_...' })
- * ```
  */
 export function github(
   config: GitHubConfig,
