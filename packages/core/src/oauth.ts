@@ -65,13 +65,11 @@ export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
   tokenKey?: string
 }
 
-export interface StandardOAuthConfig {
-  clientId: string
-  clientSecret: string
-  redirectUri: string
-  authUrl: string
-  tokenUrl: string
-  scopes?: string[]
+export interface BaseOAuthConfig {
+  /** Storage backend for tokens */
+  storage: Storage
+  /** Custom key for storing tokens (default varies by provider) */
+  tokenKey?: string
 }
 
 const STATE_TTL = 600
@@ -162,6 +160,15 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
       await storage.set(tokensKey(), tokens)
     },
   }
+}
+
+interface StandardOAuthConfig {
+  clientId: string
+  clientSecret: string
+  redirectUri: string
+  authUrl: string
+  tokenUrl: string
+  scopes?: string[]
 }
 
 /**

@@ -8,11 +8,11 @@ export { createEmitter } from './events'
 export type { HttpClient, HttpClientConfig, HttpMethod } from './http'
 export { createHttpClient } from './http'
 export type {
+  BaseOAuthConfig,
   OAuth,
   OAuthFlow,
   OAuthOptions,
   OAuthTokens,
-  StandardOAuthConfig,
 } from './oauth'
 export { createOAuth, standardOAuthFlow } from './oauth'
 export type {

@@ -1,10 +1,10 @@
 import type {
   ActionsMap,
+  BaseOAuthConfig,
   OAuthProvider,
   Provider,
   ProviderWebhooks,
   Result,
-  Storage,
 } from '@triggerskit/core'
 import type { SlackEvents } from './events'
 import type { SlackOAuth, SlackTokens } from './oauth'
@@ -32,14 +32,10 @@ export interface SlackOAuthConfig {
   userScopes?: string[]
 }
 
-export interface SlackConfigWithOAuth {
+export interface SlackConfigWithOAuth extends BaseOAuthConfig {
   /** OAuth configuration */
   oauth: SlackOAuthConfig
-  /** Storage backend for tokens */
-  storage: Storage
   token?: never
-  /** Custom key for storing tokens (default: 'slack_token') */
-  tokenKey?: string
   /** Custom base URL (default: 'https://slack.com/api') */
   baseUrl?: string
   /** Signing secret for webhook verification */
@@ -50,8 +46,6 @@ export interface SlackConfigWithToken {
   /** Slack bot token (xoxb-...) or user token (xoxp-...) */
   token: string
   oauth?: never
-  storage?: never
-  tokenKey?: never
   /** Custom base URL (default: 'https://slack.com/api') */
   baseUrl?: string
   /** Signing secret for webhook verification */

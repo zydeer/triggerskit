@@ -1,11 +1,11 @@
 import type {
   ActionsMap,
+  BaseOAuthConfig,
   OAuthProvider,
   OAuthTokens,
   Provider,
   ProviderWebhooks,
   Result,
-  Storage,
 } from '@triggerskit/core'
 import type { GitHubEvents } from './events'
 import type { GitHubOAuth } from './oauth'
@@ -32,14 +32,10 @@ export interface GitHubOAuthConfig {
   scopes?: string[]
 }
 
-export interface GitHubConfigWithOAuth {
+export interface GitHubConfigWithOAuth extends BaseOAuthConfig {
   /** OAuth configuration */
   oauth: GitHubOAuthConfig
-  /** Storage backend for tokens */
-  storage: Storage
   token?: never
-  /** Custom key for storing tokens (default: 'github_token') */
-  tokenKey?: string
   /** Custom base URL (default: 'https://api.github.com') */
   baseUrl?: string
 }
@@ -48,8 +44,6 @@ export interface GitHubConfigWithToken {
   /** GitHub personal access token */
   token: string
   oauth?: never
-  storage?: never
-  tokenKey?: never
   /** Custom base URL (default: 'https://api.github.com') */
   baseUrl?: string
 }
