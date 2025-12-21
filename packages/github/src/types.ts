@@ -1,6 +1,7 @@
 import type {
   ActionsMap,
   OAuthProvider,
+  OAuthTokens,
   Provider,
   ProviderWebhooks,
   Result,
@@ -61,6 +62,7 @@ export type GitHubProviderWithOAuth = OAuthProvider<
   GitHubEvents,
   WebhookEvent,
   ProviderWebhooks<WebhookEvent>,
+  OAuthTokens,
   GitHubOAuth
 >
 

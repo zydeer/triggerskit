@@ -29,7 +29,7 @@ export function github(config: GitHubConfigWithToken): GitHubProviderWithToken
  *     redirectUri: 'https://app.com/callback',
  *     scopes: ['repo', 'user'],
  *   },
- *   storage: memoryStorage(),
+ *   storage: memory(),
  * })
  *
  * // With personal access token

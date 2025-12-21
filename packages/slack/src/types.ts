@@ -7,7 +7,7 @@ import type {
   Storage,
 } from '@triggerskit/core'
 import type { SlackEvents } from './events'
-import type { SlackOAuth } from './oauth'
+import type { SlackOAuth, SlackTokens } from './oauth'
 import type { Message, SlackEvent, User } from './schemas'
 
 export interface SlackOAuthConfig {
@@ -121,6 +121,7 @@ export type SlackProviderWithOAuth = OAuthProvider<
   SlackEvents,
   SlackEvent,
   ProviderWebhooks<SlackEvent>,
+  SlackTokens,
   SlackOAuth
 >
 

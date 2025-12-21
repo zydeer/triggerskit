@@ -14,23 +14,22 @@ export interface OAuthTokens {
 
 /**
  * Defines how to perform OAuth for a specific provider.
- * Implement this interface to create custom OAuth flows.
  */
-export interface OAuthFlow {
+export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
   /** Build the authorization URL users will be redirected to. */
   getAuthorizationUrl(state: string, scopes?: string[]): string
 
   /** Exchange the authorization code for tokens. */
-  exchangeCode(code: string): Promise<OAuthTokens>
+  exchangeCode(code: string): Promise<TTokens>
 
   /** Refresh an expired token. Optional - not all providers support refresh. */
-  refreshToken?(refreshToken: string): Promise<OAuthTokens>
+  refreshToken?(refreshToken: string): Promise<TTokens>
 }
 
 /**
  * OAuth interface returned by createOAuth.
  */
-export interface OAuth {
+export interface OAuth<TTokens extends OAuthTokens = OAuthTokens> {
   /** Get the authorization URL to redirect users to. */
   getAuthUrl(options?: {
     state?: string
@@ -53,14 +52,14 @@ export interface OAuth {
   getAccessToken(): Promise<string | null>
 
   /** Get all stored tokens. */
-  getTokens(): Promise<OAuthTokens | null>
+  getTokens(): Promise<TTokens | null>
 
   /** Store tokens manually. */
-  storeTokens(tokens: OAuthTokens): Promise<void>
+  storeTokens(tokens: TTokens): Promise<void>
 }
 
-export interface OAuthOptions {
-  flow: OAuthFlow
+export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
+  flow: OAuthFlow<TTokens>
   storage: Storage
   namespace: string
   tokenKey?: string
@@ -85,44 +84,19 @@ function generateState(): string {
   return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-export function normalizeTokens(data: any): OAuthTokens {
-  const expiresIn =
-    typeof data.expires_in === 'number' ? data.expires_in : undefined
-
-  return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token,
-    expiresIn,
-    expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
-    tokenType: data.token_type,
-    scope: data.scope,
-  }
-}
-
 /**
  * Create an OAuth handler from a flow definition.
- *
- * @example
- * ```ts
- * const oauth = createOAuth({
- *   flow: standardOAuthFlow({ clientId, clientSecret, redirectUri, authUrl, tokenUrl }),
- *   storage: memoryStorage(),
- *   namespace: 'github',
- * })
- *
- * const { url } = await oauth.getAuthUrl()
- * await oauth.handleCallback(code, state)
- * const token = await oauth.getAccessToken()
- * ```
  */
-export function createOAuth(options: OAuthOptions): OAuth {
+export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
+  options: OAuthOptions<TTokens>,
+): OAuth<TTokens> {
   const { flow, storage, namespace, tokenKey = 'default' } = options
 
   const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
   const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
 
-  const getTokens = async (): Promise<OAuthTokens | null> => {
-    const tokens = await storage.get<OAuthTokens>(tokensKey())
+  const getTokens = async (): Promise<TTokens | null> => {
+    const tokens = await storage.get<TTokens>(tokensKey())
     if (!tokens) return null
 
     if (tokens.expiresAt && tokens.expiresAt <= Date.now()) {
@@ -193,9 +167,25 @@ export function createOAuth(options: OAuthOptions): OAuth {
 /**
  * Create a standard OAuth 2.0 flow.
  */
-export function standardOAuthFlow(config: StandardOAuthConfig): OAuthFlow {
+export function standardOAuthFlow(
+  config: StandardOAuthConfig,
+): OAuthFlow<OAuthTokens> {
   const { clientId, clientSecret, redirectUri, authUrl, tokenUrl, scopes } =
     config
+
+  const normalizeTokens = (data: any): OAuthTokens => {
+    const expiresIn =
+      typeof data.expires_in === 'number' ? data.expires_in : undefined
+
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresIn,
+      expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
+      tokenType: data.token_type,
+      scope: data.scope,
+    }
+  }
 
   return {
     getAuthorizationUrl(state, requestScopes) {

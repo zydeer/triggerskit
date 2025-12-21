@@ -1,6 +1,5 @@
 import {
   createOAuth,
-  normalizeTokens,
   type OAuth,
   type OAuthFlow,
   type OAuthTokens,
@@ -28,7 +27,9 @@ export interface SlackTokens extends OAuthTokens {
   appId?: string
 }
 
-export function slackOAuthFlow(config: SlackOAuthConfig): OAuthFlow {
+export function slackOAuthFlow(
+  config: SlackOAuthConfig,
+): OAuthFlow<SlackTokens> {
   const { clientId, clientSecret, redirectUri, scopes, userScopes } = config
 
   return {
@@ -70,41 +71,39 @@ export function slackOAuthFlow(config: SlackOAuthConfig): OAuthFlow {
           details: data,
         }
       }
+      const expiresIn =
+        typeof data.expires_in === 'number' ? data.expires_in : undefined
 
-      return normalizeSlackTokens(data)
+      return {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresIn,
+        expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
+        tokenType: data.token_type,
+        scope: data.scope,
+        team: data.team,
+        enterprise: data.enterprise,
+        authedUser: data.authed_user
+          ? {
+              id: data.authed_user.id,
+              scope: data.authed_user.scope,
+              accessToken: data.authed_user.access_token,
+              tokenType: data.authed_user.token_type,
+            }
+          : undefined,
+        botUserId: data.bot_user_id,
+        appId: data.app_id,
+      }
     },
   }
 }
 
-function normalizeSlackTokens(data: any): SlackTokens {
-  const base = normalizeTokens(data)
-
-  return {
-    ...base,
-    team: data.team,
-    enterprise: data.enterprise,
-    authedUser: data.authed_user
-      ? {
-          id: data.authed_user.id,
-          scope: data.authed_user.scope,
-          accessToken: data.authed_user.access_token,
-          tokenType: data.authed_user.token_type,
-        }
-      : undefined,
-    botUserId: data.bot_user_id,
-    appId: data.app_id,
-  }
-}
-
-export interface SlackOAuth extends OAuth {
+export interface SlackOAuth extends OAuth<SlackTokens> {
   /** Get the bot access token. */
   getBotToken(): Promise<string | null>
 
   /** Get the user access token (if user scopes were requested). */
   getUserToken(): Promise<string | null>
-
-  /** Get all Slack tokens including team and user info. */
-  getSlackTokens(): Promise<SlackTokens | null>
 }
 
 export interface CreateSlackOAuthOptions {
@@ -116,7 +115,7 @@ export interface CreateSlackOAuthOptions {
 export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
   const { config, storage, tokenKey = 'default' } = options
 
-  const oauth = createOAuth({
+  const oauth = createOAuth<SlackTokens>({
     flow: slackOAuthFlow(config),
     storage,
     namespace: 'slack',
@@ -131,12 +130,8 @@ export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
     },
 
     async getUserToken() {
-      const tokens = (await oauth.getTokens()) as SlackTokens | null
+      const tokens = await oauth.getTokens()
       return tokens?.authedUser?.accessToken ?? null
-    },
-
-    async getSlackTokens() {
-      return (await oauth.getTokens()) as SlackTokens | null
     },
   }
 }

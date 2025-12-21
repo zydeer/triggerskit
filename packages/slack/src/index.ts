@@ -18,37 +18,6 @@ export function slack(config: SlackConfigWithToken): SlackProviderWithToken
 
 /**
  * Create a Slack provider.
- *
- * @example
- * ```ts
- * // With OAuth
- * const slack = slackProvider({
- *   oauth: {
- *     clientId: 'xxx',
- *     clientSecret: 'xxx',
- *     redirectUri: 'https://app.com/callback',
- *     scopes: ['chat:write', 'channels:read'],
- *   },
- *   storage: memoryStorage(),
- *   signingSecret: 'xxx',
- * })
- *
- * // OAuth flow
- * const { url } = await slack.oauth.getAuthUrl()
- * await slack.oauth.handleCallback(code, state)
- *
- * // With token
- * const slack = slackProvider({
- *   token: 'xoxb-...',
- *   signingSecret: 'xxx',
- * })
- *
- * // Send a message
- * await slack.actions.postMessage({ channel: 'C123', text: 'Hello!' })
- *
- * // Listen for events
- * slack.on('message', (event) => console.log(event.text))
- * ```
  */
 export function slack(
   config: SlackConfig,

@@ -14,7 +14,7 @@ export type {
   OAuthTokens,
   StandardOAuthConfig,
 } from './oauth'
-export { createOAuth, normalizeTokens, standardOAuthFlow } from './oauth'
+export { createOAuth, standardOAuthFlow } from './oauth'
 export type {
   ActionsMap,
   OAuthProvider,

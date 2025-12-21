@@ -7,22 +7,6 @@ import { createWebhookHandler, detectTelegram } from './webhook'
 
 /**
  * Create a Telegram bot provider instance.
- *
- * @example
- * ```ts
- * const bot = telegram({ token: 'BOT_TOKEN' })
- *
- * // Send a message
- * const result = await bot.actions.sendMessage({
- *   chat_id: 123456789,
- *   text: 'Hello, World!'
- * })
- *
- * // Listen for messages
- * bot.on('message', (msg) => {
- *   console.log('New message:', msg.text)
- * })
- * ```
  */
 export function telegram(config: TelegramConfig): TelegramProvider {
   const http = createTelegramClient(config)
@@ -39,7 +23,6 @@ export function telegram(config: TelegramConfig): TelegramProvider {
   }
 }
 
-export type { TelegramEvents } from './events'
 export type {
   Animation,
   Audio,
@@ -81,12 +64,3 @@ export type {
   Voice,
   WebhookInfo,
 } from './schemas'
-export type {
-  DeleteWebhookParams,
-  SetWebhookParams,
-  TelegramActions,
-  TelegramConfig,
-  TelegramErrorDetails,
-  TelegramProvider,
-  TelegramWebhooks,
-} from './types'

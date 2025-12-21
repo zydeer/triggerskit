@@ -1,6 +1,6 @@
 import type { EventHandler, EventMap, Unsubscribe } from './events'
 import type { HttpClient } from './http'
-import type { OAuth } from './oauth'
+import type { OAuth, OAuthTokens } from './oauth'
 import type { Result } from './result'
 
 export interface WebhookContext {
@@ -50,7 +50,8 @@ export interface OAuthProvider<
   TWebhookPayload = unknown,
   TWebhooks extends
     ProviderWebhooks<TWebhookPayload> = ProviderWebhooks<TWebhookPayload>,
-  TOAuth extends OAuth = OAuth,
+  TTokens extends OAuthTokens = OAuthTokens,
+  TOAuth extends OAuth<TTokens> = OAuth<TTokens>,
 > extends Provider<TName, TActions, TEvents, TWebhookPayload, TWebhooks> {
   readonly oauth: TOAuth
 }
