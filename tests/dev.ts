@@ -11,36 +11,26 @@ export const kit = triggers({
       token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
     }),
     gh: github({
-      token: process.env.GITHUB_TOKEN,
+      token: '',
       storage,
     }),
   },
 })
 
-kit.prettyBot.on('message', async (message) => {
-  console.log('New message:', message.text)
-
-  await kit.prettyBot.actions.sendMessage({
-    chat_id: message.chat.id,
-    text: `You said: ${message.text}`,
-  })
-})
-
 Bun.serve({
-  port: 4000,
   routes: {
     '/': {
       GET: async () => {
-        const result = await kit.prettyBot.actions.sendMessage({
-          chat_id: 8432550641,
-          text: 'Replying to specific text',
+        const result = await kit.gh.actions.getRepo({
+          owner: 'bunup',
+          repo: 'bunup',
         })
 
         if (!result.ok) {
           return new Response(result.error.message)
         }
 
-        return Response.json(result.data.chat)
+        return Response.json(result.data)
       },
     },
     '/me': {

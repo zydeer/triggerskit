@@ -1,6 +1,5 @@
 import type { Storage } from '@triggerskit/core'
 
-/** Minimal Redis client interface - works with 'redis', 'ioredis', or compatible clients */
 export interface RedisClient {
   get(key: string): Promise<string | null>
   set(key: string, value: string, options?: { EX?: number }): Promise<unknown>
