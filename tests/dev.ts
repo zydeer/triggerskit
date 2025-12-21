@@ -40,7 +40,7 @@ const result = Bun.serve({
 
       const user = await userGithub.actions.getUser()
 
-      return Response.json(user);
+      return Response.json(user)
     },
     '/auth': async (req) => {
       const userGithub = kit.gh.forUser(USER_ID)
