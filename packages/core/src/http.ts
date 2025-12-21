@@ -1,5 +1,5 @@
 import type { Result, TKError } from './result'
-import { fail, ok } from './result'
+import { err, ok } from './result'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -55,7 +55,7 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
       const data = await response.json()
 
       if (!response.ok) {
-        return fail(
+        return err(
           transformError?.(data, response.status) ?? {
             message: data.message ?? 'API error',
             details: data,
@@ -66,9 +66,9 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
       return ok(data as T)
     } catch (e) {
       if (e instanceof Error && e.name === 'AbortError') {
-        return fail({ message: 'Request timed out' })
+        return err({ message: 'Request timed out' })
       }
-      return fail({ message: 'Network request failed', details: e })
+      return err({ message: 'Network request failed', details: e })
     } finally {
       clearTimeout(timeoutId)
     }

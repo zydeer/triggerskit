@@ -36,12 +36,7 @@ export type Result<T, E = unknown> =
 
 export const ok = <T>(data: T): Result<T> => ({ ok: true, data })
 
-export const err = <E = unknown>(e: TKError<E>): Result<never, E> => ({
-  ok: false,
-  error: e,
-})
-
-export const fail = (e: unknown): Result<never> => ({
+export const err = (e: unknown): Result<never> => ({
   ok: false,
   error: toError(e),
 })

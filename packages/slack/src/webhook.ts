@@ -1,6 +1,6 @@
 import {
   type EventEmitter,
-  fail,
+  err,
   ok,
   parse,
   type Result,
@@ -64,7 +64,7 @@ export function createWebhookHandler(
         )
 
         if (!isValid) {
-          return fail({ message: 'Invalid Slack signature' })
+          return err({ message: 'Invalid Slack signature' })
         }
       }
 
@@ -97,7 +97,7 @@ export function createWebhookHandler(
 
       return ok(event)
     } catch (e) {
-      return fail(e)
+      return err(e)
     }
   }
 }

@@ -1,6 +1,6 @@
 import {
   type EventEmitter,
-  fail,
+  err,
   ok,
   parse,
   type Result,
@@ -36,7 +36,7 @@ export function createWebhookHandler(emitter: EventEmitter<TelegramEvents>) {
 
       return ok(result.data)
     } catch (e) {
-      return fail(e)
+      return err(e)
     }
   }
 }

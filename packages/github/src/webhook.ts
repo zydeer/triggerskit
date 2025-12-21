@@ -1,6 +1,6 @@
 import {
   type EventEmitter,
-  fail,
+  err,
   parse,
   type Result,
   type WebhookContext,
@@ -54,7 +54,7 @@ export function createWebhookHandler(emitter: EventEmitter<GitHubEvents>) {
         }
       }
     } catch (e) {
-      return fail(e)
+      return err(e)
     }
   }
 }

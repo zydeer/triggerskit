@@ -28,7 +28,6 @@ export type {
 export type { Result, TKError } from './result'
 export {
   err,
-  fail,
   isTKError,
   ok,
   parse,

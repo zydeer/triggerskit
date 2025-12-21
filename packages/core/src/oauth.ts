@@ -1,5 +1,5 @@
 import type { Result } from './result'
-import { err, fail, ok } from './result'
+import { err, ok } from './result'
 import type { Storage } from './storage'
 
 export interface OAuthTokens {
@@ -136,7 +136,7 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
 
         return ok({ success: true })
       } catch (e) {
-        return fail(e)
+        return err(e)
       }
     },
 
