@@ -1,45 +1,34 @@
 import type {
   ActionsMap,
-  BaseOAuth,
   OAuthProvider,
   ProviderWebhooks,
   Result,
   Storage,
 } from '@triggerskit/core'
 import type { SlackEvents } from './events'
+import type { SlackOAuth } from './oauth'
 import type { Message, SlackEvent, User } from './schemas'
 
 export interface SlackConfig {
-  /** Bot token (for simple authentication) */
   token?: string
-  /** OAuth configuration (for OAuth flow) */
   oauth?: {
     clientId: string
     clientSecret: string
     redirectUri: string
     scopes?: string[]
-    userScopes?: string[] // Separate user scopes for Slack
+    userScopes?: string[]
   }
-  /** Storage adapter for OAuth tokens */
   storage?: Storage
-  /** Key to store/retrieve OAuth tokens (default: 'default') */
   tokenKey?: string
-  /** Custom base URL (default: 'https://slack.com/api') */
   baseUrl?: string
-  /** Request timeout in milliseconds (default: 30000) */
   timeout?: number
-  /** Signing secret for webhook verification */
   signingSecret?: string
 }
 
 export interface SlackActions extends ActionsMap {
-  /** Get information about the bot/app */
   authTest(): Promise<Result<AuthTestResponse>>
-  /** Post a message to a channel */
   postMessage(params: PostMessageParams): Promise<Result<Message>>
-  /** Get user info */
   getUserInfo(params: { user: string }): Promise<Result<User>>
-  /** List conversations (channels) */
   listConversations(
     params?: ListConversationsParams,
   ): Promise<Result<ConversationsListResponse>>
@@ -77,9 +66,7 @@ export interface ListConversationsParams {
 export interface ConversationsListResponse {
   ok: boolean
   channels: Channel[]
-  response_metadata?: {
-    next_cursor?: string
-  }
+  response_metadata?: { next_cursor?: string }
 }
 
 export interface Channel {
@@ -107,25 +94,10 @@ export interface Channel {
   shared_team_ids: string[]
   pending_connected_team_ids: string[]
   is_member: boolean
-  topic?: {
-    value: string
-    creator: string
-    last_set: number
-  }
-  purpose?: {
-    value: string
-    creator: string
-    last_set: number
-  }
+  topic?: { value: string; creator: string; last_set: number }
+  purpose?: { value: string; creator: string; last_set: number }
   previous_names?: string[]
   num_members?: number
-}
-
-export interface SlackOAuth extends BaseOAuth {
-  /** Get bot access token (if available) */
-  getBotToken(): Promise<string | null>
-  /** Get user access token (if available) */
-  getUserToken(): Promise<string | null>
 }
 
 export type SlackProvider = OAuthProvider<

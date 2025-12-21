@@ -1,4 +1,4 @@
-import { fail, type HttpClient, parse, type Result } from '@triggerskit/core'
+import { type HttpClient, parse, type Result } from '@triggerskit/core'
 import { z } from 'zod'
 import {
   GetUserInfoParamsSchema,
@@ -73,83 +73,68 @@ const ConversationsListResponseSchema = z.object({
     }),
   ),
   response_metadata: z
-    .object({
-      next_cursor: z.string().optional(),
-    })
+    .object({ next_cursor: z.string().optional() })
     .optional(),
 })
 
 export function createActions(http: HttpClient): SlackActions {
   return {
     async authTest(): Promise<Result<AuthTestResponse>> {
-      try {
-        return parse(AuthTestResponseSchema, await http('/auth.test'))
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http('/auth.test')
+      if (!result.ok) return result
+      return parse(AuthTestResponseSchema, result.data)
     },
 
-    async postMessage(params: PostMessageParams): Promise<Result<any>> {
-      try {
-        const validated = parse(PostMessageParamsSchema, params)
-        if (!validated.ok) return validated
+    async postMessage(params: PostMessageParams) {
+      const validated = parse(PostMessageParamsSchema, params)
+      if (!validated.ok) return validated
 
-        const response = await http('/chat.postMessage', {
-          method: 'POST',
-          body: JSON.stringify(validated.data),
-        })
+      const result = await http('/chat.postMessage', {
+        method: 'POST',
+        body: JSON.stringify(validated.data),
+      })
+      if (!result.ok) return result
 
-        return parse(MessageSchema, (response as any).message || response)
-      } catch (e) {
-        return fail(e)
-      }
+      const response = result.data as { message?: unknown }
+      return parse(MessageSchema, response.message || response)
     },
 
-    async getUserInfo(params: { user: string }): Promise<Result<any>> {
-      try {
-        const validated = parse(GetUserInfoParamsSchema, params)
-        if (!validated.ok) return validated
+    async getUserInfo(params: { user: string }) {
+      const validated = parse(GetUserInfoParamsSchema, params)
+      if (!validated.ok) return validated
 
-        const response = await http(
-          `/users.info?user=${encodeURIComponent(params.user)}`,
-        )
+      const result = await http(
+        `/users.info?user=${encodeURIComponent(params.user)}`,
+      )
+      if (!result.ok) return result
 
-        return parse(UserSchema, (response as any).user)
-      } catch (e) {
-        return fail(e)
-      }
+      const response = result.data as { user?: unknown }
+      return parse(UserSchema, response.user)
     },
 
     async listConversations(
       params?: ListConversationsParams,
     ): Promise<Result<ConversationsListResponse>> {
-      try {
-        if (params) {
-          const validated = parse(ListConversationsParamsSchema, params)
-          if (!validated.ok) return validated
-        }
-
-        const queryParams = params
-          ? `?${new URLSearchParams(
-              Object.entries(params).reduce(
-                (acc, [key, value]) => {
-                  if (value !== undefined) {
-                    acc[key] = String(value)
-                  }
-                  return acc
-                },
-                {} as Record<string, string>,
-              ),
-            )}`
-          : ''
-
-        return parse(
-          ConversationsListResponseSchema,
-          await http(`/conversations.list${queryParams}`),
-        )
-      } catch (e) {
-        return fail(e)
+      if (params) {
+        const validated = parse(ListConversationsParamsSchema, params)
+        if (!validated.ok) return validated
       }
+
+      const queryParams = params
+        ? `?${new URLSearchParams(
+            Object.entries(params).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined) acc[key] = String(value)
+                return acc
+              },
+              {} as Record<string, string>,
+            ),
+          )}`
+        : ''
+
+      const result = await http(`/conversations.list${queryParams}`)
+      if (!result.ok) return result
+      return parse(ConversationsListResponseSchema, result.data)
     },
   }
 }

@@ -1,9 +1,8 @@
-import {
-  error,
-  type Provider,
-  type Result,
-  type WebhookContext,
-  type WebhookPayload,
+import type {
+  Provider,
+  Result,
+  WebhookContext,
+  WebhookPayload,
 } from '@triggerskit/core'
 
 export type Providers = Record<string, Provider>
@@ -53,11 +52,7 @@ function createWebhookHandler<T extends Providers>(providers: T) {
 
     return {
       ok: false,
-      error: error(
-        'No matching provider found for this webhook',
-        undefined,
-        'NO_PROVIDER_MATCH',
-      ),
+      error: { message: 'No matching provider found for this webhook' },
     }
   }
 }

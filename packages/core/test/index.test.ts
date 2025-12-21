@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { z } from 'zod'
-import {
-  createEmitter,
-  err,
-  error,
-  fail,
-  isTKError,
-  ok,
-  parse,
-  toError,
-} from '../src'
+import { createEmitter, err, fail, isTKError, ok, parse, toError } from '../src'
 
 describe('Result utilities', () => {
   it('ok creates a successful result', () => {
@@ -21,7 +12,7 @@ describe('Result utilities', () => {
   })
 
   it('err creates a failed result', () => {
-    const e = error('Something went wrong')
+    const e = { message: 'Something went wrong' }
     const result = err(e)
     expect(result.ok).toBe(false)
     if (!result.ok) {
@@ -48,22 +39,20 @@ describe('Result utilities', () => {
 
 describe('error utilities', () => {
   it('creates error with message', () => {
-    const e = error('Test error')
+    const e = { message: 'Test error' }
     expect(e.message).toBe('Test error')
-    expect(e.code).toBeUndefined()
     expect(e.details).toBeUndefined()
   })
 
-  it('creates error with details and code', () => {
-    const e = error('Test error', { code: 123 }, 'TEST_CODE')
+  it('creates error with details', () => {
+    const e = { message: 'Test error', details: { code: 123 } }
     expect(e.message).toBe('Test error')
-    expect(e.code).toBe('TEST_CODE')
     expect(e.details).toEqual({ code: 123 })
   })
 
   it('isTKError identifies TKError objects', () => {
     expect(isTKError({ message: 'test' })).toBe(true)
-    expect(isTKError({ message: 'test', code: 'CODE' })).toBe(true)
+    expect(isTKError({ message: 'test', details: {} })).toBe(true)
     expect(isTKError({})).toBe(false)
     expect(isTKError(null)).toBe(false)
     expect(isTKError('string')).toBe(false)
@@ -75,7 +64,7 @@ describe('error utilities', () => {
   })
 
   it('toError passes through TKError', () => {
-    const original = error('Test', { x: 1 })
+    const original = { message: 'Test', details: { x: 1 } }
     const e = toError(original)
     expect(e).toBe(original)
   })
@@ -105,7 +94,7 @@ describe('parse', () => {
     const result = parse(schema, { name: 'John' })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('VALIDATION_ERROR')
+      expect(result.error.message).toContain('Validation failed')
     }
   })
 })

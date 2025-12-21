@@ -1,79 +1,168 @@
 import {
-  createProviderOAuth,
-  error,
-  type OAuthClient,
+  type BaseOAuth,
+  createOAuthWithTokens,
+  normalizeTokens,
+  type OAuthFlow,
   type OAuthTokens,
+  type Storage,
 } from '@triggerskit/core'
-import type { SlackOAuth } from './types'
 
-interface SlackOAuthTokens extends OAuthTokens {
-  team?: { id: string; name: string }
-  enterprise?: { id: string; name: string }
-  authed_user?: {
-    id: string
-    scope?: string
-    access_token?: string
-    token_type?: string
-  }
-  bot_user_id?: string
-  app_id?: string
+export interface SlackOAuthConfig {
+  clientId: string
+  clientSecret: string
+  redirectUri: string
+  scopes?: string[]
+  userScopes?: string[]
 }
 
-export function createSlackOAuth(
-  client: OAuthClient,
-  tokenKey: string,
-): SlackOAuth {
-  const baseOAuth = createProviderOAuth(client, tokenKey)
+export interface SlackTokens extends OAuthTokens {
+  team?: { id: string; name: string }
+  enterprise?: { id: string; name: string }
+  authedUser?: {
+    id: string
+    scope?: string
+    accessToken?: string
+    tokenType?: string
+  }
+  botUserId?: string
+  appId?: string
+}
+
+export function slackOAuthFlow(config: SlackOAuthConfig): OAuthFlow {
+  const { clientId, clientSecret, redirectUri, scopes, userScopes } = config
 
   return {
-    ...baseOAuth,
+    getAuthorizationUrl(state, requestScopes) {
+      const url = new URL('https://slack.com/oauth/v2/authorize')
+      url.searchParams.set('client_id', clientId)
+      url.searchParams.set('redirect_uri', redirectUri)
+      url.searchParams.set('state', state)
 
-    async getBotToken(): Promise<string | null> {
-      const tokens = (await client.getTokens(
-        tokenKey,
-      )) as SlackOAuthTokens | null
-      if (!tokens) return null
+      const finalScopes = requestScopes ?? scopes
+      if (finalScopes?.length) {
+        url.searchParams.set('scope', finalScopes.join(','))
+      }
 
-      return tokens.accessToken
+      if (userScopes?.length) {
+        url.searchParams.set('user_scope', userScopes.join(','))
+      }
+
+      return url.toString()
     },
 
-    async getUserToken(): Promise<string | null> {
-      const tokens = (await client.getTokens(
-        tokenKey,
-      )) as SlackOAuthTokens | null
+    async exchangeCode(code) {
+      const response = await fetch('https://slack.com/api/oauth.v2.access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: redirectUri,
+          code,
+        }),
+      })
 
-      if (!tokens?.authed_user?.access_token) return null
+      const data = await response.json()
 
-      return tokens.authed_user.access_token
+      if (!data.ok) {
+        throw {
+          message: `Slack OAuth error: ${data.error || 'Unknown error'}`,
+          details: data,
+        }
+      }
+
+      return normalizeSlackTokens(data)
     },
+  }
+}
+
+function normalizeSlackTokens(data: Record<string, unknown>): SlackTokens {
+  const base = normalizeTokens(data)
+
+  return {
+    ...base,
+    team: data.team as SlackTokens['team'],
+    enterprise: data.enterprise as SlackTokens['enterprise'],
+    authedUser: data.authed_user
+      ? {
+          id: (data.authed_user as Record<string, unknown>).id as string,
+          scope: (data.authed_user as Record<string, unknown>).scope as string,
+          accessToken: (data.authed_user as Record<string, unknown>)
+            .access_token as string,
+          tokenType: (data.authed_user as Record<string, unknown>)
+            .token_type as string,
+        }
+      : undefined,
+    botUserId: data.bot_user_id as string | undefined,
+    appId: data.app_id as string | undefined,
   }
 }
 
 /**
- * Transform Slack OAuth response to standard format
- * Slack returns bot token as access_token at root level
+ * Extended Slack OAuth with bot and user token access.
  */
-export function transformSlackTokenResponse(
-  data: Record<string, unknown>,
-): Record<string, unknown> {
-  if (!data.ok) {
-    throw error(
-      `Slack OAuth error: ${data.error || 'Unknown error'}`,
-      data,
-      'SLACK_OAUTH_ERROR',
-    )
-  }
+export interface SlackOAuth extends BaseOAuth {
+  /** Get the bot access token. */
+  getBotToken(): Promise<string | null>
 
-  // Slack's response structure is different - normalize it
+  /** Get the user access token (if user scopes were requested). */
+  getUserToken(): Promise<string | null>
+
+  /** Get all Slack tokens including team and user info. */
+  getSlackTokens(): Promise<SlackTokens | null>
+}
+
+export interface CreateSlackOAuthOptions {
+  config: SlackOAuthConfig
+  storage: Storage
+  tokenKey?: string
+}
+
+/**
+ * Create a Slack OAuth handler.
+ *
+ * @example
+ * ```ts
+ * const oauth = createSlackOAuth({
+ *   config: {
+ *     clientId: 'xxx',
+ *     clientSecret: 'xxx',
+ *     redirectUri: 'https://app.com/callback',
+ *     scopes: ['chat:write'],
+ *   },
+ *   storage: memoryStorage(),
+ * })
+ *
+ * const { url } = await oauth.getAuthUrl()
+ * await oauth.handleCallback(code, state)
+ * const token = await oauth.getBotToken()
+ * ```
+ */
+export function createSlackOAuth(options: CreateSlackOAuthOptions): SlackOAuth {
+  const { config, storage, tokenKey = 'default' } = options
+  const flow = slackOAuthFlow(config)
+
+  const oauthWithTokens = createOAuthWithTokens({
+    flow,
+    storage,
+    namespace: 'slack',
+    tokenKey,
+  })
+
   return {
-    access_token: data.access_token, // This is the bot token
-    token_type: data.token_type || 'bot',
-    scope: data.scope,
-    // Preserve Slack-specific fields
-    team: data.team,
-    enterprise: data.enterprise,
-    authed_user: data.authed_user,
-    bot_user_id: data.bot_user_id,
-    app_id: data.app_id,
+    ...oauthWithTokens,
+
+    async getBotToken() {
+      return oauthWithTokens.getAccessToken()
+    },
+
+    async getUserToken() {
+      const tokens = (await oauthWithTokens.getTokens()) as SlackTokens | null
+      return tokens?.authedUser?.accessToken ?? null
+    },
+
+    async getSlackTokens() {
+      return (await oauthWithTokens.getTokens()) as SlackTokens | null
+    },
   }
 }

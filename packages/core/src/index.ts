@@ -1,5 +1,3 @@
-export type { TKError } from './error'
-export { error, isTKError, toError } from './error'
 export type {
   EventEmitter,
   EventHandler,
@@ -8,14 +6,21 @@ export type {
 } from './events'
 export { createEmitter } from './events'
 export type { HttpClient, HttpClientConfig, HttpMethod } from './http'
-export { createHttpClient, HttpError } from './http'
+export { createHttpClient } from './http'
 export type {
   BaseOAuth,
-  OAuthClient,
-  OAuthConfig,
+  OAuthFlow,
+  OAuthOptions,
   OAuthTokens,
+  OAuthWithTokens,
+  StandardOAuthConfig,
 } from './oauth'
-export { createOAuthClient, createProviderOAuth } from './oauth'
+export {
+  createOAuth,
+  createOAuthWithTokens,
+  normalizeTokens,
+  standardOAuthFlow,
+} from './oauth'
 export type {
   ActionsMap,
   OAuthProvider,
@@ -26,6 +31,14 @@ export type {
   WebhookContext,
   WebhookPayload,
 } from './provider'
-export type { Result } from './result'
-export { err, fail, ok, parse } from './result'
+export type { Result, TKError } from './result'
+export {
+  err,
+  fail,
+  isTKError,
+  ok,
+  parse,
+  TriggersError,
+  toError,
+} from './result'
 export type { Storage } from './storage'

@@ -39,7 +39,7 @@ const result = Bun.serve({
     },
     '/auth': {
       GET: async () => {
-        const result = await kit.gh.oauth?.getAuthUrl({
+        const result = await kit.gh.oauth.getAuthUrl({
           scopes: ['repo'],
           state: 'random_state',
         })

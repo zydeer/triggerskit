@@ -1,4 +1,5 @@
-import { error, type TKError } from './error'
+import type { Result, TKError } from './result'
+import { fail, ok } from './result'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -13,17 +14,7 @@ export interface HttpClientConfig {
 export type HttpClient = <T = unknown>(
   path: string,
   init?: RequestInit,
-) => Promise<T>
-
-export class HttpError extends Error {
-  readonly error: TKError
-
-  constructor(err: TKError) {
-    super(err.message)
-    this.name = 'HttpError'
-    this.error = err
-  }
-}
+) => Promise<Result<T>>
 
 export function createHttpClient(config: HttpClientConfig): HttpClient {
   const {
@@ -34,7 +25,10 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
     transformError,
   } = config
 
-  return async <T = unknown>(path: string, init?: RequestInit): Promise<T> => {
+  return async <T = unknown>(
+    path: string,
+    init?: RequestInit,
+  ): Promise<Result<T>> => {
     const url = path.startsWith('http') ? path : `${baseUrl}${path}`
 
     const headers: Record<string, string> = {
@@ -62,27 +56,26 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
       })
 
       if (response.status === 204) {
-        return undefined as T
+        return ok(undefined as T)
       }
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new HttpError(
-          transformError?.(data, response.status) ??
-            error(data.message ?? 'API error', undefined, 'API_ERROR'),
+        return fail(
+          transformError?.(data, response.status) ?? {
+            message: data.message ?? 'API error',
+            details: data,
+          },
         )
       }
 
-      return data as T
+      return ok(data as T)
     } catch (e) {
-      if (e instanceof HttpError) throw e
       if (e instanceof Error && e.name === 'AbortError') {
-        throw new HttpError(error('Request timed out', undefined, 'TIMEOUT'))
+        return fail({ message: 'Request timed out' })
       }
-      throw new HttpError(
-        error('Network request failed', undefined, 'NETWORK_ERROR'),
-      )
+      return fail({ message: 'Network request failed', details: e })
     } finally {
       clearTimeout(timeoutId)
     }

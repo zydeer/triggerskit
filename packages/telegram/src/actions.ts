@@ -1,10 +1,4 @@
-import {
-  fail,
-  type HttpClient,
-  ok,
-  parse,
-  type Result,
-} from '@triggerskit/core'
+import { type HttpClient, ok, parse, type Result } from '@triggerskit/core'
 import {
   type GetMeData,
   GetMeDataSchema,
@@ -30,28 +24,21 @@ interface ApiResponse<T = unknown> {
 export function createActions(http: HttpClient): TelegramActions {
   return {
     async getMe(): Promise<Result<GetMeData>> {
-      try {
-        const response = await http<ApiResponse>('/getMe')
-        return parse(GetMeDataSchema, response.result)
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http<ApiResponse>('/getMe')
+      if (!result.ok) return result
+      return parse(GetMeDataSchema, result.data.result)
     },
 
     async sendMessage(params: SendMessageParams): Promise<Result<Message>> {
-      try {
-        const validated = parse(SendMessageParamsSchema, params)
-        if (!validated.ok) return validated
+      const validated = parse(SendMessageParamsSchema, params)
+      if (!validated.ok) return validated
 
-        const response = await http<ApiResponse>('/sendMessage', {
-          method: 'POST',
-          body: JSON.stringify(validated.data),
-        })
-
-        return parse(MessageSchema, response.result)
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http<ApiResponse>('/sendMessage', {
+        method: 'POST',
+        body: JSON.stringify(validated.data),
+      })
+      if (!result.ok) return result
+      return parse(MessageSchema, result.data.result)
     },
   }
 }
@@ -64,36 +51,27 @@ export function createWebhookActions(
     handle,
 
     async set(params: SetWebhookParams): Promise<Result<boolean>> {
-      try {
-        const response = await http<ApiResponse<boolean>>('/setWebhook', {
-          method: 'POST',
-          body: JSON.stringify(params),
-        })
-        return ok(response.result)
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http<ApiResponse<boolean>>('/setWebhook', {
+        method: 'POST',
+        body: JSON.stringify(params),
+      })
+      if (!result.ok) return result
+      return ok(result.data.result)
     },
 
     async delete(params?: DeleteWebhookParams): Promise<Result<boolean>> {
-      try {
-        const response = await http<ApiResponse<boolean>>('/deleteWebhook', {
-          method: 'POST',
-          body: JSON.stringify(params ?? {}),
-        })
-        return ok(response.result)
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http<ApiResponse<boolean>>('/deleteWebhook', {
+        method: 'POST',
+        body: JSON.stringify(params ?? {}),
+      })
+      if (!result.ok) return result
+      return ok(result.data.result)
     },
 
     async info(): Promise<Result<WebhookInfo>> {
-      try {
-        const response = await http<ApiResponse>('/getWebhookInfo')
-        return parse(WebhookInfoSchema, response.result)
-      } catch (e) {
-        return fail(e)
-      }
+      const result = await http<ApiResponse>('/getWebhookInfo')
+      if (!result.ok) return result
+      return parse(WebhookInfoSchema, result.data.result)
     },
   }
 }

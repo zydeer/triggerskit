@@ -1,33 +1,24 @@
-import {
-  createHttpClient,
-  type HttpClient,
-  type OAuthClient,
-} from '@triggerskit/core'
+import { createHttpClient, type HttpClient } from '@triggerskit/core'
 import type { GitHubConfig } from './types'
 
 export interface GitHubClientOptions {
   config: GitHubConfig
-  tokenKey: string
-  oauthClient?: OAuthClient
+  getToken?: () => Promise<string | null>
 }
 
 export function createGitHubClient(options: GitHubClientOptions): HttpClient {
-  const { config, tokenKey, oauthClient } = options
-  const baseUrl = config.baseUrl ?? 'https://api.github.com'
+  const { config, getToken } = options
 
   return createHttpClient({
-    baseUrl,
+    baseUrl: config.baseUrl ?? 'https://api.github.com',
     timeout: config.timeout,
     headers: {
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     },
     getToken: async () => {
-      if (config.token) return config.token
-      if (oauthClient) {
-        const tokens = await oauthClient.getTokens(tokenKey)
-        return tokens?.accessToken ?? null
-      }
+      if ('token' in config && config.token) return config.token
+      if (getToken) return getToken()
       return null
     },
   })

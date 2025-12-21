@@ -1,4 +1,3 @@
-import { error } from './error'
 import type { Result } from './result'
 import { err, fail, ok } from './result'
 import type { Storage } from './storage'
@@ -10,54 +9,75 @@ export interface OAuthTokens {
   expiresAt?: number
   tokenType?: string
   scope?: string
-  [key: string]: unknown // Allow provider-specific fields
+  [key: string]: unknown
 }
 
-export interface OAuthConfig {
-  clientId: string
-  clientSecret: string
-  redirectUri: string
-  scopes?: string[]
-  authorizationUrl: string
-  tokenUrl: string
-  authMethod?: 'body' | 'header'
-  scopeSeparator?: string // Default is ' ', but some providers use ','
-  additionalAuthParams?: Record<string, string> // For provider-specific auth params
-  additionalTokenParams?: Record<string, string> // For provider-specific token params
-  tokenResponseTransform?: (
-    data: Record<string, unknown>,
-  ) => Record<string, unknown>
+/**
+ * Defines how to perform OAuth for a specific provider.
+ * Implement this interface to create custom OAuth flows.
+ */
+export interface OAuthFlow {
+  /** Build the authorization URL users will be redirected to. */
+  getAuthorizationUrl(state: string, scopes?: string[]): string
+
+  /** Exchange the authorization code for tokens. */
+  exchangeCode(code: string): Promise<OAuthTokens>
+
+  /** Refresh an expired token. Optional - not all providers support refresh. */
+  refreshToken?(refreshToken: string): Promise<OAuthTokens>
 }
 
+/**
+ * Standard OAuth interface returned by createOAuth.
+ */
 export interface BaseOAuth {
-  /** Get authorization URL for OAuth flow */
+  /** Get the authorization URL to redirect users to. */
   getAuthUrl(options?: {
     state?: string
     scopes?: string[]
-    additionalParams?: Record<string, string>
   }): Promise<{ url: string; state: string }>
-  /** Handle OAuth callback - exchange code for tokens */
+
+  /** Handle the OAuth callback. Call this when the user returns with a code. */
   handleCallback(
     code: string,
     state: string,
   ): Promise<Result<{ success: true }>>
-  /** Check if OAuth tokens are available and valid */
+
+  /** Check if there are valid tokens stored. */
   isAuthenticated(): Promise<boolean>
-  /** Revoke/delete stored tokens */
+
+  /** Delete stored tokens. */
   revokeTokens(): Promise<void>
 }
 
-export interface OAuthClient {
-  getAuthUrl(options?: {
-    state?: string
-    scopes?: string[]
-    additionalParams?: Record<string, string>
-  }): Promise<{ url: string; state: string }>
-  exchangeCode(code: string, state: string): Promise<Result<OAuthTokens>>
-  getTokens(key: string): Promise<OAuthTokens | null>
-  storeTokens(key: string, tokens: OAuthTokens): Promise<void>
-  deleteTokens(key: string): Promise<void>
-  hasValidTokens(key: string): Promise<boolean>
+/**
+ * Extended OAuth interface with direct token access.
+ */
+export interface OAuthWithTokens extends BaseOAuth {
+  /** Get the current access token. Automatically refreshes if expired. */
+  getAccessToken(): Promise<string | null>
+
+  /** Get all stored tokens. */
+  getTokens(): Promise<OAuthTokens | null>
+
+  /** Store tokens manually. */
+  storeTokens(tokens: OAuthTokens): Promise<void>
+}
+
+export interface OAuthOptions {
+  flow: OAuthFlow
+  storage: Storage
+  namespace: string
+  tokenKey?: string
+}
+
+export interface StandardOAuthConfig {
+  clientId: string
+  clientSecret: string
+  redirectUri: string
+  authUrl: string
+  tokenUrl: string
+  scopes?: string[]
 }
 
 const STATE_TTL = 600
@@ -70,223 +90,234 @@ function generateState(): string {
   return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-function normalizeTokens(
-  data: Record<string, unknown>,
-  transform?: (data: Record<string, unknown>) => Record<string, unknown>,
-): OAuthTokens {
-  const transformed = transform ? transform(data) : data
+/**
+ * Normalize a snake_case token response to camelCase OAuthTokens.
+ */
+export function normalizeTokens(data: Record<string, unknown>): OAuthTokens {
   const expiresIn =
-    typeof transformed.expires_in === 'number'
-      ? transformed.expires_in
-      : undefined
+    typeof data.expires_in === 'number' ? data.expires_in : undefined
 
-  const tokens: OAuthTokens = {
-    accessToken: transformed.access_token as string,
-    refreshToken: transformed.refresh_token as string | undefined,
+  return {
+    accessToken: data.access_token as string,
+    refreshToken: data.refresh_token as string | undefined,
     expiresIn,
     expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
-    tokenType: transformed.token_type as string | undefined,
-    scope: transformed.scope as string | undefined,
+    tokenType: data.token_type as string | undefined,
+    scope: data.scope as string | undefined,
   }
-
-  // Include any additional fields from the response
-  for (const [key, value] of Object.entries(transformed)) {
-    if (!(key in tokens) && !key.includes('_')) {
-      tokens[key] = value
-    }
-  }
-
-  return tokens
-}
-
-async function requestTokens(
-  tokenUrl: string,
-  params: URLSearchParams,
-  config: OAuthConfig,
-): Promise<OAuthTokens> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    Accept: 'application/json',
-  }
-
-  if (config.authMethod === 'header') {
-    headers.Authorization = `Basic ${btoa(`${config.clientId}:${config.clientSecret}`)}`
-  } else {
-    params.set('client_id', config.clientId)
-    params.set('client_secret', config.clientSecret)
-  }
-
-  // Add any additional token params
-  if (config.additionalTokenParams) {
-    for (const [key, value] of Object.entries(config.additionalTokenParams)) {
-      params.set(key, value)
-    }
-  }
-
-  const response = await fetch(tokenUrl, {
-    method: 'POST',
-    headers,
-    body: params.toString(),
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw error(
-      `OAuth token request failed: ${errorText}`,
-      undefined,
-      'OAUTH_ERROR',
-    )
-  }
-
-  return normalizeTokens(await response.json(), config.tokenResponseTransform)
 }
 
 /**
- * Create a standardized OAuth interface for providers
+ * Create an OAuth handler from a flow definition.
+ *
+ * @example
+ * ```ts
+ * const oauth = createOAuth({
+ *   flow: standardOAuthFlow({ clientId, clientSecret, redirectUri, authUrl, tokenUrl }),
+ *   storage: memoryStorage(),
+ *   namespace: 'github',
+ * })
+ *
+ * const { url } = await oauth.getAuthUrl()
+ * await oauth.handleCallback(code, state)
+ * ```
  */
-export function createProviderOAuth(
-  client: OAuthClient,
-  tokenKey: string,
-): BaseOAuth {
+export function createOAuth(options: OAuthOptions): BaseOAuth {
+  const { flow, storage, namespace, tokenKey = 'default' } = options
+
+  const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
+  const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
+
   return {
-    getAuthUrl: (options) => client.getAuthUrl(options),
+    async getAuthUrl(options) {
+      const state = options?.state ?? generateState()
+      await storage.set(stateKey(state), { state, ts: Date.now() }, STATE_TTL)
+      const url = flow.getAuthorizationUrl(state, options?.scopes)
+      return { url, state }
+    },
 
     async handleCallback(code, state) {
       try {
-        const result = await client.exchangeCode(code, state)
-        if (!result.ok) return result
+        const stored = await storage.get<{ state: string }>(stateKey(state))
+        if (!stored) {
+          return err({ message: 'Invalid or expired OAuth state' })
+        }
 
-        await client.storeTokens(tokenKey, result.data)
+        await storage.delete(stateKey(state))
+        const tokens = await flow.exchangeCode(code)
+        await storage.set(tokensKey(), tokens)
+
         return ok({ success: true })
       } catch (e) {
         return fail(e)
       }
     },
 
-    isAuthenticated: () => client.hasValidTokens(tokenKey),
-    revokeTokens: () => client.deleteTokens(tokenKey),
+    async isAuthenticated() {
+      const tokens = await storage.get<OAuthTokens>(tokensKey())
+      if (!tokens) return false
+
+      if (tokens.expiresAt && tokens.expiresAt <= Date.now()) {
+        if (tokens.refreshToken && flow.refreshToken) {
+          try {
+            const newTokens = await flow.refreshToken(tokens.refreshToken)
+            await storage.set(tokensKey(), newTokens)
+            return true
+          } catch {
+            await storage.delete(tokensKey())
+            return false
+          }
+        }
+        await storage.delete(tokensKey())
+        return false
+      }
+
+      return true
+    },
+
+    async revokeTokens() {
+      await storage.delete(tokensKey())
+    },
   }
 }
 
-export function createOAuthClient(
-  config: OAuthConfig,
-  storage: Storage,
-  namespace: string,
-): OAuthClient {
-  const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
-  const tokensKey = (key: string) => `${namespace}:${TOKENS_PREFIX}${key}`
+/**
+ * Create an OAuth handler with direct token access methods.
+ *
+ * @example
+ * ```ts
+ * const oauth = createOAuthWithTokens({
+ *   flow: standardOAuthFlow({ ... }),
+ *   storage: memoryStorage(),
+ *   namespace: 'github',
+ * })
+ *
+ * const token = await oauth.getAccessToken()
+ * ```
+ */
+export function createOAuthWithTokens(options: OAuthOptions): OAuthWithTokens {
+  const { flow, storage, namespace, tokenKey = 'default' } = options
+  const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
+  const baseOAuth = createOAuth(options)
 
-  const refreshAccessToken = (refreshToken: string) =>
-    requestTokens(
-      config.tokenUrl,
-      new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }),
-      config,
-    )
+  const getTokens = async (): Promise<OAuthTokens | null> => {
+    const tokens = await storage.get<OAuthTokens>(tokensKey())
+    if (!tokens) return null
+
+    if (tokens.expiresAt && tokens.expiresAt <= Date.now()) {
+      if (tokens.refreshToken && flow.refreshToken) {
+        try {
+          const newTokens = await flow.refreshToken(tokens.refreshToken)
+          await storage.set(tokensKey(), newTokens)
+          return newTokens
+        } catch {
+          await storage.delete(tokensKey())
+          return null
+        }
+      }
+      await storage.delete(tokensKey())
+      return null
+    }
+
+    return tokens
+  }
 
   return {
-    async getAuthUrl(options) {
-      const state = options?.state ?? generateState()
-      const scopes = options?.scopes ?? config.scopes ?? []
+    ...baseOAuth,
 
-      await storage.set(
-        stateKey(state),
-        { state, createdAt: Date.now() },
-        STATE_TTL,
-      )
+    async getAccessToken() {
+      const tokens = await getTokens()
+      return tokens?.accessToken ?? null
+    },
 
-      const params = new URLSearchParams({
-        client_id: config.clientId,
-        redirect_uri: config.redirectUri,
-        response_type: 'code',
-        state,
+    getTokens,
+
+    async storeTokens(tokens) {
+      await storage.set(tokensKey(), tokens)
+    },
+  }
+}
+
+/**
+ * Create a standard OAuth 2.0 flow. Works for most providers.
+ *
+ * @example
+ * ```ts
+ * const flow = standardOAuthFlow({
+ *   clientId: 'xxx',
+ *   clientSecret: 'xxx',
+ *   redirectUri: 'https://app.com/callback',
+ *   authUrl: 'https://github.com/login/oauth/authorize',
+ *   tokenUrl: 'https://github.com/login/oauth/access_token',
+ *   scopes: ['repo', 'user'],
+ * })
+ * ```
+ */
+export function standardOAuthFlow(config: StandardOAuthConfig): OAuthFlow {
+  const { clientId, clientSecret, redirectUri, authUrl, tokenUrl, scopes } =
+    config
+
+  return {
+    getAuthorizationUrl(state, requestScopes) {
+      const url = new URL(authUrl)
+      url.searchParams.set('client_id', clientId)
+      url.searchParams.set('redirect_uri', redirectUri)
+      url.searchParams.set('response_type', 'code')
+      url.searchParams.set('state', state)
+
+      const finalScopes = requestScopes ?? scopes
+      if (finalScopes?.length) {
+        url.searchParams.set('scope', finalScopes.join(' '))
+      }
+
+      return url.toString()
+    },
+
+    async exchangeCode(code) {
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: redirectUri,
+          code,
+        }),
       })
 
-      if (scopes.length > 0) {
-        const separator = config.scopeSeparator ?? ' '
-        params.set('scope', scopes.join(separator))
+      if (!response.ok) {
+        const text = await response.text()
+        throw { message: `Token exchange failed: ${text}` }
       }
 
-      // Add any additional auth params
-      if (config.additionalAuthParams) {
-        for (const [key, value] of Object.entries(
-          config.additionalAuthParams,
-        )) {
-          params.set(key, value)
-        }
+      return normalizeTokens(await response.json())
+    },
+
+    async refreshToken(refreshToken) {
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
+        }),
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        throw { message: `Token refresh failed: ${text}` }
       }
 
-      // Add any additional params from options
-      if (options?.additionalParams) {
-        for (const [key, value] of Object.entries(options.additionalParams)) {
-          params.set(key, value)
-        }
-      }
-
-      return { url: `${config.authorizationUrl}?${params}`, state }
-    },
-
-    async exchangeCode(code, state): Promise<Result<OAuthTokens>> {
-      try {
-        const stored = await storage.get<{ state: string }>(stateKey(state))
-        if (!stored) {
-          return err(
-            error('Invalid or expired OAuth state', undefined, 'INVALID_STATE'),
-          )
-        }
-
-        await storage.delete(stateKey(state))
-
-        const tokens = await requestTokens(
-          config.tokenUrl,
-          new URLSearchParams({
-            grant_type: 'authorization_code',
-            code,
-            redirect_uri: config.redirectUri,
-          }),
-          config,
-        )
-
-        return ok(tokens)
-      } catch (e) {
-        return fail(e)
-      }
-    },
-
-    async getTokens(key) {
-      const tokens = await storage.get<OAuthTokens>(tokensKey(key))
-      if (!tokens) return null
-
-      if (tokens.expiresAt && tokens.expiresAt <= Date.now()) {
-        if (tokens.refreshToken) {
-          try {
-            const newTokens = await refreshAccessToken(tokens.refreshToken)
-            await storage.set(tokensKey(key), newTokens)
-            return newTokens
-          } catch {
-            await storage.delete(tokensKey(key))
-            return null
-          }
-        }
-        await storage.delete(tokensKey(key))
-        return null
-      }
-
-      return tokens
-    },
-
-    async storeTokens(key, tokens) {
-      await storage.set(tokensKey(key), tokens)
-    },
-
-    async deleteTokens(key) {
-      await storage.delete(tokensKey(key))
-    },
-
-    async hasValidTokens(key) {
-      return (await this.getTokens(key)) !== null
+      return normalizeTokens(await response.json())
     },
   }
 }

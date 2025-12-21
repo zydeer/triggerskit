@@ -1,6 +1,5 @@
 import {
   type EventEmitter,
-  error,
   fail,
   ok,
   parse,
@@ -14,10 +13,6 @@ import {
   WebhookPayloadSchema,
 } from './schemas'
 
-/**
- * Verify Slack webhook signature
- * https://api.slack.com/authentication/verifying-requests-from-slack
- */
 async function verifySlackSignature(
   signingSecret: string,
   timestamp: string,
@@ -25,10 +20,7 @@ async function verifySlackSignature(
   signature: string,
 ): Promise<boolean> {
   const fiveMinutesAgo = Math.floor(Date.now() / 1000) - 60 * 5
-
-  if (Number.parseInt(timestamp) < fiveMinutesAgo) {
-    return false
-  }
+  if (Number.parseInt(timestamp, 10) < fiveMinutesAgo) return false
 
   const baseString = `v0:${timestamp}:${body}`
   const encoder = new TextEncoder()
@@ -63,7 +55,6 @@ export function createWebhookHandler(
       const timestamp = request.headers.get('x-slack-request-timestamp')
       const signature = request.headers.get('x-slack-signature')
 
-      // Verify signature if signing secret is provided
       if (signingSecret && timestamp && signature) {
         const isValid = await verifySlackSignature(
           signingSecret,
@@ -73,9 +64,7 @@ export function createWebhookHandler(
         )
 
         if (!isValid) {
-          return fail(
-            error('Invalid Slack signature', undefined, 'INVALID_SIGNATURE'),
-          )
+          return fail({ message: 'Invalid Slack signature' })
         }
       }
 
@@ -84,26 +73,25 @@ export function createWebhookHandler(
 
       if (!parsed.ok) return parsed
 
-      // Handle URL verification challenge
       if (parsed.data.type === 'url_verification') {
         const verification = parse(UrlVerificationSchema, parsed.data)
         if (!verification.ok) return verification
 
-        // Return challenge response (caller should handle this specially)
         return ok({
-          ...parsed.data,
+          team_id: '',
+          api_app_id: '',
           event: { type: 'url_verification' },
-        } as SlackEvent)
+          type: 'event_callback',
+          event_id: '',
+          event_time: 0,
+          challenge: verification.data.challenge,
+        } as unknown as SlackEvent)
       }
 
-      // Handle event callback
       const event = parsed.data as SlackEvent
       const eventType = event.event.type
 
-      // Emit specific event
       emitter.emit(eventType as keyof SlackEvents, event.event as never)
-
-      // Emit wildcard event
       emitter.emit('*', event.event)
 
       return ok(event)

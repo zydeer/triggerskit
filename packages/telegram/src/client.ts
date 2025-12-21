@@ -1,7 +1,6 @@
-import { error, type HttpClient, HttpError } from '@triggerskit/core'
+import { fail, type HttpClient, ok, type Result } from '@triggerskit/core'
 import type { TelegramConfig, TelegramErrorDetails } from './types'
 
-/** Telegram API response wrapper */
 interface TelegramResponse<T = unknown> {
   ok: boolean
   result?: T
@@ -9,12 +8,14 @@ interface TelegramResponse<T = unknown> {
   error_code?: number
 }
 
-/** Create a configured HTTP client for Telegram Bot API */
 export function createTelegramClient(config: TelegramConfig): HttpClient {
   const baseUrl = config.baseUrl ?? 'https://api.telegram.org'
   const timeout = config.timeout ?? 30000
 
-  return async <T = unknown>(path: string, init?: RequestInit): Promise<T> => {
+  return async <T = unknown>(
+    path: string,
+    init?: RequestInit,
+  ): Promise<Result<T>> => {
     const method = path.startsWith('/') ? path.slice(1) : path
     const url = `${baseUrl}/bot${config.token}/${method}`
 
@@ -35,24 +36,18 @@ export function createTelegramClient(config: TelegramConfig): HttpClient {
 
       if (!data.ok) {
         const message = data.description?.replace('Bad Request:', '').trim()
-        throw new HttpError(
-          error<TelegramErrorDetails>(
-            message ? capitalize(message) : 'Telegram API error',
-            { errorCode: data.error_code },
-            'TELEGRAM_ERROR',
-          ),
-        )
+        return fail({
+          message: message ? capitalize(message) : 'Telegram API error',
+          details: { errorCode: data.error_code } as TelegramErrorDetails,
+        })
       }
 
-      return data as T
+      return ok(data.result as T)
     } catch (e) {
-      if (e instanceof HttpError) throw e
       if (e instanceof Error && e.name === 'AbortError') {
-        throw new HttpError(error('Request timed out', undefined, 'TIMEOUT'))
+        return fail({ message: 'Request timed out' })
       }
-      throw new HttpError(
-        error('Network request failed', undefined, 'NETWORK_ERROR'),
-      )
+      return fail({ message: 'Network request failed', details: e })
     } finally {
       clearTimeout(timeoutId)
     }

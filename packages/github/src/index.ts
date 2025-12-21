@@ -1,94 +1,111 @@
-import { createEmitter, createOAuthClient, error } from '@triggerskit/core'
+import {
+  createEmitter,
+  createOAuthWithTokens,
+  TriggersError,
+} from '@triggerskit/core'
 import { createActions } from './actions'
 import { createGitHubClient } from './client'
 import type { GitHubEvents } from './events'
-import { createGitHubOAuth } from './oauth'
-import type { GitHubConfig, GitHubProvider } from './types'
+import { createGitHubOAuth, githubOAuthFlow } from './oauth'
+import type {
+  GitHubConfig,
+  GitHubConfigWithOAuth,
+  GitHubConfigWithToken,
+  GitHubProviderWithOAuth,
+  GitHubProviderWithToken,
+} from './types'
 import { createWebhookHandler, detectGitHub } from './webhook'
 
-const GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize'
-const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
+export function github(config: GitHubConfigWithOAuth): GitHubProviderWithOAuth
+
+export function github(config: GitHubConfigWithToken): GitHubProviderWithToken
 
 /**
- * Create a GitHub provider instance.
+ * Create a GitHub provider.
  *
  * @example
  * ```ts
  * // With OAuth
  * const gh = github({
  *   oauth: {
- *     clientId: 'your-client-id',
- *     clientSecret: 'your-client-secret',
- *     redirectUri: 'https://your-app.com/oauth/callback',
- *     scopes: ['repo', 'user']
+ *     clientId: 'xxx',
+ *     clientSecret: 'xxx',
+ *     redirectUri: 'https://app.com/callback',
+ *     scopes: ['repo', 'user'],
  *   },
- *   storage: memoryStorage()
+ *   storage: memoryStorage(),
  * })
  *
  * // With personal access token
  * const gh = github({ token: 'ghp_...' })
  * ```
  */
-export function github(config: GitHubConfig): GitHubProvider {
-  const tokenKey = config.tokenKey ?? 'default'
-
-  // Validate config
-  if (!config.oauth && !config.token) {
-    throw error(
-      'GitHub provider requires either oauth config with storage or a token',
-      undefined,
-      'INVALID_CONFIG',
+export function github(
+  config: GitHubConfig,
+): GitHubProviderWithOAuth | GitHubProviderWithToken {
+  if (!('oauth' in config) && !('token' in config)) {
+    throw new TriggersError(
+      'GitHub requires either oauth config with storage, or a token',
     )
   }
 
-  if (config.oauth && !config.storage) {
-    throw error(
-      'OAuth config provided but storage is missing. Both oauth and storage are required for OAuth flow.',
-      undefined,
-      'MISSING_STORAGE',
-    )
+  if ('oauth' in config && config.oauth && !config.storage) {
+    throw new TriggersError('OAuth config requires storage')
   }
 
-  const oauthClient =
-    config.oauth && config.storage
-      ? createOAuthClient(
-          {
-            ...config.oauth,
-            authorizationUrl: GITHUB_AUTH_URL,
-            tokenUrl: GITHUB_TOKEN_URL,
-            authMethod: 'body',
-          },
-          config.storage,
-          'github',
-        )
-      : undefined
-
-  const http = createGitHubClient({ config, tokenKey, oauthClient })
   const emitter = createEmitter<GitHubEvents>()
   const handleWebhook = createWebhookHandler(emitter)
 
-  const baseProvider = {
-    name: 'github' as const,
+  if ('oauth' in config && config.oauth && config.storage) {
+    const oauthWithTokens = createOAuthWithTokens({
+      flow: githubOAuthFlow(config.oauth),
+      storage: config.storage,
+      namespace: 'github',
+      tokenKey: config.tokenKey,
+    })
+
+    const http = createGitHubClient({
+      config,
+      getToken: () => oauthWithTokens.getAccessToken(),
+    })
+
+    return {
+      name: 'github',
+      actions: createActions(http),
+      webhooks: { handle: handleWebhook },
+      on: emitter.on,
+      http,
+      detect: detectGitHub,
+      oauth: createGitHubOAuth({
+        config: config.oauth,
+        storage: config.storage,
+        tokenKey: config.tokenKey,
+      }),
+    }
+  }
+
+  // Token flow
+  const http = createGitHubClient({ config })
+
+  return {
+    name: 'github',
     actions: createActions(http),
     webhooks: { handle: handleWebhook },
     on: emitter.on,
     http,
     detect: detectGitHub,
   }
-
-  // Return with OAuth if configured
-  if (oauthClient) {
-    return {
-      ...baseProvider,
-      oauth: createGitHubOAuth(oauthClient, tokenKey),
-    }
-  }
-
-  // Return without OAuth
-  return baseProvider as GitHubProvider
 }
 
 export type { GitHubEvents } from './events'
+export {
+  type CreateGitHubOAuthOptions,
+  createGitHubOAuth,
+  createGitHubOAuthWithTokens,
+  type GitHubOAuth,
+  type GitHubOAuthConfig,
+  githubOAuthFlow,
+} from './oauth'
 export type {
   Comment,
   CreateCommentParams,
@@ -109,6 +126,9 @@ export type {
 export type {
   GitHubActions,
   GitHubConfig,
-  GitHubOAuth,
+  GitHubConfigWithOAuth,
+  GitHubConfigWithToken,
   GitHubProvider,
+  GitHubProviderWithOAuth,
+  GitHubProviderWithToken,
 } from './types'

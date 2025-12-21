@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-// User schema
 export const UserSchema = z.object({
   id: z.string(),
   team_id: z.string().optional(),
@@ -42,7 +41,6 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>
 
-// Message schema
 export const MessageSchema = z.object({
   type: z.string(),
   subtype: z.string().optional(),
@@ -60,7 +58,6 @@ export const MessageSchema = z.object({
 
 export type Message = z.infer<typeof MessageSchema>
 
-// Event schemas
 export const MessageEventSchema = z.object({
   type: z.literal('message'),
   channel: z.string(),
@@ -132,7 +129,6 @@ export type MemberJoinedChannelEvent = z.infer<
   typeof MemberJoinedChannelEventSchema
 >
 
-// Slack Event wrapper
 export const SlackEventSchema = z.object({
   token: z.string().optional(),
   team_id: z.string(),
@@ -143,9 +139,7 @@ export const SlackEventSchema = z.object({
     ReactionAddedEventSchema,
     ReactionRemovedEventSchema,
     MemberJoinedChannelEventSchema,
-    z
-      .object({ type: z.string() })
-      .passthrough(), // Catch-all for other events
+    z.object({ type: z.string() }).passthrough(),
   ]),
   type: z.literal('event_callback'),
   event_id: z.string(),
@@ -167,7 +161,6 @@ export const SlackEventSchema = z.object({
 
 export type SlackEvent = z.infer<typeof SlackEventSchema>
 
-// URL verification challenge
 export const UrlVerificationSchema = z.object({
   type: z.literal('url_verification'),
   token: z.string(),
@@ -176,7 +169,6 @@ export const UrlVerificationSchema = z.object({
 
 export type UrlVerification = z.infer<typeof UrlVerificationSchema>
 
-// Webhook payload (can be event or url verification)
 export const WebhookPayloadSchema = z.union([
   SlackEventSchema,
   UrlVerificationSchema,
@@ -184,7 +176,6 @@ export const WebhookPayloadSchema = z.union([
 
 export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>
 
-// Parameter schemas for validation
 export const PostMessageParamsSchema = z.object({
   channel: z.string(),
   text: z.string().optional(),

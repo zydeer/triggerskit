@@ -18,6 +18,9 @@ export type ActionsMap = {
   [key: string]: (...args: never[]) => Promise<Result<unknown>>
 }
 
+/**
+ * Base provider interface for all integrations.
+ */
 export interface Provider<
   TName extends string = string,
   TActions extends ActionsMap = ActionsMap,
@@ -37,6 +40,9 @@ export interface Provider<
   detect(ctx: WebhookContext): boolean | Promise<boolean>
 }
 
+/**
+ * Provider with OAuth support.
+ */
 export interface OAuthProvider<
   TName extends string = string,
   TActions extends ActionsMap = ActionsMap,

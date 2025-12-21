@@ -1,5 +1,34 @@
 import type { ZodType } from 'zod'
-import { error, type TKError, toError } from './error'
+
+export interface TKError<T = unknown> {
+  message: string
+  details?: T
+}
+
+export function isTKError(value: unknown): value is TKError {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'message' in value &&
+    typeof (value as TKError).message === 'string'
+  )
+}
+
+export function toError(e: unknown): TKError {
+  if (isTKError(e)) return e
+  if (e instanceof Error) return { message: e.message }
+  return { message: 'Unknown error' }
+}
+
+export class TriggersError extends Error {
+  readonly details?: unknown
+
+  constructor(message: string, details?: unknown) {
+    super(message)
+    this.name = 'TriggersError'
+    this.details = details
+  }
+}
 
 export type Result<T, E = unknown> =
   | { ok: true; data: T }
@@ -29,11 +58,8 @@ export function parse<T>(schema: ZodType<T>, data: unknown): Result<T> {
     return `${path}: ${i.message}`
   })
 
-  return err(
-    error(
-      `Validation failed: ${issues.join('; ')}`,
-      result.error.issues,
-      'VALIDATION_ERROR',
-    ),
-  )
+  return err({
+    message: `Validation failed: ${issues.join('; ')}`,
+    details: result.error.issues,
+  })
 }
