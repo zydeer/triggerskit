@@ -18,8 +18,6 @@ export interface TelegramConfig {
   token: string
   /** Custom base URL (default: 'https://api.telegram.org') */
   baseUrl?: string
-  /** Request timeout in milliseconds (default: 30000) */
-  timeout?: number
 }
 
 export interface TelegramActions extends ActionsMap {
@@ -67,7 +65,3 @@ export type TelegramProvider = Provider<
   Update,
   TelegramWebhooks
 >
-
-export interface TelegramErrorDetails {
-  errorCode?: number
-}

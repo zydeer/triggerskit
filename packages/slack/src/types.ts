@@ -133,9 +133,3 @@ export type SlackProviderWithToken = Provider<
 >
 
 export type SlackProvider = SlackProviderWithOAuth | SlackProviderWithToken
-
-export interface SlackErrorDetails {
-  error?: string
-  needed?: string
-  provided?: string
-}

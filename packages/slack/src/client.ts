@@ -22,7 +22,7 @@ export function createSlackClient(options: SlackClientOptions): HttpClient {
       const slackError = data as { ok: boolean; error?: string }
       return {
         message: slackError.error || 'Slack API error',
-        details: { error: slackError.error },
+        details: data,
       }
     },
   })
