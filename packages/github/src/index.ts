@@ -87,3 +87,21 @@ export function github(
     detect: detectGitHub,
   }
 }
+
+export type {
+  Comment,
+  CreateCommentParams,
+  CreateIssueParams,
+  GetRepoParams,
+  Issue,
+  IssuesEvent,
+  Label,
+  ListReposParams,
+  Milestone,
+  PullRequest,
+  PullRequestEvent,
+  PushEvent,
+  Repository,
+  User,
+  WebhookEvent,
+} from './schemas'

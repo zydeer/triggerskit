@@ -185,17 +185,85 @@ export const PostMessageParamsSchema = z.object({
   reply_broadcast: z.boolean().optional(),
   mrkdwn: z.boolean().optional(),
 })
+export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>
 
 export const GetUserInfoParamsSchema = z.object({
   user: z.string(),
 })
+export type GetUserInfoParams = z.infer<typeof GetUserInfoParamsSchema>
 
-export const ListConversationsParamsSchema = z
-  .object({
-    cursor: z.string().optional(),
-    exclude_archived: z.boolean().optional(),
-    limit: z.number().optional(),
-    team_id: z.string().optional(),
-    types: z.string().optional(),
-  })
-  .optional()
+export const ListConversationsParamsSchema = z.object({
+  cursor: z.string().optional(),
+  exclude_archived: z.boolean().optional(),
+  limit: z.number().optional(),
+  team_id: z.string().optional(),
+  types: z.string().optional(),
+})
+export type ListConversationsParams = z.infer<
+  typeof ListConversationsParamsSchema
+>
+
+export const ChannelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  is_channel: z.boolean(),
+  is_group: z.boolean(),
+  is_im: z.boolean(),
+  is_mpim: z.boolean(),
+  is_private: z.boolean(),
+  created: z.number(),
+  is_archived: z.boolean(),
+  is_general: z.boolean(),
+  unlinked: z.number(),
+  name_normalized: z.string(),
+  is_shared: z.boolean(),
+  is_org_shared: z.boolean(),
+  is_pending_ext_shared: z.boolean(),
+  pending_shared: z.array(z.string()),
+  context_team_id: z.string(),
+  updated: z.number(),
+  parent_conversation: z.string().optional(),
+  creator: z.string(),
+  is_ext_shared: z.boolean(),
+  shared_team_ids: z.array(z.string()),
+  pending_connected_team_ids: z.array(z.string()),
+  is_member: z.boolean(),
+  topic: z
+    .object({
+      value: z.string(),
+      creator: z.string(),
+      last_set: z.number(),
+    })
+    .optional(),
+  purpose: z
+    .object({
+      value: z.string(),
+      creator: z.string(),
+      last_set: z.number(),
+    })
+    .optional(),
+  previous_names: z.array(z.string()).optional(),
+  num_members: z.number().optional(),
+})
+export type Channel = z.infer<typeof ChannelSchema>
+
+export const ConversationsListSchema = z.object({
+  ok: z.boolean(),
+  channels: z.array(ChannelSchema),
+  response_metadata: z
+    .object({ next_cursor: z.string().optional() })
+    .optional(),
+})
+export type ConversationsList = z.infer<typeof ConversationsListSchema>
+
+export const AuthTestDataSchema = z.object({
+  ok: z.boolean(),
+  url: z.string(),
+  team: z.string(),
+  user: z.string(),
+  team_id: z.string(),
+  user_id: z.string(),
+  bot_id: z.string().optional(),
+  is_enterprise_install: z.boolean().optional(),
+})
+export type AuthTestData = z.infer<typeof AuthTestDataSchema>

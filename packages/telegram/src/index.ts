@@ -23,7 +23,6 @@ export function telegram(config: TelegramConfig): TelegramProvider {
   }
 }
 
-export type { TelegramEvents } from './events'
 export type {
   Animation,
   Audio,
@@ -65,11 +64,3 @@ export type {
   Voice,
   WebhookInfo,
 } from './schemas'
-export type {
-  DeleteWebhookParams,
-  SetWebhookParams,
-  TelegramActions,
-  TelegramConfig,
-  TelegramProvider,
-  TelegramWebhooks,
-} from './types'

@@ -67,3 +67,22 @@ export function slack(
     detect: detectSlack,
   }
 }
+
+export type {
+  AppMentionEvent,
+  AuthTestData,
+  Channel,
+  ConversationsList,
+  GetUserInfoParams,
+  ListConversationsParams,
+  MemberJoinedChannelEvent,
+  Message,
+  MessageEvent,
+  PostMessageParams,
+  ReactionAddedEvent,
+  ReactionRemovedEvent,
+  SlackEvent,
+  UrlVerification,
+  User,
+  WebhookPayload,
+} from './schemas'

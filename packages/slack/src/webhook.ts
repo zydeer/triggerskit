@@ -75,6 +75,7 @@ export function createWebhookHandler(
 
       if (parsed.data.type === 'url_verification') {
         const verification = parse(UrlVerificationSchema, parsed.data)
+
         if (!verification.ok) return verification
 
         return ok({
