@@ -1,6 +1,7 @@
 import type {
   ActionsMap,
   OAuthProvider,
+  Provider,
   ProviderWebhooks,
   Result,
   Storage,
@@ -9,21 +10,35 @@ import type { SlackEvents } from './events'
 import type { SlackOAuth } from './oauth'
 import type { Message, SlackEvent, User } from './schemas'
 
-export interface SlackConfig {
-  token?: string
-  oauth?: {
-    clientId: string
-    clientSecret: string
-    redirectUri: string
-    scopes?: string[]
-    userScopes?: string[]
-  }
-  storage?: Storage
+export interface SlackOAuthConfig {
+  clientId: string
+  clientSecret: string
+  redirectUri: string
+  scopes?: string[]
+  userScopes?: string[]
+}
+
+export interface SlackConfigWithOAuth {
+  oauth: SlackOAuthConfig
+  storage: Storage
+  token?: never
   tokenKey?: string
   baseUrl?: string
   timeout?: number
   signingSecret?: string
 }
+
+export interface SlackConfigWithToken {
+  token: string
+  oauth?: never
+  storage?: never
+  tokenKey?: never
+  baseUrl?: string
+  timeout?: number
+  signingSecret?: string
+}
+
+export type SlackConfig = SlackConfigWithOAuth | SlackConfigWithToken
 
 export interface SlackActions extends ActionsMap {
   authTest(): Promise<Result<AuthTestResponse>>
@@ -100,7 +115,7 @@ export interface Channel {
   num_members?: number
 }
 
-export type SlackProvider = OAuthProvider<
+export type SlackProviderWithOAuth = OAuthProvider<
   'slack',
   SlackActions,
   SlackEvents,
@@ -108,6 +123,16 @@ export type SlackProvider = OAuthProvider<
   ProviderWebhooks<SlackEvent>,
   SlackOAuth
 >
+
+export type SlackProviderWithToken = Provider<
+  'slack',
+  SlackActions,
+  SlackEvents,
+  SlackEvent,
+  ProviderWebhooks<SlackEvent>
+>
+
+export type SlackProvider = SlackProviderWithOAuth | SlackProviderWithToken
 
 export interface SlackErrorDetails {
   error?: string

@@ -84,7 +84,7 @@ export function github(
     }
   }
 
-  // Token flow
+  // token flow
   const http = createGitHubClient({ config })
 
   return {
@@ -97,15 +97,6 @@ export function github(
   }
 }
 
-export type { GitHubEvents } from './events'
-export {
-  type CreateGitHubOAuthOptions,
-  createGitHubOAuth,
-  createGitHubOAuthWithTokens,
-  type GitHubOAuth,
-  type GitHubOAuthConfig,
-  githubOAuthFlow,
-} from './oauth'
 export type {
   Comment,
   CreateCommentParams,
@@ -123,12 +114,3 @@ export type {
   User,
   WebhookEvent,
 } from './schemas'
-export type {
-  GitHubActions,
-  GitHubConfig,
-  GitHubConfigWithOAuth,
-  GitHubConfigWithToken,
-  GitHubProvider,
-  GitHubProviderWithOAuth,
-  GitHubProviderWithToken,
-} from './types'

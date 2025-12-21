@@ -1,8 +1,6 @@
 import {
   type BaseOAuth,
   createOAuth,
-  createOAuthWithTokens,
-  type OAuthWithTokens,
   type Storage,
   standardOAuthFlow,
 } from '@triggerskit/core'
@@ -39,19 +37,6 @@ export function createGitHubOAuth(
   const { config, storage, tokenKey = 'default' } = options
 
   return createOAuth({
-    flow: githubOAuthFlow(config),
-    storage,
-    namespace: 'github',
-    tokenKey,
-  })
-}
-
-export function createGitHubOAuthWithTokens(
-  options: CreateGitHubOAuthOptions,
-): OAuthWithTokens {
-  const { config, storage, tokenKey = 'default' } = options
-
-  return createOAuthWithTokens({
     flow: githubOAuthFlow(config),
     storage,
     namespace: 'github',

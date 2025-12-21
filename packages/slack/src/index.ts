@@ -3,14 +3,25 @@ import { createActions } from './actions'
 import { createSlackClient } from './client'
 import type { SlackEvents } from './events'
 import { createSlackOAuth } from './oauth'
-import type { SlackConfig, SlackProvider } from './types'
+import type {
+  SlackConfig,
+  SlackConfigWithOAuth,
+  SlackConfigWithToken,
+  SlackProviderWithOAuth,
+  SlackProviderWithToken,
+} from './types'
 import { createWebhookHandler, detectSlack } from './webhook'
+
+export function slack(config: SlackConfigWithOAuth): SlackProviderWithOAuth
+
+export function slack(config: SlackConfigWithToken): SlackProviderWithToken
 
 /**
  * Create a Slack provider.
  *
  * @example
  * ```ts
+ * // With OAuth
  * const slack = slackProvider({
  *   oauth: {
  *     clientId: 'xxx',
@@ -26,6 +37,12 @@ import { createWebhookHandler, detectSlack } from './webhook'
  * const { url } = await slack.oauth.getAuthUrl()
  * await slack.oauth.handleCallback(code, state)
  *
+ * // With token
+ * const slack = slackProvider({
+ *   token: 'xoxb-...',
+ *   signingSecret: 'xxx',
+ * })
+ *
  * // Send a message
  * await slack.actions.postMessage({ channel: 'C123', text: 'Hello!' })
  *
@@ -33,33 +50,44 @@ import { createWebhookHandler, detectSlack } from './webhook'
  * slack.on('message', (event) => console.log(event.text))
  * ```
  */
-export function slack(config: SlackConfig): SlackProvider {
-  if (!config.oauth && !config.token) {
+export function slack(
+  config: SlackConfig,
+): SlackProviderWithOAuth | SlackProviderWithToken {
+  if (!('oauth' in config) && !('token' in config)) {
     throw new TriggersError(
       'Slack requires either oauth config with storage, or a token',
     )
   }
 
-  if (config.oauth && !config.storage) {
+  if ('oauth' in config && config.oauth && !config.storage) {
     throw new TriggersError('OAuth config requires storage')
   }
 
-  const oauth =
-    config.oauth && config.storage
-      ? createSlackOAuth({
-          config: config.oauth,
-          storage: config.storage,
-          tokenKey: config.tokenKey,
-        })
-      : undefined
-
-  if (!oauth) {
-    throw new TriggersError('Slack provider requires OAuth configuration')
-  }
-
-  const http = createSlackClient({ config, oauth })
   const emitter = createEmitter<SlackEvents>()
   const handleWebhook = createWebhookHandler(emitter, config.signingSecret)
+
+  if ('oauth' in config && config.oauth && config.storage) {
+    const oauth = createSlackOAuth({
+      config: config.oauth,
+      storage: config.storage,
+      tokenKey: config.tokenKey,
+    })
+
+    const http = createSlackClient({ config, oauth })
+
+    return {
+      name: 'slack',
+      actions: createActions(http),
+      webhooks: { handle: handleWebhook },
+      on: emitter.on,
+      http,
+      detect: detectSlack,
+      oauth,
+    }
+  }
+
+  // token flow
+  const http = createSlackClient({ config })
 
   return {
     name: 'slack',
@@ -68,7 +96,6 @@ export function slack(config: SlackConfig): SlackProvider {
     on: emitter.on,
     http,
     detect: detectSlack,
-    oauth,
   }
 }
 

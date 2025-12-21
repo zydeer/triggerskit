@@ -7,24 +7,19 @@ import {
 } from '@triggerskit/core'
 import type { GitHubEvents } from './events'
 import {
-  type IssuesEvent,
   IssuesEventSchema,
-  type PullRequestEvent,
   PullRequestEventSchema,
-  type PushEvent,
   PushEventSchema,
   type WebhookEvent,
   WebhookEventSchema,
 } from './schemas'
 
-/** Check if the request is from GitHub */
 export function detectGitHub(ctx: WebhookContext): boolean {
   return (
     ctx.headers.has('x-github-event') || ctx.headers.has('x-hub-signature-256')
   )
 }
 
-/** Create the webhook handler function */
 export function createWebhookHandler(emitter: EventEmitter<GitHubEvents>) {
   return async function handleWebhook(
     request: Request,
@@ -36,21 +31,20 @@ export function createWebhookHandler(emitter: EventEmitter<GitHubEvents>) {
       switch (eventType) {
         case 'push': {
           const result = parse(PushEventSchema, body)
-          if (result.ok) emitter.emit('push', result.data as PushEvent)
-          return result as Result<WebhookEvent>
+          if (result.ok) emitter.emit('push', result.data)
+          return result
         }
 
         case 'issues': {
           const result = parse(IssuesEventSchema, body)
-          if (result.ok) emitter.emit('issues', result.data as IssuesEvent)
-          return result as Result<WebhookEvent>
+          if (result.ok) emitter.emit('issues', result.data)
+          return result
         }
 
         case 'pull_request': {
           const result = parse(PullRequestEventSchema, body)
-          if (result.ok)
-            emitter.emit('pull_request', result.data as PullRequestEvent)
-          return result as Result<WebhookEvent>
+          if (result.ok) emitter.emit('pull_request', result.data)
+          return result
         }
 
         default: {
