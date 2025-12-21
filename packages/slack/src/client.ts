@@ -12,7 +12,6 @@ export function createSlackClient(options: SlackClientOptions): HttpClient {
 
   return createHttpClient({
     baseUrl: config.baseUrl ?? 'https://slack.com/api',
-    timeout: config.timeout,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
     getToken: async () => {
       if (config.token) return config.token

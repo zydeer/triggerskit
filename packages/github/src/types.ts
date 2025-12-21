@@ -43,7 +43,6 @@ export interface GitHubConfigWithToken {
   storage?: never
   tokenKey?: never
   baseUrl?: string
-  timeout?: number
 }
 
 export type GitHubConfig = GitHubConfigWithOAuth | GitHubConfigWithToken

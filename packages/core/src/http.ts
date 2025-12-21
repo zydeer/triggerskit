@@ -5,7 +5,6 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export interface HttpClientConfig {
   baseUrl: string
-  timeout?: number
   headers?: Record<string, string>
   getToken?: () => string | null | Promise<string | null>
   transformError?: (data: unknown, status: number) => TKError
@@ -17,13 +16,7 @@ export type HttpClient = <T = unknown>(
 ) => Promise<Result<T>>
 
 export function createHttpClient(config: HttpClientConfig): HttpClient {
-  const {
-    baseUrl,
-    timeout = 30000,
-    headers: defaultHeaders,
-    getToken,
-    transformError,
-  } = config
+  const { baseUrl, headers: defaultHeaders, getToken, transformError } = config
 
   return async <T = unknown>(
     path: string,
@@ -46,7 +39,7 @@ export function createHttpClient(config: HttpClientConfig): HttpClient {
     Object.assign(headers, init?.headers)
 
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
 
     try {
       const response = await fetch(url, {

@@ -11,7 +11,6 @@ export function createGitHubClient(options: GitHubClientOptions): HttpClient {
 
   return createHttpClient({
     baseUrl: config.baseUrl ?? 'https://api.github.com',
-    timeout: config.timeout,
     headers: {
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',

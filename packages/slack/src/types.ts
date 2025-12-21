@@ -34,7 +34,6 @@ export interface SlackConfigWithToken {
   storage?: never
   tokenKey?: never
   baseUrl?: string
-  timeout?: number
   signingSecret?: string
 }
 
