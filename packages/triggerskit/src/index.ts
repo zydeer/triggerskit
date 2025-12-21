@@ -74,8 +74,10 @@ function createWebhookHandler<T extends Providers>(providers: T) {
  * import { github } from '@triggerskit/github'
  *
  * const kit = triggers({
- *   telegram: telegram({ token: 'BOT_TOKEN' }),
- *   github: github({ token: 'ghp_xxxx' }),
+ *   providers: {
+ *     telegram: telegram({ token: 'BOT_TOKEN' }),
+ *     github: github({ token: 'ghp_xxxx' }),
+ *   }
  * })
  *
  * // Access providers directly
@@ -89,10 +91,12 @@ function createWebhookHandler<T extends Providers>(providers: T) {
  * }
  * ```
  */
-export function triggers<T extends Providers>(providers: T): TriggersKit<T> {
+export function triggers<T extends Providers>(config: {
+  providers: T
+}): TriggersKit<T> {
   return {
-    ...providers,
-    handle: createWebhookHandler(providers),
+    ...config.providers,
+    handle: createWebhookHandler(config.providers),
   }
 }
 

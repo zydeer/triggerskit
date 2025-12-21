@@ -28,6 +28,14 @@
         "zod": "^4.2.1",
       },
     },
+    "packages/github": {
+      "name": "@triggerskit/github",
+      "version": "0.1.15",
+      "dependencies": {
+        "@triggerskit/core": "workspace:*",
+        "zod": "^4.2.1",
+      },
+    },
     "packages/telegram": {
       "name": "@triggerskit/telegram",
       "version": "0.1.15",
@@ -345,6 +353,8 @@
     "@shikijs/vscode-textmate": ["@shikijs/vscode-textmate@10.0.2", "", {}, "sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg=="],
 
     "@triggerskit/core": ["@triggerskit/core@workspace:packages/core"],
+
+    "@triggerskit/github": ["@triggerskit/github@workspace:packages/github"],
 
     "@triggerskit/telegram": ["@triggerskit/telegram@workspace:packages/telegram"],
 

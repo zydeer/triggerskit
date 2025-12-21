@@ -28,11 +28,11 @@ Bun.serve({
           text: 'Replying to specific text',
         })
 
-        if (result.data) {
-          return Response.json(result.data.chat)
+        if (!result.ok) {
+          return new Response(result.error.message)
         }
 
-        return new Response(result.error.message)
+        return Response.json(result.data.chat)
       },
     },
     '/me': {
@@ -44,7 +44,7 @@ Bun.serve({
     },
     '/raw': {
       GET: async () => {
-        const result = await kit.prettyBot.request('/getUpdates', {
+        const result = await kit.prettyBot.http('/getUpdates', {
           method: 'POST',
           body: JSON.stringify({ offset: 0, limit: 10 }),
         })
@@ -56,13 +56,11 @@ Bun.serve({
       POST: async (request) => {
         const result = await kit.handle(request)
 
-        if (result.data) {
+        if (result.ok) {
           if (result.data.provider === 'prettyBot') {
             console.log(`Webhook handled by: ${result.data.payload}`)
           }
-        }
-
-        if (result.error) {
+        } else {
           console.error('Webhook error:', result.error.message)
         }
 
