@@ -29,6 +29,7 @@ export function createActions(http: HttpClient): SlackActions {
       if (!result.ok) return result
 
       const response = result.data as { message?: unknown }
+
       return parse(MessageSchema, response.message || response)
     },
 
@@ -42,6 +43,7 @@ export function createActions(http: HttpClient): SlackActions {
       if (!result.ok) return result
 
       const response = result.data as { user?: unknown }
+
       return parse(UserSchema, response.user)
     },
 
@@ -64,7 +66,9 @@ export function createActions(http: HttpClient): SlackActions {
         : ''
 
       const result = await http(`/conversations.list${queryParams}`)
+
       if (!result.ok) return result
+
       return parse(ConversationsListSchema, result.data)
     },
   }
