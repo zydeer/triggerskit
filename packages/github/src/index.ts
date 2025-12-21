@@ -88,3 +88,5 @@ export type {
   User,
   WebhookEvent,
 } from './schemas'
+
+export default github

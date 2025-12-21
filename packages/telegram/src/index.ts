@@ -64,3 +64,5 @@ export type {
   Voice,
   WebhookInfo,
 } from './schemas'
+
+export default telegram

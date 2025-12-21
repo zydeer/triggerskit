@@ -36,6 +36,14 @@
         "zod": "^4.2.1",
       },
     },
+    "packages/slack": {
+      "name": "@triggerskit/slack",
+      "version": "0.1.15",
+      "dependencies": {
+        "@triggerskit/core": "workspace:*",
+        "zod": "^4.2.1",
+      },
+    },
     "packages/telegram": {
       "name": "@triggerskit/telegram",
       "version": "0.1.15",
@@ -55,6 +63,7 @@
       "name": "test",
       "dependencies": {
         "@triggerskit/github": "workspace:*",
+        "@triggerskit/slack": "workspace:*",
         "@triggerskit/telegram": "workspace:*",
         "triggerskit": "workspace:*",
       },
@@ -356,6 +365,8 @@
     "@triggerskit/core": ["@triggerskit/core@workspace:packages/core"],
 
     "@triggerskit/github": ["@triggerskit/github@workspace:packages/github"],
+
+    "@triggerskit/slack": ["@triggerskit/slack@workspace:packages/slack"],
 
     "@triggerskit/telegram": ["@triggerskit/telegram@workspace:packages/telegram"],
 

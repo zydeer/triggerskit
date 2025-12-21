@@ -1,22 +1,26 @@
-import { github } from '@triggerskit/github'
-import { telegram } from '@triggerskit/telegram'
-import { triggers } from 'triggerskit'
+import github from '@triggerskit/github'
+import slack from '@triggerskit/slack'
+import telegram from '@triggerskit/telegram'
+import triggers from 'triggerskit'
 import { memory } from 'triggerskit/storage'
 
 const storage = memory()
 
 export const kit = triggers({
   providers: {
-    prettyBot: telegram({
+    tl: telegram({
       token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
     }),
     gh: github({
       oauth: {
-        clientId: 'Ov23liiPYTB16I9Yfwxe',
-        clientSecret: '36affd5a5e7b12b06626d337d5a8b4516f01d4d8',
-        redirectUri: 'http://localhost:3000/auth/callback',
+        clientId: '...',
+        clientSecret: '...',
+        redirectUri: '...',
       },
       storage,
+    }),
+    sl: slack({
+      token: '...',
     }),
   },
 })
@@ -70,14 +74,14 @@ const result = Bun.serve({
     },
     '/me': {
       GET: async () => {
-        const result = await kit.prettyBot.actions.getMe()
+        const result = await kit.tl.actions.getMe()
 
         return Response.json(result)
       },
     },
     '/raw': {
       GET: async () => {
-        const result = await kit.prettyBot.http('/getUpdates', {
+        const result = await kit.tl.http('/getUpdates', {
           method: 'POST',
           body: JSON.stringify({ offset: 0, limit: 10 }),
         })
@@ -90,7 +94,7 @@ const result = Bun.serve({
         const result = await kit.handle(request)
 
         if (result.ok) {
-          if (result.data.provider === 'prettyBot') {
+          if (result.data.provider === 'tl') {
             console.log(`Webhook handled by: ${result.data.payload}`)
           }
         } else {
@@ -102,13 +106,13 @@ const result = Bun.serve({
     },
     '/webhook/telegram': {
       POST: async (request) => {
-        await kit.prettyBot.webhooks.handle(request)
+        await kit.tl.webhooks.handle(request)
         return new Response('OK')
       },
     },
     '/webhook/setup': {
       GET: async () => {
-        const result = await kit.prettyBot.webhooks.set({
+        const result = await kit.tl.webhooks.set({
           url: 'https://example.com/webhook',
           secret_token: 'my-secret-token',
         })
@@ -118,14 +122,14 @@ const result = Bun.serve({
     },
     '/webhook/info': {
       GET: async () => {
-        const result = await kit.prettyBot.webhooks.info()
+        const result = await kit.tl.webhooks.info()
 
         return Response.json(result)
       },
     },
     '/webhook/delete': {
       GET: async () => {
-        const result = await kit.prettyBot.webhooks.delete()
+        const result = await kit.tl.webhooks.delete()
 
         return Response.json(result)
       },

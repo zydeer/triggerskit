@@ -86,3 +86,5 @@ export type {
   User,
   WebhookPayload,
 } from './schemas'
+
+export default slack
