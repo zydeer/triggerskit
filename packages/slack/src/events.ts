@@ -13,5 +13,4 @@ export interface SlackEvents extends EventMap {
   reaction_added: ReactionAddedEvent
   reaction_removed: ReactionRemovedEvent
   member_joined_channel: MemberJoinedChannelEvent
-  '*': { type: string; [key: string]: unknown }
 }

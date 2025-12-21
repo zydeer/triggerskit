@@ -69,6 +69,7 @@ export function createWebhookHandler(
       }
 
       const payload = JSON.parse(body)
+
       const parsed = parse(WebhookPayloadSchema, payload)
 
       if (!parsed.ok) return parsed
@@ -86,14 +87,13 @@ export function createWebhookHandler(
           event_id: '',
           event_time: 0,
           challenge: verification.data.challenge,
-        } as unknown as SlackEvent)
+        })
       }
 
-      const event = parsed.data as SlackEvent
+      const event = parsed.data
       const eventType = event.event.type
 
-      emitter.emit(eventType as keyof SlackEvents, event.event as never)
-      emitter.emit('*', event.event)
+      emitter.emit(eventType, event.event)
 
       return ok(event)
     } catch (e) {
