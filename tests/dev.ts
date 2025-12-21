@@ -42,7 +42,7 @@ const result = Bun.serve({
       },
     },
     '/auth': {
-      GET: async () => {
+      GET: async (request) => {
         const result = await kit.gh.oauth.getAuthUrl({
           scopes: ['repo'],
         })
@@ -50,6 +50,8 @@ const result = Bun.serve({
         if (!result) {
           return new Response('Failed to generate auth URL')
         }
+
+        request.cookies.set('auth_state', result.state)
 
         return Response.redirect(result.url)
       },
