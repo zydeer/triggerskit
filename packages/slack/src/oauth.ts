@@ -76,25 +76,23 @@ export function slackOAuthFlow(config: SlackOAuthConfig): OAuthFlow {
   }
 }
 
-function normalizeSlackTokens(data: Record<string, unknown>): SlackTokens {
+function normalizeSlackTokens(data: any): SlackTokens {
   const base = normalizeTokens(data)
 
   return {
     ...base,
-    team: data.team as SlackTokens['team'],
-    enterprise: data.enterprise as SlackTokens['enterprise'],
+    team: data.team,
+    enterprise: data.enterprise,
     authedUser: data.authed_user
       ? {
-          id: (data.authed_user as Record<string, unknown>).id as string,
-          scope: (data.authed_user as Record<string, unknown>).scope as string,
-          accessToken: (data.authed_user as Record<string, unknown>)
-            .access_token as string,
-          tokenType: (data.authed_user as Record<string, unknown>)
-            .token_type as string,
+          id: data.authed_user.id,
+          scope: data.authed_user.scope,
+          accessToken: data.authed_user.access_token,
+          tokenType: data.authed_user.token_type,
         }
       : undefined,
-    botUserId: data.bot_user_id as string | undefined,
-    appId: data.app_id as string | undefined,
+    botUserId: data.bot_user_id,
+    appId: data.app_id,
   }
 }
 

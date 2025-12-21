@@ -56,13 +56,10 @@ export interface OAuthProvider<
 }
 
 export type WebhookPayload<T> =
-  // biome-ignore lint/suspicious/noExplicitAny: needed for type extraction
   T extends Provider<string, any, EventMap, infer P> ? P : unknown
 
 export type ProviderActions<T> =
-  // biome-ignore lint/suspicious/noExplicitAny: needed for type extraction
   T extends Provider<string, infer A, any> ? A : never
 
 export type ProviderEvents<T> =
-  // biome-ignore lint/suspicious/noExplicitAny: needed for type extraction
   T extends Provider<string, any, infer E> ? E : never

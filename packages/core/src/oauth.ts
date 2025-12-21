@@ -88,17 +88,17 @@ function generateState(): string {
 /**
  * Normalize a snake_case token response to camelCase OAuthTokens.
  */
-export function normalizeTokens(data: Record<string, unknown>): OAuthTokens {
+export function normalizeTokens(data: any): OAuthTokens {
   const expiresIn =
     typeof data.expires_in === 'number' ? data.expires_in : undefined
 
   return {
-    accessToken: data.access_token as string,
-    refreshToken: data.refresh_token as string | undefined,
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
     expiresIn,
     expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
-    tokenType: data.token_type as string | undefined,
-    scope: data.scope as string | undefined,
+    tokenType: data.token_type,
+    scope: data.scope,
   }
 }
 
