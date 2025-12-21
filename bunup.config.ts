@@ -21,6 +21,10 @@ export default defineWorkspace(
       name: 'github',
       root: 'packages/github',
     },
+    {
+      name: 'slack',
+      root: 'packages/slack',
+    },
   ],
   {
     exports: true,

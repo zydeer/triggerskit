@@ -1,0 +1,30 @@
+{
+  "name": "@triggerskit/slack",
+  "description": "TriggersKit Slack Adapter",
+  "version": "0.1.15",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zydeer/triggerskit.git"
+  },
+  "dependencies": {
+    "@triggerskit/core": "workspace:*",
+    "zod": "^4.2.1"
+  },
+  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
+  "license": "MIT"
+}
