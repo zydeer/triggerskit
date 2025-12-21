@@ -8,10 +8,10 @@ const storage = memory()
 
 export const kit = triggers({
   providers: {
-    tl: telegram({
+    telegram: telegram({
       token: '8012216171:AAEoYSKa0aCyAILgErMC1TiSLtkZLxfVisI',
     }),
-    gh: github({
+    github: github({
       oauth: {
         clientId: '...',
         clientSecret: '...',
@@ -19,7 +19,7 @@ export const kit = triggers({
       },
       storage,
     }),
-    sl: slack({
+    slack: slack({
       token: '...',
     }),
   },
@@ -30,7 +30,7 @@ const USER_ID = '1234567890'
 const result = Bun.serve({
   routes: {
     '/': async () => {
-      const userGithub = kit.gh.forUser(USER_ID)
+      const userGithub = kit.github.forUser(USER_ID)
 
       const isAuthenticated = await userGithub.oauth.isAuthenticated()
 
@@ -38,16 +38,17 @@ const result = Bun.serve({
         return Response.redirect('/auth')
       }
 
-      const user = await userGithub.actions.getUser()
+      const repo = await userGithub.actions.getRepo({
+        owner: 'bunup',
+        repo: 'bunup',
+      })
 
-      return Response.json(user)
+      return Response.json(repo)
     },
     '/auth': async (req) => {
-      const userGithub = kit.gh.forUser(USER_ID)
+      const userGithub = kit.github.forUser(USER_ID)
 
-      const result = await userGithub.oauth.getAuthUrl({
-        scopes: ['user'],
-      })
+      const result = await userGithub.oauth.getAuthUrl()
 
       req.cookies.set('auth_state', result.state)
 
@@ -55,13 +56,9 @@ const result = Bun.serve({
     },
     '/auth/callback': async (req) => {
       const url = new URL(req.url)
-      const code = url.searchParams.get('code')
+      const code = url.searchParams.get('code')!
 
-      if (!code) {
-        return new Response('Missing code', { status: 400 })
-      }
-
-      const userGithub = kit.gh.forUser(USER_ID)
+      const userGithub = kit.github.forUser(USER_ID)
 
       const state = req.cookies.get('auth_state')!
 
