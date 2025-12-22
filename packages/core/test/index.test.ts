@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { createEmitter } from '../src'
+import { createEmitter } from '../src/events'
 
 describe('EventEmitter', () => {
   it('emits and receives events', () => {
