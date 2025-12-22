@@ -65,7 +65,7 @@ const result = Bun.serve({
       const result = await userGithub.oauth.handleCallback(code, state)
 
       if (!result.ok) {
-        return new Response('Auth failed!', { status: 400 })
+        return new Response(result.error.message, { status: 400 })
       }
 
       return Response.redirect('/')

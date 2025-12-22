@@ -114,7 +114,7 @@ export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
   namespace: string
   /** User ID for storing tokens (each user gets isolated tokens) */
   tokenKey: string
-  /** Enable PKCE (RFC 7636). Default: false */
+  /** Enable PKCE (RFC 7636) */
   usePKCE?: boolean
 }
 
@@ -129,7 +129,6 @@ const TOKENS_PREFIX = 'oauth:tokens:'
 
 interface StoredState {
   state: string
-  ts: number
   codeVerifier?: string
 }
 
@@ -155,8 +154,8 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
 ): OAuth<TTokens> {
   const { flow, storage, namespace, tokenKey, usePKCE = false } = options
 
-  const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
-  const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
+  const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}:${state}`
+  const tokensKey = () => `${namespace}:${TOKENS_PREFIX}:${tokenKey}`
 
   const getTokens = async (): Promise<TTokens | null> => {
     const tokens = await storage.get<TTokens>(tokensKey())
@@ -198,7 +197,7 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
 
       await storage.set(
         stateKey(state),
-        { state, ts: Date.now(), codeVerifier } satisfies StoredState,
+        { state, codeVerifier } satisfies StoredState,
         STATE_TTL,
       )
 
