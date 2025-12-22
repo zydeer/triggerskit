@@ -1,11 +1,14 @@
 import type { Storage } from '@triggerskit/core'
 
 interface Entry {
+  /** The stored value */
   value: unknown
+  /** Expiration timestamp in milliseconds, or null if no expiration */
   expiresAt: number | null
 }
 
 export interface MemoryStorageOptions {
+  /** Cleanup interval in milliseconds for expired entries */
   cleanupInterval?: number
 }
 

@@ -8,12 +8,14 @@ export interface RedisClient {
 }
 
 export interface RedisStorageOptions {
+  /** Redis client instance */
   client: RedisClient
+  /** Optional key prefix for namespacing */
   prefix?: string
 }
 
 /**
- * Redis storage adapter for production use.
+ * Redis storage adapter.
  *
  * @example
  * ```ts
