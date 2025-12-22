@@ -13,6 +13,7 @@ export type {
   OAuthFlow,
   OAuthOptions,
   OAuthTokens,
+  PKCEParams,
 } from './oauth'
 export { createOAuth, standardOAuthFlow } from './oauth'
 export type {

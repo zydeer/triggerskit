@@ -1,3 +1,5 @@
+import * as sha2 from '@oslojs/crypto/sha2'
+import * as encoding from '@oslojs/encoding'
 import type { Result } from './result'
 import { err, ok } from './result'
 import type { Storage } from './storage'
@@ -18,6 +20,16 @@ export interface OAuthTokens {
 }
 
 /**
+ * PKCE parameters for OAuth 2.0 (RFC 7636).
+ */
+export interface PKCEParams {
+  /** The code challenge derived from code_verifier */
+  codeChallenge: string
+  /** The code challenge method (S256 or plain) */
+  codeChallengeMethod: 'S256' | 'plain'
+}
+
+/**
  * Defines how to perform OAuth for a specific provider.
  */
 export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
@@ -25,14 +37,20 @@ export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
    * Build the authorization URL users will be redirected to.
    * @param state - The state parameter for CSRF protection
    * @param scopes - Optional array of OAuth scopes to request
+   * @param pkce - Optional PKCE parameters if PKCE is enabled
    */
-  getAuthorizationUrl(state: string, scopes?: string[]): string
+  getAuthorizationUrl(
+    state: string,
+    scopes?: string[],
+    pkce?: PKCEParams,
+  ): string
 
   /**
    * Exchange the authorization code for tokens.
    * @param code - The authorization code from the OAuth callback
+   * @param codeVerifier - Optional PKCE code verifier if PKCE is enabled
    */
-  exchangeCode(code: string): Promise<TTokens>
+  exchangeCode(code: string, codeVerifier?: string): Promise<TTokens>
 
   /**
    * Refresh an expired token. Optional - not all providers support refresh.
@@ -41,9 +59,6 @@ export interface OAuthFlow<TTokens extends OAuthTokens = OAuthTokens> {
   refreshToken?(refreshToken: string): Promise<TTokens>
 }
 
-/**
- * OAuth interface returned by createOAuth.
- */
 export interface OAuth<TTokens extends OAuthTokens = OAuthTokens> {
   /**
    * Get the authorization URL to redirect users to.
@@ -99,9 +114,10 @@ export interface OAuthOptions<TTokens extends OAuthTokens = OAuthTokens> {
   namespace: string
   /** User ID for storing tokens (each user gets isolated tokens) */
   tokenKey: string
+  /** Enable PKCE (RFC 7636). Default: false */
+  usePKCE?: boolean
 }
 
-/** Base configuration for OAuth providers */
 export interface BaseOAuthConfig {
   /** Storage backend for tokens */
   storage: Storage
@@ -114,18 +130,30 @@ const TOKENS_PREFIX = 'oauth:tokens:'
 interface StoredState {
   state: string
   ts: number
+  codeVerifier?: string
 }
 
-function generateState(): string {
-  const array = new Uint8Array(32)
-  crypto.getRandomValues(array)
-  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
+export function createS256CodeChallenge(codeVerifier: string): string {
+  const codeChallengeBytes = sha2.sha256(new TextEncoder().encode(codeVerifier))
+  return encoding.encodeBase64urlNoPadding(codeChallengeBytes)
+}
+
+export function generateCodeVerifier(): string {
+  const randomValues = new Uint8Array(32)
+  crypto.getRandomValues(randomValues)
+  return encoding.encodeBase64urlNoPadding(randomValues)
+}
+
+export function generateState(): string {
+  const randomValues = new Uint8Array(32)
+  crypto.getRandomValues(randomValues)
+  return encoding.encodeBase64urlNoPadding(randomValues)
 }
 
 export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
   options: OAuthOptions<TTokens>,
 ): OAuth<TTokens> {
-  const { flow, storage, namespace, tokenKey } = options
+  const { flow, storage, namespace, tokenKey, usePKCE = false } = options
 
   const stateKey = (state: string) => `${namespace}:${STATE_PREFIX}${state}`
   const tokensKey = () => `${namespace}:${TOKENS_PREFIX}${tokenKey}`
@@ -155,12 +183,26 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
   return {
     async getAuthUrl(opts) {
       const state = opts?.state ?? generateState()
+
+      let pkceParams: PKCEParams | undefined
+      let codeVerifier: string | undefined
+
+      if (usePKCE) {
+        codeVerifier = generateCodeVerifier()
+        const codeChallenge = createS256CodeChallenge(codeVerifier)
+        pkceParams = {
+          codeChallenge,
+          codeChallengeMethod: 'S256',
+        }
+      }
+
       await storage.set(
         stateKey(state),
-        { state, ts: Date.now() } satisfies StoredState,
+        { state, ts: Date.now(), codeVerifier } satisfies StoredState,
         STATE_TTL,
       )
-      const url = flow.getAuthorizationUrl(state, opts?.scopes)
+
+      const url = flow.getAuthorizationUrl(state, opts?.scopes, pkceParams)
       return { url, state }
     },
 
@@ -172,7 +214,7 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
         }
 
         await storage.delete(stateKey(state))
-        const tokens = await flow.exchangeCode(code)
+        const tokens = await flow.exchangeCode(code, stored.codeVerifier)
         await storage.set(tokensKey(), tokens)
 
         return ok({ success: true })
@@ -242,7 +284,7 @@ export function standardOAuthFlow(
   }
 
   return {
-    getAuthorizationUrl(state, requestScopes) {
+    getAuthorizationUrl(state, requestScopes, pkce) {
       const url = new URL(authUrl)
       url.searchParams.set('client_id', clientId)
       url.searchParams.set('redirect_uri', redirectUri)
@@ -254,23 +296,34 @@ export function standardOAuthFlow(
         url.searchParams.set('scope', finalScopes.join(' '))
       }
 
+      if (pkce) {
+        url.searchParams.set('code_challenge', pkce.codeChallenge)
+        url.searchParams.set('code_challenge_method', pkce.codeChallengeMethod)
+      }
+
       return url.toString()
     },
 
-    async exchangeCode(code) {
+    async exchangeCode(code, codeVerifier) {
+      const bodyParams: Record<string, string> = {
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        code,
+      }
+
+      if (codeVerifier) {
+        bodyParams.code_verifier = codeVerifier
+      }
+
       const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
         },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUri,
-          code,
-        }),
+        body: new URLSearchParams(bodyParams),
       })
 
       if (!response.ok) {

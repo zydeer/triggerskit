@@ -24,6 +24,8 @@
   "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/core#readme",
   "license": "MIT",
   "dependencies": {
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
     "zod": "^4.2.1"
   }
 }

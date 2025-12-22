@@ -25,5 +25,6 @@ export function createGitHubOAuth(
     storage,
     namespace: 'github',
     tokenKey: userId,
+    usePKCE: true,
   })
 }
