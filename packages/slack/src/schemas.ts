@@ -4,6 +4,7 @@ import { z } from 'zod'
  * Represents a Slack user.
  *
  * @see https://api.slack.com/types/user
+ * @see https://api.slack.com/methods/users.info
  */
 export const UserSchema = z
   .object({
@@ -67,6 +68,10 @@ export const UserSchema = z
           .optional()
           .meta({ description: 'Normalized display name.' }),
         email: z.string().optional().meta({ description: 'Email address.' }),
+        image_original: z
+          .string()
+          .optional()
+          .meta({ description: 'URL of original avatar image.' }),
         image_24: z
           .string()
           .optional()
@@ -126,6 +131,13 @@ export const UserSchema = z
       .boolean()
       .optional()
       .meta({ description: 'Whether the user is an app user.' }),
+    has_2fa: z.boolean().optional().meta({
+      description: 'Whether the user has two-factor authentication enabled.',
+    }),
+    is_stranger: z.boolean().optional().meta({
+      description:
+        'Whether the user belongs to a foreign workspace party to a shared channel.',
+    }),
   })
   .meta({
     description: 'Represents a Slack user.',
@@ -134,9 +146,179 @@ export const UserSchema = z
 export type User = z.infer<typeof UserSchema>
 
 /**
+ * Block Kit text object.
+ *
+ * @see https://api.slack.com/reference/block-kit/composition-objects#text
+ */
+export const BlockKitTextSchema = z
+  .object({
+    type: z.enum(['plain_text', 'mrkdwn']).meta({
+      description: 'The formatting to use for this text object.',
+    }),
+    text: z.string().meta({ description: 'The text for the block.' }),
+    emoji: z.boolean().optional().meta({
+      description:
+        'Indicates whether emojis in a text field should be escaped into the colon emoji format.',
+    }),
+    verbatim: z.boolean().optional().meta({
+      description:
+        'When set to false (as is default) URLs will be auto-converted into links.',
+    }),
+  })
+  .meta({
+    description: 'Block Kit text object.',
+  })
+
+export type BlockKitText = z.infer<typeof BlockKitTextSchema>
+
+/**
+ * Block Kit block element (simplified structure for type safety).
+ * For full Block Kit documentation, see: https://api.slack.com/block-kit
+ */
+export const BlockKitBlockSchema: z.ZodType<any> = z
+  .object({
+    type: z.string().meta({ description: 'The type of block.' }),
+  })
+  .passthrough()
+  .meta({
+    description:
+      'Block Kit block element. See https://api.slack.com/block-kit for full documentation.',
+  })
+
+export type BlockKitBlock = z.infer<typeof BlockKitBlockSchema>
+
+/**
+ * Legacy message attachment.
+ *
+ * @see https://api.slack.com/reference/messaging/attachments
+ */
+export const AttachmentSchema = z
+  .object({
+    fallback: z
+      .string()
+      .optional()
+      .meta({ description: 'A plain-text summary of the attachment.' }),
+    color: z.string().optional().meta({
+      description: 'Color bar along the left side of the attachment.',
+    }),
+    pretext: z
+      .string()
+      .optional()
+      .meta({ description: 'Text that appears above the attachment block.' }),
+    author_name: z
+      .string()
+      .optional()
+      .meta({ description: 'Small text used to display the author name.' }),
+    author_link: z.string().optional().meta({
+      description: 'A valid URL that will hyperlink the author_name text.',
+    }),
+    author_icon: z.string().optional().meta({
+      description:
+        'A valid URL that displays a small 16x16px image to the left of the author_name text.',
+    }),
+    title: z.string().optional().meta({
+      description:
+        'The title is displayed as larger, bold text near the top of a message attachment.',
+    }),
+    title_link: z.string().optional().meta({
+      description: 'A valid URL that turns the title text into a hyperlink.',
+    }),
+    text: z
+      .string()
+      .optional()
+      .meta({ description: 'The main text in a message attachment.' }),
+    fields: z
+      .array(
+        z.object({
+          title: z
+            .string()
+            .optional()
+            .meta({ description: 'The title may not contain markup.' }),
+          value: z
+            .string()
+            .optional()
+            .meta({ description: 'The value of the field.' }),
+          short: z.boolean().optional().meta({
+            description:
+              'Whether the field object is short enough to be displayed side-by-side with other field objects.',
+          }),
+        }),
+      )
+      .optional()
+      .meta({ description: 'An array of field objects.' }),
+    image_url: z.string().optional().meta({
+      description:
+        'A valid URL to an image file that will be displayed inside a message attachment.',
+    }),
+    thumb_url: z.string().optional().meta({
+      description:
+        'A valid URL to an image file that will be displayed as a thumbnail on the right side of a message attachment.',
+    }),
+    footer: z.string().optional().meta({
+      description:
+        'Add some brief text to help contextualize and identify an attachment.',
+    }),
+    footer_icon: z.string().optional().meta({
+      description:
+        'A valid URL to an image file that will be displayed beside the footer text.',
+    }),
+    ts: z.number().optional().meta({
+      description:
+        'A Unix timestamp that is used to relate your attachment to a specific time.',
+    }),
+    id: z
+      .number()
+      .optional()
+      .meta({ description: 'A unique identifier for the attachment.' }),
+  })
+  .passthrough()
+  .meta({
+    description:
+      'Legacy message attachment. See https://api.slack.com/reference/messaging/attachments for full documentation.',
+  })
+
+export type Attachment = z.infer<typeof AttachmentSchema>
+
+/**
+ * Message metadata object.
+ *
+ * @see https://api.slack.com/methods/chat.postMessage
+ */
+export const MessageMetadataSchema = z
+  .object({
+    event_type: z.string().meta({
+      description: 'The type of event associated with this message.',
+    }),
+    event_payload: z
+      .record(
+        z.string(),
+        z.union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.null(),
+          z.array(z.any()),
+          z.record(z.string(), z.any()),
+        ]),
+      )
+      .meta({
+        description:
+          'The payload of the event. Can contain strings, numbers, booleans, null, arrays, or nested objects.',
+      }),
+  })
+  .passthrough()
+  .meta({
+    description:
+      'JSON object with event_type and event_payload fields. You can also provide Work Object entity metadata using this parameter.',
+  })
+
+export type MessageMetadata = z.infer<typeof MessageMetadataSchema>
+
+/**
  * Represents a Slack message.
  *
  * @see https://api.slack.com/messaging/retrieving#individual_messages
+ * @see https://api.slack.com/methods/chat.postMessage
  */
 export const MessageSchema = z
   .object({
@@ -169,12 +351,16 @@ export const MessageSchema = z
       .string()
       .optional()
       .meta({ description: 'Thread timestamp if message is in a thread.' }),
+    username: z
+      .string()
+      .optional()
+      .meta({ description: 'Username of the bot that sent the message.' }),
     blocks: z
-      .array(z.unknown())
+      .array(BlockKitBlockSchema)
       .optional()
       .meta({ description: 'Block Kit blocks for rich formatting.' }),
     attachments: z
-      .array(z.unknown())
+      .array(AttachmentSchema)
       .optional()
       .meta({ description: 'Legacy message attachments.' }),
   })
@@ -442,40 +628,84 @@ export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>
 /**
  * Parameters for posting a message to a channel.
  *
+ * Sends a message to a channel.
+ *
  * @see https://api.slack.com/methods/chat.postMessage
  */
 export const PostMessageParamsSchema = z
   .object({
-    channel: z
-      .string()
-      .min(1)
-      .meta({ description: 'Channel ID or name to post message to.' }),
-    text: z
-      .string()
-      .optional()
-      .meta({ description: 'Message text (required if blocks not provided).' }),
-    blocks: z
-      .array(z.unknown())
-      .optional()
-      .meta({ description: 'Block Kit blocks for rich formatting.' }),
-    attachments: z
-      .array(z.unknown())
-      .optional()
-      .meta({ description: 'Legacy message attachments.' }),
-    thread_ts: z
-      .string()
-      .optional()
-      .meta({ description: 'Thread timestamp to reply to.' }),
-    reply_broadcast: z
-      .boolean()
-      .optional()
-      .meta({ description: 'Whether to broadcast thread reply to channel.' }),
+    channel: z.string().min(1).meta({
+      description:
+        'An encoded ID or channel name that represents a channel, private group, or IM channel to send the message to.',
+    }),
+    text: z.string().max(40000).optional().meta({
+      description:
+        'How this field works and whether it is required depends on other fields you use in your API call. If you are using blocks, this is used as a fallback string to display in notifications. If you are not using blocks, this is the main body text of the message. It can be formatted as plain text, or with mrkdwn.',
+    }),
+    as_user: z.boolean().optional().meta({
+      description:
+        '(Legacy) Pass true to post the message as the authed user instead of as a bot. Defaults to false. Can only be used by classic apps.',
+    }),
+    attachments: z.array(AttachmentSchema).max(100).optional().meta({
+      description:
+        'A JSON-based array of structured attachments, presented as a URL-encoded string.',
+    }),
+    blocks: z.array(BlockKitBlockSchema).optional().meta({
+      description:
+        'A JSON-based array of structured blocks, presented as a URL-encoded string.',
+    }),
+    current_draft_last_updated_ts: z.string().optional().meta({
+      description:
+        "This field represents the timestamp of the draft's last update at the time this API is called. If the current message is a draft, this field can be provided to ensure synchronization with the server.",
+    }),
+    icon_emoji: z.string().optional().meta({
+      description:
+        'Emoji to use as the icon for this message. Overrides icon_url.',
+    }),
+    icon_url: z.string().url().optional().meta({
+      description: 'URL to an image to use as the icon for this message.',
+    }),
+    link_names: z.boolean().optional().meta({
+      description:
+        'Find and link user groups. No longer supports linking individual users; use syntax shown in Mentioning Users instead.',
+    }),
+    markdown_text: z.string().max(12000).optional().meta({
+      description:
+        'Accepts message text formatted in markdown. This argument should not be used in conjunction with blocks or text. Limit this field to 12,000 characters.',
+    }),
+    metadata: MessageMetadataSchema.optional().meta({
+      description:
+        'JSON object with event_type and event_payload fields, presented as a URL-encoded string. You can also provide Work Object entity metadata using this parameter. Metadata you post to Slack is accessible to any app or user who is a member of that workspace.',
+    }),
     mrkdwn: z.boolean().optional().meta({
-      description: 'Whether to enable markdown formatting (default: true).',
+      description:
+        'Disable Slack markup parsing by setting to false. Enabled by default.',
+    }),
+    parse: z.enum(['full', 'none']).optional().meta({
+      description: 'Change how messages are treated.',
+    }),
+    reply_broadcast: z.boolean().optional().meta({
+      description:
+        'Used in conjunction with thread_ts and indicates whether reply should be made visible to everyone in the channel or conversation. Defaults to false.',
+    }),
+    thread_ts: z.string().optional().meta({
+      description:
+        "Provide another message's ts value to make this message a reply. Avoid using a reply's ts value; use its parent instead.",
+    }),
+    unfurl_links: z.boolean().optional().meta({
+      description:
+        'Pass true to enable unfurling of primarily text-based content.',
+    }),
+    unfurl_media: z.boolean().optional().meta({
+      description: 'Pass false to disable unfurling of media content.',
+    }),
+    username: z.string().optional().meta({
+      description: "Set your bot's user name.",
     }),
   })
   .meta({
-    description: 'Parameters for posting a message to a channel.',
+    description:
+      'Parameters for posting a message to a channel. Sends a message to a channel.',
   })
 
 export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>
@@ -483,17 +713,21 @@ export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>
 /**
  * Parameters for getting user information.
  *
+ * Gets information about a user.
+ *
  * @see https://api.slack.com/methods/users.info
  */
 export const GetUserInfoParamsSchema = z
   .object({
-    user: z
-      .string()
-      .min(1)
-      .meta({ description: 'User ID to get information for.' }),
+    user: z.string().min(1).meta({ description: 'User to get info on' }),
+    include_locale: z.boolean().optional().meta({
+      description:
+        'Set this to true to receive the locale for this user. Defaults to false',
+    }),
   })
   .meta({
-    description: 'Parameters for getting user information.',
+    description:
+      'Parameters for getting user information. Gets information about a user.',
   })
 
 export type GetUserInfoParams = z.infer<typeof GetUserInfoParamsSchema>
@@ -501,35 +735,36 @@ export type GetUserInfoParams = z.infer<typeof GetUserInfoParamsSchema>
 /**
  * Parameters for listing conversations (channels).
  *
+ * Lists all channels in a Slack team.
+ *
  * @see https://api.slack.com/methods/conversations.list
  */
 export const ListConversationsParamsSchema = z
   .object({
-    cursor: z
-      .string()
-      .optional()
-      .meta({ description: 'Pagination cursor from previous response.' }),
+    cursor: z.string().optional().meta({
+      description:
+        'Paginate through collections of data by setting the cursor parameter to a next_cursor attribute returned by a previous request\'s response_metadata. Default value fetches the first "page" of the collection.',
+    }),
     exclude_archived: z.boolean().optional().meta({
-      description: 'Whether to exclude archived channels (default: false).',
+      description:
+        'Set to true to exclude archived channels from the list. Default: false',
     }),
     limit: z.number().min(1).max(1000).optional().meta({
       description:
-        'Maximum number of results to return (default: 100, max: 1000).',
+        "The maximum number of items to return. Fewer than the requested number of items may be returned, even if the end of the list hasn't been reached. Must be an integer under 1000. Default: 100",
     }),
-    team_id: z
-      .string()
-      .optional()
-      .meta({ description: 'Team ID (for Enterprise Grid).' }),
-    types: z
-      .array(z.enum(['public_channel', 'private_channel', 'mpim', 'im']))
-      .optional()
-      .meta({
-        description:
-          'Array of channel types to include (public_channel, private_channel, mpim, im).',
-      }),
+    team_id: z.string().optional().meta({
+      description:
+        'Encoded team id to list channels in, required if token belongs to org-wide app',
+    }),
+    types: z.string().optional().meta({
+      description:
+        'Mix and match channel types by providing a comma-separated list of any combination of public_channel, private_channel, mpim, im. Default: public_channel',
+    }),
   })
   .meta({
-    description: 'Parameters for listing conversations (channels).',
+    description:
+      'Parameters for listing conversations (channels). Lists all channels in a Slack team.',
   })
 
 export type ListConversationsParams = z.infer<
@@ -540,58 +775,77 @@ export type ListConversationsParams = z.infer<
  * Represents a Slack channel/conversation.
  *
  * @see https://api.slack.com/types/conversation
+ * @see https://api.slack.com/methods/conversations.list
  */
 export const ChannelSchema = z
   .object({
     id: z.string().meta({ description: 'Unique identifier for the channel.' }),
-    name: z.string().meta({ description: 'Channel name.' }),
+    name: z.string().optional().meta({ description: 'Channel name.' }),
     is_channel: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether this is a public channel.' }),
     is_group: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether this is a private channel.' }),
     is_im: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether this is a direct message.' }),
     is_mpim: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether this is a multi-person direct message.' }),
     is_private: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether the channel is private.' }),
     created: z
       .number()
+      .optional()
       .meta({ description: 'Unix timestamp of channel creation.' }),
     is_archived: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether the channel is archived.' }),
     is_general: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether this is the #general channel.' }),
     unlinked: z
       .number()
+      .optional()
       .meta({ description: 'Number of times channel has been unlinked.' }),
     name_normalized: z
       .string()
+      .optional()
       .meta({ description: 'Normalized channel name.' }),
-    is_shared: z.boolean().meta({
+    is_shared: z.boolean().optional().meta({
       description: 'Whether the channel is shared with another workspace.',
     }),
-    is_org_shared: z.boolean().meta({
+    is_ext_shared: z
+      .boolean()
+      .optional()
+      .meta({ description: 'Whether the channel is externally shared.' }),
+    is_org_shared: z.boolean().optional().meta({
       description: 'Whether the channel is shared across an organization.',
     }),
     is_pending_ext_shared: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether external sharing is pending.' }),
     pending_shared: z
       .array(z.string())
+      .optional()
       .meta({ description: 'List of pending shared workspace IDs.' }),
     context_team_id: z
       .string()
+      .optional()
       .meta({ description: 'Team/workspace ID for context.' }),
     updated: z
       .number()
+      .optional()
       .meta({ description: 'Unix timestamp of last channel update.' }),
     parent_conversation: z
       .string()
@@ -599,18 +853,19 @@ export const ChannelSchema = z
       .meta({ description: 'Parent conversation ID (for threads).' }),
     creator: z
       .string()
+      .optional()
       .meta({ description: 'User ID who created the channel.' }),
-    is_ext_shared: z
-      .boolean()
-      .meta({ description: 'Whether the channel is externally shared.' }),
     shared_team_ids: z
       .array(z.string())
+      .optional()
       .meta({ description: 'List of team IDs this channel is shared with.' }),
     pending_connected_team_ids: z
       .array(z.string())
+      .optional()
       .meta({ description: 'List of pending connected team IDs.' }),
     is_member: z
       .boolean()
+      .optional()
       .meta({ description: 'Whether the authenticated user is a member.' }),
     topic: z
       .object({
@@ -642,6 +897,29 @@ export const ChannelSchema = z
       .number()
       .optional()
       .meta({ description: 'Number of members in the channel.' }),
+    user: z
+      .string()
+      .optional()
+      .meta({ description: 'User ID for direct message channels.' }),
+    is_user_deleted: z
+      .boolean()
+      .optional()
+      .meta({ description: 'Whether the user in a DM has been deleted.' }),
+    is_open: z
+      .boolean()
+      .optional()
+      .meta({ description: 'Whether the channel is open.' }),
+    priority: z
+      .number()
+      .optional()
+      .meta({ description: 'Priority value for the channel.' }),
+    unread_count: z
+      .number()
+      .optional()
+      .meta({ description: 'Unread count (for DM conversations only).' }),
+    unread_count_display: z.number().optional().meta({
+      description: 'Unread count display (for DM conversations only).',
+    }),
   })
   .meta({
     description: 'Represents a Slack channel/conversation.',
@@ -681,6 +959,8 @@ export type ConversationsList = z.infer<typeof ConversationsListSchema>
 /**
  * Response data from auth.test method.
  *
+ * Checks authentication & identity.
+ *
  * @see https://api.slack.com/methods/auth.test
  */
 export const AuthTestDataSchema = z
@@ -705,9 +985,14 @@ export const AuthTestDataSchema = z
       .boolean()
       .optional()
       .meta({ description: 'Whether this is an Enterprise Grid install.' }),
+    enterprise_id: z.string().optional().meta({
+      description:
+        'When working against a team within an Enterprise organization, you will also find their enterprise_id here.',
+    }),
   })
   .meta({
-    description: 'Response data from auth.test method.',
+    description:
+      'Response data from auth.test method. Checks authentication & identity.',
   })
 
 export type AuthTestData = z.infer<typeof AuthTestDataSchema>

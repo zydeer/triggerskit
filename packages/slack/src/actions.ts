@@ -28,8 +28,14 @@ export function createActions(http: HttpClient): SlackActions {
       })
       if (!result.ok) return result
 
-      const response = result.data as { message?: unknown }
+      const response = result.data as {
+        channel?: string
+        ts?: string
+        message?: unknown
+      }
 
+      // The response includes channel, ts, and message fields
+      // Return the message object which contains the full message data
       return parse(MessageSchema, response.message || response)
     },
 
@@ -37,9 +43,17 @@ export function createActions(http: HttpClient): SlackActions {
       const validated = parse(GetUserInfoParamsSchema, params)
       if (!validated.ok) return validated
 
-      const result = await http(
-        `/users.info?user=${encodeURIComponent(validated.data.user)}`,
-      )
+      const queryParams = new URLSearchParams({
+        user: validated.data.user,
+      })
+      if (validated.data.include_locale !== undefined) {
+        queryParams.append(
+          'include_locale',
+          String(validated.data.include_locale),
+        )
+      }
+
+      const result = await http(`/users.info?${queryParams.toString()}`)
       if (!result.ok) return result
 
       const response = result.data as { user?: unknown }
@@ -58,11 +72,7 @@ export function createActions(http: HttpClient): SlackActions {
             Object.entries(params).reduce(
               (acc, [key, value]) => {
                 if (value !== undefined) {
-                  if (key === 'types' && Array.isArray(value)) {
-                    acc[key] = value.join(',')
-                  } else {
-                    acc[key] = String(value)
-                  }
+                  acc[key] = String(value)
                 }
                 return acc
               },
