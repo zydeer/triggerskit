@@ -111,6 +111,11 @@ const STATE_TTL = 600
 const STATE_PREFIX = 'oauth:state:'
 const TOKENS_PREFIX = 'oauth:tokens:'
 
+interface StoredState {
+  state: string
+  ts: number
+}
+
 function generateState(): string {
   const array = new Uint8Array(32)
   crypto.getRandomValues(array)
@@ -150,14 +155,18 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
   return {
     async getAuthUrl(opts) {
       const state = opts?.state ?? generateState()
-      await storage.set(stateKey(state), { state, ts: Date.now() }, STATE_TTL)
+      await storage.set(
+        stateKey(state),
+        { state, ts: Date.now() } satisfies StoredState,
+        STATE_TTL,
+      )
       const url = flow.getAuthorizationUrl(state, opts?.scopes)
       return { url, state }
     },
 
     async handleCallback(code, state) {
       try {
-        const stored = await storage.get<{ state: string }>(stateKey(state))
+        const stored = await storage.get<StoredState>(stateKey(state))
         if (!stored) {
           return err({ message: 'Invalid or expired OAuth state' })
         }
