@@ -1,4 +1,5 @@
-import { createEmitter, TriggersError } from '@triggerskit/core'
+import { createEmitter } from '@triggerskit/core/events'
+import { TriggersError } from '@triggerskit/core/result'
 import { createActions } from './actions'
 import { createSlackClient } from './client'
 import type { SlackEvents } from './events'

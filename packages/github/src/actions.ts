@@ -1,4 +1,5 @@
-import { type HttpClient, parse, type Result } from '@triggerskit/core'
+import type { HttpClient } from '@triggerskit/core/http'
+import { parse, type Result } from '@triggerskit/core/result'
 import { z } from 'zod'
 import {
   type Comment,

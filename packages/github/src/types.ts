@@ -1,12 +1,11 @@
+import type { BaseOAuthConfig, OAuthTokens } from '@triggerskit/core/oauth'
 import type {
   ActionsMap,
-  BaseOAuthConfig,
   OAuthProvider,
-  OAuthTokens,
   Provider,
   ProviderWebhooks,
-  Result,
-} from '@triggerskit/core'
+} from '@triggerskit/core/provider'
+import type { Result } from '@triggerskit/core/result'
 import type { GitHubEvents } from './events'
 import type { GitHubOAuth } from './oauth'
 import type {

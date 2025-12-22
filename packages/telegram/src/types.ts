@@ -2,8 +2,8 @@ import type {
   ActionsMap,
   Provider,
   ProviderWebhooks,
-  Result,
-} from '@triggerskit/core'
+} from '@triggerskit/core/provider'
+import type { Result } from '@triggerskit/core/result'
 import type { TelegramEvents } from './events'
 import type {
   GetMeData,

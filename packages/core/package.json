@@ -6,13 +6,41 @@
   "files": [
     "dist"
   ],
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
+    "./oauth": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/oauth.d.ts",
+        "default": "./dist/oauth.js"
+      }
+    },
+    "./http": {
+      "import": {
+        "types": "./dist/http.d.ts",
+        "default": "./dist/http.js"
+      }
+    },
+    "./storage": {
+      "import": {
+        "types": "./dist/storage.d.ts",
+        "default": "./dist/storage.js"
+      }
+    },
+    "./result": {
+      "import": {
+        "types": "./dist/result.d.ts",
+        "default": "./dist/result.js"
+      }
+    },
+    "./events": {
+      "import": {
+        "types": "./dist/events.d.ts",
+        "default": "./dist/events.js"
+      }
+    },
+    "./provider": {
+      "import": {
+        "types": "./dist/provider.d.ts",
+        "default": "./dist/provider.js"
       }
     },
     "./package.json": "./package.json"

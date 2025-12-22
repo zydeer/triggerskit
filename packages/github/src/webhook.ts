@@ -1,10 +1,6 @@
-import {
-  type EventEmitter,
-  err,
-  parse,
-  type Result,
-  type WebhookContext,
-} from '@triggerskit/core'
+import type { EventEmitter } from '@triggerskit/core/events'
+import type { WebhookContext } from '@triggerskit/core/provider'
+import { err, parse, type Result } from '@triggerskit/core/result'
 import type { GitHubEvents } from './events'
 import {
   IssuesEventSchema,

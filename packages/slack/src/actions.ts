@@ -1,4 +1,5 @@
-import { type HttpClient, parse } from '@triggerskit/core'
+import type { HttpClient } from '@triggerskit/core/http'
+import { parse } from '@triggerskit/core/result'
 import {
   AuthTestDataSchema,
   ConversationsListSchema,

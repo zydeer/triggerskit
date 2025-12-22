@@ -5,6 +5,9 @@ export default defineWorkspace(
     {
       name: 'core',
       root: 'packages/core',
+      config: {
+        entry: 'src/*.ts',
+      },
     },
     {
       name: 'triggerskit',

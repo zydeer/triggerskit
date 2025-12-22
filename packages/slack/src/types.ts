@@ -1,11 +1,11 @@
+import type { BaseOAuthConfig } from '@triggerskit/core/oauth'
 import type {
   ActionsMap,
-  BaseOAuthConfig,
   OAuthProvider,
   Provider,
   ProviderWebhooks,
-  Result,
-} from '@triggerskit/core'
+} from '@triggerskit/core/provider'
+import type { Result } from '@triggerskit/core/result'
 import type { SlackEvents } from './events'
 import type { SlackOAuth, SlackTokens } from './oauth'
 import type {

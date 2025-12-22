@@ -1,4 +1,4 @@
-import { createHttpClient, type HttpClient } from '@triggerskit/core'
+import { createHttpClient, type HttpClient } from '@triggerskit/core/http'
 import type { SlackOAuth } from './oauth'
 import type { SlackConfig } from './types'
 

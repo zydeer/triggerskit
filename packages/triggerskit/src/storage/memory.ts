@@ -1,4 +1,4 @@
-import type { Storage } from '@triggerskit/core'
+import type { Storage } from '@triggerskit/core/storage'
 
 interface Entry {
   /** The stored value */

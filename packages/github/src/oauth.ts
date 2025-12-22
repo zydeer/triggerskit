@@ -1,9 +1,9 @@
 import {
   createOAuth,
   type OAuth,
-  type Storage,
   standardOAuthFlow,
-} from '@triggerskit/core'
+} from '@triggerskit/core/oauth'
+import type { Storage } from '@triggerskit/core/storage'
 import type { GitHubOAuthConfig } from './types'
 
 export type GitHubOAuth = OAuth

@@ -1,4 +1,4 @@
-import { createEmitter } from '@triggerskit/core'
+import { createEmitter } from '@triggerskit/core/events'
 import { createActions, createWebhookActions } from './actions'
 import { createTelegramClient } from './client'
 import type { TelegramEvents } from './events'

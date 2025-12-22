@@ -1,4 +1,5 @@
-import { type HttpClient, ok, parse, type Result } from '@triggerskit/core'
+import type { HttpClient } from '@triggerskit/core/http'
+import { ok, parse, type Result } from '@triggerskit/core/result'
 import {
   type GetMeData,
   GetMeDataSchema,

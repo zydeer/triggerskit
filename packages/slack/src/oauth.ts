@@ -3,8 +3,8 @@ import {
   type OAuth,
   type OAuthFlow,
   type OAuthTokens,
-  type Storage,
-} from '@triggerskit/core'
+} from '@triggerskit/core/oauth'
+import type { Storage } from '@triggerskit/core/storage'
 import type { SlackOAuthConfig } from './types'
 
 export interface SlackTokens extends OAuthTokens {
