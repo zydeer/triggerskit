@@ -195,9 +195,9 @@ export function createOAuth<TTokens extends OAuthTokens = OAuthTokens>(
         }
       }
 
-      await storage.set(
+      await storage.set<StoredState>(
         stateKey(state),
-        { state, codeVerifier } satisfies StoredState,
+        { state, codeVerifier },
         STATE_TTL,
       )
 
