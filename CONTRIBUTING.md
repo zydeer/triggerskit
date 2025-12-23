@@ -30,7 +30,7 @@ To test your changes in real-time:
    ```
    This launches a local server at `http://localhost:4000`
 
-3. **Edit `tests/dev.ts`** to test packages as users would:
+3. **Edit `test/dev.ts`** to test packages as users would:
    ```typescript
    // Import and use packages like in a real application
    import { something } from '@triggerskit/package-name';
