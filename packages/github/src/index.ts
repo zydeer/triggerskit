@@ -34,7 +34,7 @@ export function github(
       webhooks: { handle: handleWebhook },
       on: emitter.on,
       detect: detectGitHub,
-      forUser: (userId: string) => {
+      forUser: (userId) => {
         const oauth = createGitHubOAuth(oauthConfig, storage, userId)
         const userHttp = createGitHubClient({
           config,
