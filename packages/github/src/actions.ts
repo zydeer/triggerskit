@@ -2,15 +2,15 @@ import type { HttpClient } from '@triggerskit/core/http'
 import { parse, type Result } from '@triggerskit/core/result'
 import { z } from 'zod'
 import {
-  type Comment,
-  CommentSchema,
-  type CreateCommentParams,
-  CreateCommentParamsSchema,
+  type CreateIssueCommentParams,
+  CreateIssueCommentParamsSchema,
   type CreateIssueParams,
   CreateIssueParamsSchema,
   type GetRepoParams,
   GetRepoParamsSchema,
   type Issue,
+  type IssueComment,
+  IssueCommentSchema,
   IssueSchema,
   type ListReposParams,
   ListReposParamsSchema,
@@ -67,8 +67,10 @@ export function createActions(http: HttpClient): GitHubActions {
       return parse(IssueSchema, result.data)
     },
 
-    async createComment(params: CreateCommentParams): Promise<Result<Comment>> {
-      const validated = parse(CreateCommentParamsSchema, params)
+    async createIssueComment(
+      params: CreateIssueCommentParams,
+    ): Promise<Result<IssueComment>> {
+      const validated = parse(CreateIssueCommentParamsSchema, params)
       if (!validated.ok) return validated
 
       const { owner, repo, issue_number, body } = validated.data
@@ -80,7 +82,7 @@ export function createActions(http: HttpClient): GitHubActions {
         },
       )
       if (!result.ok) return result
-      return parse(CommentSchema, result.data)
+      return parse(IssueCommentSchema, result.data)
     },
   }
 }

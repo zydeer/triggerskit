@@ -250,7 +250,7 @@ export type SecurityAndAnalysis = z.infer<typeof SecurityAndAnalysisSchema>
  * @see https://docs.github.com/en/rest/repos/repos#list-organization-repositories
  * @see https://docs.github.com/en/rest/repos/repos#get-a-repository
  */
-export const RepositorySchema: z.ZodType<any> = z
+export const RepositorySchema = z
   .object({
     id: z
       .number()
@@ -533,14 +533,11 @@ export const RepositorySchema: z.ZodType<any> = z
       description:
         'Whether rebase merges are allowed. Only visible to users with contents:read and contents:write permissions.',
     }),
-    template_repository: z
-      .lazy(() => RepositorySchema)
-      .nullable()
-      .optional()
-      .meta({
-        description:
-          'Template repository if this repository was generated from a template. Only visible to users with contents:read and contents:write permissions.',
-      }),
+    get template_repository(): z.ZodOptional<
+      z.ZodNullable<typeof RepositorySchema>
+    > {
+      return RepositorySchema.nullable().optional()
+    },
     temp_clone_token: z.string().nullable().optional().meta({
       description:
         'Temporary clone token for the repository. Only visible to users with contents:read and contents:write permissions.',
@@ -578,22 +575,12 @@ export const RepositorySchema: z.ZodType<any> = z
       description:
         'Organization that owns the repository. Only present for organization-owned repositories.',
     }),
-    parent: z
-      .lazy(() => RepositorySchema)
-      .nullable()
-      .optional()
-      .meta({
-        description:
-          'Parent repository if this repository is a fork. The parent is the repository this repository was forked from.',
-      }),
-    source: z
-      .lazy(() => RepositorySchema)
-      .nullable()
-      .optional()
-      .meta({
-        description:
-          'Source repository if this repository is a fork. The source is the ultimate source for the network.',
-      }),
+    get parent(): z.ZodOptional<z.ZodNullable<typeof RepositorySchema>> {
+      return RepositorySchema.nullable().optional()
+    },
+    get source(): z.ZodOptional<z.ZodNullable<typeof RepositorySchema>> {
+      return RepositorySchema.nullable().optional()
+    },
   })
   .meta({
     description:
@@ -1265,7 +1252,7 @@ export type GetUserParams = z.infer<typeof GetUserParamsSchema>
  *
  * @see https://docs.github.com/en/rest/issues/comments#create-an-issue-comment
  */
-export const CreateCommentParamsSchema = z
+export const CreateIssueCommentParamsSchema = z
   .object({
     owner: z.string().min(1).meta({
       description:
@@ -1288,14 +1275,16 @@ export const CreateCommentParamsSchema = z
       'Parameters for creating a comment on an issue or pull request. This endpoint triggers notifications.',
   })
 
-export type CreateCommentParams = z.infer<typeof CreateCommentParamsSchema>
+export type CreateIssueCommentParams = z.infer<
+  typeof CreateIssueCommentParamsSchema
+>
 
 /**
  * Represents a comment on an issue or pull request.
  *
  * @see https://docs.github.com/en/rest/issues/comments#create-an-issue-comment
  */
-export const CommentSchema = z
+export const IssueCommentSchema = z
   .object({
     id: z.number().meta({ description: 'Unique identifier for the comment.' }),
     node_id: z
@@ -1340,4 +1329,4 @@ export const CommentSchema = z
       'Represents a comment on an issue or pull request. You can use the REST API to create comments on issues and pull requests.',
   })
 
-export type Comment = z.infer<typeof CommentSchema>
+export type IssueComment = z.infer<typeof IssueCommentSchema>

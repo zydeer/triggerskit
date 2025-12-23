@@ -13,9 +13,9 @@ export const kit = triggers({
     }),
     github: github({
       oauth: {
-        clientId: '...',
-        clientSecret: '...',
-        redirectUri: '...',
+        clientId: 'Ov23liiPYTB16I9Yfwxe',
+        clientSecret: '36affd5a5e7b12b06626d337d5a8b4516f01d4d8',
+        redirectUri: 'http://localhost:3000/auth/callback',
       },
       storage,
     }),
@@ -38,9 +38,11 @@ const result = Bun.serve({
         return Response.redirect('/auth')
       }
 
-      const repo = await user.actions.getRepo({
-        owner: 'bunup',
-        repo: 'bunup',
+      const repo = await user.actions.createComment({
+        owner: 'arshad-yaseen',
+        repo: 'yuku',
+        issue_number: 8,
+        body: 'Hello, world!',
       })
 
       return Response.json(repo)
