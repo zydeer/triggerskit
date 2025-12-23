@@ -30,15 +30,15 @@ const USER_ID = '1234567890'
 const result = Bun.serve({
   routes: {
     '/': async () => {
-      const userGithub = kit.github.forUser(USER_ID)
+      const user = kit.github.forUser(USER_ID)
 
-      const isAuthenticated = await userGithub.oauth.isAuthenticated()
+      const isAuthenticated = await user.oauth.isAuthenticated()
 
       if (!isAuthenticated) {
         return Response.redirect('/auth')
       }
 
-      const repo = await userGithub.actions.getRepo({
+      const repo = await user.actions.getRepo({
         owner: 'bunup',
         repo: 'bunup',
       })
@@ -46,9 +46,9 @@ const result = Bun.serve({
       return Response.json(repo)
     },
     '/auth': async (req) => {
-      const userGithub = kit.github.forUser(USER_ID)
+      const user = kit.github.forUser(USER_ID)
 
-      const result = await userGithub.oauth.getAuthUrl()
+      const result = await user.oauth.getAuthUrl()
 
       req.cookies.set('auth_state', result.state)
 
@@ -58,11 +58,11 @@ const result = Bun.serve({
       const url = new URL(req.url)
       const code = url.searchParams.get('code')!
 
-      const userGithub = kit.github.forUser(USER_ID)
+      const user = kit.github.forUser(USER_ID)
 
       const state = req.cookies.get('auth_state')!
 
-      const result = await userGithub.oauth.handleCallback(code, state)
+      const result = await user.oauth.handleCallback(code, state)
 
       if (!result.ok) {
         return new Response(result.error.message, { status: 400 })

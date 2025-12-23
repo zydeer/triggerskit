@@ -36,10 +36,12 @@ export function github(
       detect: detectGitHub,
       forUser: (userId) => {
         const oauth = createGitHubOAuth(oauthConfig, storage, userId)
+
         const userHttp = createGitHubClient({
           config,
           getToken: () => oauth.getAccessToken(),
         })
+
         return { oauth, actions: createActions(userHttp), http: userHttp }
       },
     }
@@ -62,15 +64,21 @@ export type {
   CreateCommentParams,
   CreateIssueParams,
   GetRepoParams,
+  GetUserParams,
   Issue,
   IssuesEvent,
   Label,
+  License,
+  ListOrgReposParams,
   ListReposParams,
   Milestone,
+  Permissions,
   PullRequest,
   PullRequestEvent,
+  PullRequestReference,
   PushEvent,
   Repository,
+  SecurityAndAnalysis,
   User,
   WebhookEvent,
 } from './schemas'
