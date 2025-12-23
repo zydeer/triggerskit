@@ -38,7 +38,7 @@ const result = Bun.serve({
         return Response.redirect('/auth')
       }
 
-      const repo = await user.actions.createIssueComment({
+      const repo = await user.actions.createComment({
         owner: 'arshad-yaseen',
         repo: 'yuku',
         issue_number: 8,
