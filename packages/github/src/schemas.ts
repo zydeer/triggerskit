@@ -1252,7 +1252,7 @@ export type GetUserParams = z.infer<typeof GetUserParamsSchema>
  *
  * @see https://docs.github.com/en/rest/issues/comments#create-an-issue-comment
  */
-export const CreateIssueCommentParamsSchema = z
+export const CreateCommentParamsSchema = z
   .object({
     owner: z.string().min(1).meta({
       description:
@@ -1266,8 +1266,7 @@ export const CreateIssueCommentParamsSchema = z
       description: 'The number that identifies the issue. Required.',
     }),
     body: z.string().min(1).meta({
-      description:
-        'The contents of the comment. Required. You can use the REST API to create comments on issues and pull requests. Every pull request is an issue, but not every issue is a pull request.',
+      description: 'The contents of the comment. Required.',
     }),
   })
   .meta({
@@ -1275,16 +1274,14 @@ export const CreateIssueCommentParamsSchema = z
       'Parameters for creating a comment on an issue or pull request. This endpoint triggers notifications.',
   })
 
-export type CreateIssueCommentParams = z.infer<
-  typeof CreateIssueCommentParamsSchema
->
+export type CreateCommentParams = z.infer<typeof CreateCommentParamsSchema>
 
 /**
  * Represents a comment on an issue or pull request.
  *
  * @see https://docs.github.com/en/rest/issues/comments#create-an-issue-comment
  */
-export const IssueCommentSchema = z
+export const CommentSchema = z
   .object({
     id: z.number().meta({ description: 'Unique identifier for the comment.' }),
     node_id: z
@@ -1325,8 +1322,7 @@ export const IssueCommentSchema = z
       }),
   })
   .meta({
-    description:
-      'Represents a comment on an issue or pull request. You can use the REST API to create comments on issues and pull requests.',
+    description: 'Represents a comment on an issue or pull request.',
   })
 
-export type IssueComment = z.infer<typeof IssueCommentSchema>
+export type Comment = z.infer<typeof CommentSchema>

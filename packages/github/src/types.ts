@@ -9,11 +9,11 @@ import type { Result } from '@triggerskit/core/result'
 import type { GitHubEvents } from './events'
 import type { GitHubOAuth } from './oauth'
 import type {
-  CreateIssueCommentParams,
+  Comment,
+  CreateCommentParams,
   CreateIssueParams,
   GetRepoParams,
   Issue,
-  IssueComment,
   ListReposParams,
   Repository,
   User,
@@ -59,9 +59,7 @@ export interface GitHubActions extends ActionsMap {
   /** Create a new issue in a repository */
   createIssue(params: CreateIssueParams): Promise<Result<Issue>>
   /** Create a comment on an issue or pull request */
-  createIssueComment(
-    params: CreateIssueCommentParams,
-  ): Promise<Result<IssueComment>>
+  createComment(params: CreateCommentParams): Promise<Result<Comment>>
 }
 
 export type GitHubProviderWithOAuth = OAuthProvider<

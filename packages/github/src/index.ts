@@ -60,12 +60,12 @@ export function github(
 }
 
 export type {
-  CreateIssueCommentParams,
+  Comment,
+  CreateCommentParams,
   CreateIssueParams,
   GetRepoParams,
   GetUserParams,
   Issue,
-  IssueComment,
   IssuesEvent,
   Label,
   License,
