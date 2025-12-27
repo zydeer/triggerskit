@@ -14,8 +14,8 @@ export const kit = triggers({
     }),
     github: github({
       oauth: {
-        clientId: 'Ov23liiPYTB16I9Yfwxe',
-        clientSecret: '36affd5a5e7b12b06626d337d5a8b4516f01d4d8',
+        clientId: '...',
+        clientSecret: '...',
         redirectUri: 'http://localhost:3000/auth/github/callback',
       },
 
