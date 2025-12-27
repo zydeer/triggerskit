@@ -1,7 +1,9 @@
 import github from '@triggerskit/github'
 import slack from '@triggerskit/slack'
 import telegram from '@triggerskit/telegram'
+import { Hono } from 'hono'
 import triggers from 'triggerskit'
+// import { oauth } from 'triggerskit/frameworks/hono'
 import { memory } from 'triggerskit/storage'
 
 const storage = memory()
@@ -13,10 +15,11 @@ export const kit = triggers({
     }),
     github: github({
       oauth: {
-        clientId: '...',
-        clientSecret: '...',
-        redirectUri: '...',
+        clientId: 'Ov23liiPYTB16I9Yfwxe',
+        clientSecret: '36affd5a5e7b12b06626d337d5a8b4516f01d4d8',
+        redirectUri: 'http://localhost:3000/auth/github/callback',
       },
+
       storage,
     }),
     slack: slack({
@@ -27,52 +30,38 @@ export const kit = triggers({
 
 const USER_ID = '1234567890'
 
-const result = Bun.serve({
-  routes: {
-    '/': async () => {
-      const user = kit.github.forUser(USER_ID)
+const app = new Hono()
 
-      const isAuthenticated = await user.oauth.isAuthenticated()
+app.get('/', async () => {
+  const user = kit.github.forUser(USER_ID)
 
-      if (!isAuthenticated) {
-        return Response.redirect('/auth')
-      }
+  const isAuthenticated = await user.oauth.isAuthenticated()
 
-      const repo = await user.actions.createComment({
-        owner: 'arshad-yaseen',
-        repo: 'yuku',
-        issue_number: 8,
-        body: 'Hello, world!',
-      })
+  if (!isAuthenticated) {
+    return Response.redirect('/auth/github')
+  }
 
-      return Response.json(repo)
-    },
-    '/auth': async (req) => {
-      const user = kit.github.forUser(USER_ID)
+  const repo = await user.actions.createComment({
+    owner: 'arshad-yaseen',
+    repo: 'yuku',
+    issue_number: 8,
+    body: 'Hello, world!',
+  })
 
-      const result = await user.oauth.getAuthUrl()
-
-      req.cookies.set('auth_state', result.state)
-
-      return Response.redirect(result.url)
-    },
-    '/auth/callback': async (req) => {
-      const url = new URL(req.url)
-      const code = url.searchParams.get('code')!
-
-      const user = kit.github.forUser(USER_ID)
-
-      const state = req.cookies.get('auth_state')!
-
-      const result = await user.oauth.handleCallback(code, state)
-
-      if (!result.ok) {
-        return new Response(result.error.message, { status: 400 })
-      }
-
-      return Response.redirect('/')
-    },
-  },
+  return Response.json(repo)
 })
 
-console.log(`Test server is running on http://localhost:${result.port}`)
+app.get('/auth/:provider', (c) =>
+  kit.handleOAuth(c.req.param('provider'), USER_ID),
+)
+
+app.get('/auth/:provider/callback', (c) =>
+  kit.handleOAuthCallback(c.req.param('provider'), USER_ID, c.req.raw, () =>
+    Response.redirect('/'),
+  ),
+)
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+}

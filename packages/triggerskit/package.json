@@ -21,6 +21,12 @@
         "default": "./dist/storage/index.js"
       }
     },
+    "./frameworks/hono": {
+      "import": {
+        "types": "./dist/frameworks/hono.d.ts",
+        "default": "./dist/frameworks/hono.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -31,5 +37,8 @@
     "type": "git",
     "url": "git+https://github.com/zydeer/triggerskit.git"
   },
-  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme"
+  "homepage": "https://github.com/zydeer/triggerskit/tree/main/packages/triggerskit#readme",
+  "peerDependencies": {
+    "hono": ">=4.0.0"
+  }
 }

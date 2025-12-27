@@ -15,8 +15,39 @@ export type WebhookResult<T extends Providers> = {
   }
 }[keyof T & string]
 
-export type TriggersKit<T extends Providers> = T & {
-  handle(request: Request): Promise<Result<WebhookResult<T>>>
+export type KitHandlerPayload<P extends Providers> = {
+  providers: P
+}
+
+export type KitHandler<T extends Providers = Providers, R = void> = (
+  payload: KitHandlerPayload<T>,
+) => R
+
+export type Kit<T extends Providers, R> = T & {
+  handleWebhook(request: Request): Promise<Result<WebhookResult<T>>>
+  handle(handler: KitHandler<T, R>): R
+  handleOAuth(
+    provider: string | undefined,
+    userId: string | undefined,
+  ): Promise<any>
+  handleOAuthCallback(
+    provider: string | undefined,
+    userId: string | undefined,
+    request: Request,
+    onSuccess: () => any,
+  ): Promise<any>
+}
+
+export function triggers<T extends Providers, R>(config: {
+  providers: T
+}): Kit<T, R> {
+  return {
+    ...config.providers,
+    handleWebhook: createWebhookHandler(config.providers),
+    handle: createHandler(config.providers),
+    handleOAuth: createOAuthHandler(config.providers),
+    handleOAuthCallback: createOAuthCallbackHandler(config.providers),
+  }
 }
 
 function createWebhookHandler<T extends Providers>(providers: T) {
@@ -58,12 +89,88 @@ function createWebhookHandler<T extends Providers>(providers: T) {
   }
 }
 
-export function triggers<T extends Providers>(config: {
-  providers: T
-}): TriggersKit<T> {
-  return {
-    ...config.providers,
-    handle: createWebhookHandler(config.providers),
+function createHandler<T extends Providers, R>(providers: T) {
+  return (callback: KitHandler<T, R>) =>
+    callback({
+      providers,
+    })
+}
+
+function createOAuthHandler<T extends Providers>(providers: T) {
+  return async (provider: string | undefined, userId: string | undefined) => {
+    if (!userId) {
+      return new Response('No user ID specified', { status: 400 })
+    }
+
+    if (!provider) {
+      return new Response('No provider specified', { status: 400 })
+    }
+
+    const providerConfig = providers[provider]
+
+    if (!providerConfig) {
+      return new Response('Invalid provider', { status: 400 })
+    }
+
+    if (!('forUser' in providerConfig)) {
+      return new Response('Provider does not support OAuth', { status: 400 })
+    }
+
+    const oauthProvider = providerConfig as OAuthProvider
+
+    const user = oauthProvider.forUser(userId)
+
+    const result = await user.oauth.getAuthUrl()
+
+    return Response.redirect(result.url)
+  }
+}
+
+function createOAuthCallbackHandler<T extends Providers>(providers: T) {
+  return async (
+    provider: string | undefined,
+    userId: string | undefined,
+    request: Request,
+    onSuccess: () => any,
+  ) => {
+    if (!userId) {
+      return new Response('No user ID specified', { status: 400 })
+    }
+
+    if (!provider) {
+      return new Response('No provider specified', { status: 400 })
+    }
+
+    const providerConfig = providers[provider]
+
+    if (!providerConfig) {
+      return new Response('Invalid provider', { status: 400 })
+    }
+
+    if (!('forUser' in providerConfig)) {
+      return new Response('Provider does not support OAuth', { status: 400 })
+    }
+
+    const oauthProvider = providerConfig as OAuthProvider
+
+    const user = oauthProvider.forUser(userId)
+
+    const code = new URL(request.url).searchParams.get('code')
+    const state = new URL(request.url).searchParams.get('state')
+
+    if (!code || !state) {
+      return new Response('Missing code or state', { status: 400 })
+    }
+
+    const result = await user.oauth.handleCallback(code, state)
+
+    if (!result.ok) {
+      return new Response('OAuth callback failed: ' + result.error.message, {
+        status: 400,
+      })
+    }
+
+    return onSuccess()
   }
 }
 

@@ -123,6 +123,9 @@ export interface BaseOAuthConfig {
   storage: Storage
 }
 
+/*
+  OAuth state TTL in seconds
+*/
 const STATE_TTL = 600
 const STATE_PREFIX = 'oauth:state:'
 const TOKENS_PREFIX = 'oauth:tokens:'

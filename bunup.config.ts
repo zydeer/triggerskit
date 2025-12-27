@@ -13,7 +13,7 @@ export default defineWorkspace(
       name: 'triggerskit',
       root: 'packages/triggerskit',
       config: {
-        entry: ['src/index.ts', 'src/storage/index.ts'],
+        entry: ['src/index.ts', 'src/storage/index.ts', 'src/frameworks/*'],
       },
     },
     {

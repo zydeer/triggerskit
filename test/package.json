@@ -10,5 +10,8 @@
     "@triggerskit/telegram": "workspace:*",
     "@triggerskit/slack": "workspace:*",
     "@triggerskit/github": "workspace:*"
+  },
+  "devDependencies": {
+    "hono": "^4.11.3"
   }
 }
