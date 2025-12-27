@@ -27,12 +27,12 @@ export const kit = triggers({
   },
 })
 
-const USER_ID = '1234567890'
+const userId = '1234567890'
 
 const app = new Hono()
 
 app.get('/', async () => {
-  const user = kit.github.forUser(USER_ID)
+  const user = kit.github.forUser(userId)
 
   const isAuthenticated = await user.oauth.isAuthenticated()
 
@@ -51,7 +51,7 @@ app.get('/', async () => {
 app.get('/auth/:provider', (c) =>
   kit.authorize({
     provider: c.req.param('provider') as ProviderName<typeof kit>,
-    userId: USER_ID,
+    userId,
   }),
 )
 
@@ -59,10 +59,10 @@ app.get('/auth/:provider/callback', (c) =>
   kit
     .oauthCallback({
       provider: c.req.param('provider') as ProviderName<typeof kit>,
-      userId: USER_ID,
+      userId,
       callbackUrl: c.req.url,
     })
-    .onSuccess(() => c.text('Authentication Success')),
+    .onSuccess(() => Response.redirect('/')),
 )
 
 export default {
