@@ -44,11 +44,16 @@ export type OAuthCallbackParams = {
   userId: string
   /** The callback URL containing OAuth code and state parameters */
   callbackUrl: string | URL
-  /** Callback function invoked after successful OAuth authentication */
-  onSuccess: () => Response
 }
 
-export type OAuthCallback = (params: OAuthCallbackParams) => Promise<Response>
+export type OAuthCallback = (params: OAuthCallbackParams) => {
+  /**
+   * Chains a success callback that will be invoked after successful OAuth authentication.
+   * @param callback - A function that returns a Response to be sent on successful authentication
+   * @returns A promise that resolves to a Response (from callback on success, or an error response on failure)
+   */
+  onSuccess: (callback: () => Response) => Promise<Response>
+}
 
 export type Kit<T extends Providers> = T & {
   /**
@@ -76,8 +81,8 @@ export type Kit<T extends Providers> = T & {
    * - Exchanges the authorization code for access tokens using the code verifier if PKCE is enabled
    * - Stores the obtained tokens securely for the user
    * - Invokes the success callback on successful authentication
-   * @param params - The OAuth callback parameters including provider, userId, callbackUrl, and onSuccess
-   * @returns A promise that resolves to a Response (from onSuccess on success, or an error response on failure)
+   * @param params - The OAuth callback parameters including provider, userId, and callbackUrl
+   * @returns An object with an onSuccess method that accepts a callback function returning a Response
    */
   oauthCallback: OAuthCallback
 }
@@ -134,7 +139,7 @@ function createWebhookHandler<T extends Providers>(
   }
 }
 
-function createOAuthHandler<T extends Providers>(providers: T): Authorize<T> {
+function createOAuthHandler<T extends Providers>(providers: T): Authorize {
   return async ({ provider, userId }) => {
     if (!userId) {
       return new Response('User ID is required but was not provided', {
@@ -182,72 +187,82 @@ function createOAuthHandler<T extends Providers>(providers: T): Authorize<T> {
 
 function createOAuthCallbackHandler<T extends Providers>(
   providers: T,
-): OAuthCallback<T> {
-  return async ({ provider, userId, callbackUrl, onSuccess }) => {
-    if (!userId) {
-      return new Response('User ID is required but was not provided', {
-        status: 400,
-      })
-    }
+): OAuthCallback {
+  return ({ provider, userId, callbackUrl }) => {
+    return {
+      onSuccess: async (callback) => {
+        if (!userId) {
+          return new Response('User ID is required but was not provided', {
+            status: 400,
+          })
+        }
 
-    if (!provider) {
-      return new Response('OAuth provider is required but was not specified', {
-        status: 400,
-      })
-    }
+        if (!provider) {
+          return new Response(
+            'OAuth provider is required but was not specified',
+            {
+              status: 400,
+            },
+          )
+        }
 
-    const providerConfig = providers[provider]
-    if (!providerConfig) {
-      return new Response(
-        `Provider '${provider}' is not configured or does not exist`,
-        { status: 404 },
-      )
-    }
+        const providerConfig = providers[provider]
+        if (!providerConfig) {
+          return new Response(
+            `Provider '${provider}' is not configured or does not exist`,
+            { status: 404 },
+          )
+        }
 
-    if (!('forUser' in providerConfig)) {
-      return new Response(
-        `Provider '${provider}' does not support OAuth authentication`,
-        { status: 501 },
-      )
-    }
+        if (!('forUser' in providerConfig)) {
+          return new Response(
+            `Provider '${provider}' does not support OAuth authentication`,
+            { status: 501 },
+          )
+        }
 
-    const url =
-      typeof callbackUrl === 'string'
-        ? new URL(callbackUrl)
-        : new URL(callbackUrl.toString())
-    const code = url.searchParams.get('code')
-    const state = url.searchParams.get('state')
+        const url =
+          typeof callbackUrl === 'string'
+            ? new URL(callbackUrl)
+            : new URL(callbackUrl.toString())
+        const code = url.searchParams.get('code')
+        const state = url.searchParams.get('state')
 
-    if (!code || !state) {
-      const missing = []
-      if (!code) missing.push('code')
-      if (!state) missing.push('state')
+        if (!code || !state) {
+          const missing = []
+          if (!code) missing.push('code')
+          if (!state) missing.push('state')
 
-      return new Response(
-        `OAuth callback is missing required parameters: ${missing.join(', ')}`,
-        { status: 400 },
-      )
-    }
+          return new Response(
+            `OAuth callback is missing required parameters: ${missing.join(', ')}`,
+            { status: 400 },
+          )
+        }
 
-    try {
-      const oauthProvider = providerConfig as OAuthProvider
-      const user = oauthProvider.forUser(userId)
-      const result = await user.oauth.handleCallback(code, state)
+        try {
+          const oauthProvider = providerConfig as OAuthProvider
+          const user = oauthProvider.forUser(userId)
+          const result = await user.oauth.handleCallback(code, state)
 
-      if (!result.ok) {
-        return new Response(
-          `OAuth authentication failed: ${result.error.message}`,
-          { status: 401 },
-        )
-      }
+          if (!result.ok) {
+            return new Response(
+              `OAuth authentication failed: ${result.error.message}`,
+              { status: 401 },
+            )
+          }
 
-      return onSuccess()
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error'
-      return new Response(`Failed to process OAuth callback: ${errorMessage}`, {
-        status: 500,
-      })
+          return callback()
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error'
+          return new Response(
+            `Failed to process OAuth callback: ${errorMessage}`,
+            {
+              status: 500,
+            },
+          )
+        }
+      },
     }
   }
 }

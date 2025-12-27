@@ -40,11 +40,9 @@ app.get('/', async () => {
     return Response.redirect('/auth/github')
   }
 
-  const repo = await user.actions.createComment({
+  const repo = await user.actions.getRepo({
     owner: 'arshad-yaseen',
     repo: 'yuku',
-    issue_number: 8,
-    body: 'Hello, world!',
   })
 
   return Response.json(repo)
@@ -58,12 +56,13 @@ app.get('/auth/:provider', (c) =>
 )
 
 app.get('/auth/:provider/callback', (c) =>
-  kit.oauthCallback({
-    provider: c.req.param('provider'),
-    userId: USER_ID,
-    callbackUrl: c.req.url,
-    onSuccess: () => Response.redirect('/'),
-  }),
+  kit
+    .oauthCallback({
+      provider: c.req.param('provider'),
+      userId: USER_ID,
+      callbackUrl: c.req.url,
+    })
+    .onSuccess(() => c.text('Authentication Success')),
 )
 
 export default {
