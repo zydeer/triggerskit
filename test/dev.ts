@@ -52,13 +52,19 @@ app.get('/', async () => {
 })
 
 app.get('/auth/:provider', (c) =>
-  kit.handleOAuth(c.req.param('provider'), USER_ID),
+  kit.authorize({
+    provider: c.req.param('provider'),
+    userId: USER_ID,
+  }),
 )
 
 app.get('/auth/:provider/callback', (c) =>
-  kit.handleOAuthCallback(c.req.param('provider'), USER_ID, c.req.raw, () =>
-    Response.redirect('/'),
-  ),
+  kit.oauthCallback({
+    provider: c.req.param('provider'),
+    userId: USER_ID,
+    callbackUrl: c.req.url,
+    onSuccess: () => Response.redirect('/'),
+  }),
 )
 
 export default {

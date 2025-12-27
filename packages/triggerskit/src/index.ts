@@ -21,27 +21,25 @@ export type WebhookResult<T extends Providers> = {
   }
 }[keyof T & string]
 
-export type HandleWebhook<T extends Providers> = (
+export type ProcessWebhook<T extends Providers> = (
   request: Request,
 ) => Promise<Result<WebhookResult<T>>>
 
 /**
- * Parameters for handling OAuth authorization initiation.
+ * Parameters for OAuth authorization initiation.
  */
-export type HandleOAuthParams<T extends Providers> = {
+export type AuthorizeParams = {
   /** The provider name (must be one of the configured provider keys) */
-  provider: keyof T & string
+  provider: string
   /** The user ID for whom the OAuth flow is being initiated */
   userId: string
 }
 
-export type HandleOAuth<T extends Providers> = (
-  params: HandleOAuthParams<T>,
-) => Promise<Response>
+export type Authorize = (params: AuthorizeParams) => Promise<Response>
 
-export type HandleOAuthCallbackParams<T extends Providers> = {
+export type OAuthCallbackParams = {
   /** The provider name (must be one of the configured provider keys) */
-  provider: keyof T & string
+  provider: string
   /** The user ID for whom the OAuth flow is being completed */
   userId: string
   /** The callback URL containing OAuth code and state parameters */
@@ -50,30 +48,38 @@ export type HandleOAuthCallbackParams<T extends Providers> = {
   onSuccess: () => Response
 }
 
-export type HandleOAuthCallback<T extends Providers> = (
-  params: HandleOAuthCallbackParams<T>,
-) => Promise<Response>
+export type OAuthCallback = (params: OAuthCallbackParams) => Promise<Response>
 
 export type Kit<T extends Providers> = T & {
   /**
-   * Handles incoming webhook requests and routes them to the appropriate provider.
+   * Processes incoming webhook requests and routes them to the appropriate provider.
    * @param request - The incoming webhook request
    * @returns A promise that resolves to a Result containing the provider name and parsed payload
    */
-  handleWebhook: HandleWebhook<T>
+  processWebhook: ProcessWebhook<T>
   /**
-   * Handles OAuth authorization initiation by generating an authorization URL.
+   * Initiates OAuth authorization by generating an authorization URL.
+   * Automatically handles OAuth security features:
+   * - Generates and stores a cryptographically secure state parameter for CSRF protection
+   * - If PKCE is enabled for the provider, automatically generates code verifier and code challenge (S256)
+   * - Stores state and PKCE parameters with TTL for secure validation on callback
    * @param params - The OAuth parameters including provider and userId
-   * @returns A promise that resolves to a Response (typically a redirect to the OAuth provider)
+   * @returns A promise that resolves to a Response redirecting to the OAuth provider's authorization page
    */
-  handleOAuth: HandleOAuth<T>
+  authorize: Authorize<T>
   /**
-   * Handles OAuth callback after user authorization.
-   * Validates the OAuth code and state, exchanges them for tokens, and invokes the success callback.
+   * Processes OAuth callback after user authorization.
+   * Performs complete OAuth callback validation and token exchange:
+   * - Validates the state parameter against stored state (prevents CSRF attacks)
+   * - Verifies state hasn't expired (600 second TTL)
+   * - If PKCE was used, retrieves and validates the stored code verifier
+   * - Exchanges the authorization code for access tokens using the code verifier if PKCE is enabled
+   * - Stores the obtained tokens securely for the user
+   * - Invokes the success callback on successful authentication
    * @param params - The OAuth callback parameters including provider, userId, callbackUrl, and onSuccess
    * @returns A promise that resolves to a Response (from onSuccess on success, or an error response on failure)
    */
-  handleOAuthCallback: HandleOAuthCallback<T>
+  oauthCallback: OAuthCallback<T>
 }
 
 export function triggers<T extends Providers>(config: {
@@ -81,15 +87,15 @@ export function triggers<T extends Providers>(config: {
 }): Kit<T> {
   return {
     ...config.providers,
-    handleWebhook: createWebhookHandler(config.providers),
-    handleOAuth: createOAuthHandler(config.providers),
-    handleOAuthCallback: createOAuthCallbackHandler(config.providers),
+    processWebhook: createWebhookHandler(config.providers),
+    authorize: createOAuthHandler(config.providers),
+    oauthCallback: createOAuthCallbackHandler(config.providers),
   }
 }
 
 function createWebhookHandler<T extends Providers>(
   providers: T,
-): HandleWebhook<T> {
+): ProcessWebhook<T> {
   return async (request) => {
     const clonedRequest = request.clone()
 
@@ -128,7 +134,7 @@ function createWebhookHandler<T extends Providers>(
   }
 }
 
-function createOAuthHandler<T extends Providers>(providers: T): HandleOAuth<T> {
+function createOAuthHandler<T extends Providers>(providers: T): Authorize<T> {
   return async ({ provider, userId }) => {
     if (!userId) {
       return new Response('User ID is required but was not provided', {
@@ -176,7 +182,7 @@ function createOAuthHandler<T extends Providers>(providers: T): HandleOAuth<T> {
 
 function createOAuthCallbackHandler<T extends Providers>(
   providers: T,
-): HandleOAuthCallback<T> {
+): OAuthCallback<T> {
   return async ({ provider, userId, callbackUrl, onSuccess }) => {
     if (!userId) {
       return new Response('User ID is required but was not provided', {

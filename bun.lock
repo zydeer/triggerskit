@@ -60,9 +60,6 @@
       "dependencies": {
         "@triggerskit/core": "workspace:*",
       },
-      "peerDependencies": {
-        "hono": "^4.11.3",
-      },
     },
     "test": {
       "name": "test",
