@@ -1,5 +1,5 @@
 import type { HttpClient } from '@triggerskit/core/http'
-import { parse, type Result } from '@triggerskit/core/result'
+import { parse, type Result, unwrap } from '@triggerskit/core/result'
 import { z } from 'zod'
 import {
   type Comment,
@@ -24,9 +24,7 @@ import type { GitHubActions } from './types'
 export function createActions(http: HttpClient): GitHubActions {
   return {
     async getUser(): Promise<Result<User>> {
-      const result = await http('/user')
-      if (!result.ok) return result
-      return parse(UserSchema, result.data)
+      return unwrap(await http('/user'), { schema: UserSchema })
     },
 
     async listRepos(params?: ListReposParams): Promise<Result<Repository[]>> {
@@ -39,9 +37,9 @@ export function createActions(http: HttpClient): GitHubActions {
         ? `?${new URLSearchParams(params as Record<string, string>)}`
         : ''
 
-      const result = await http(`/user/repos${queryParams}`)
-      if (!result.ok) return result
-      return parse(z.array(RepositorySchema), result.data)
+      return unwrap(await http(`/user/repos${queryParams}`), {
+        schema: z.array(RepositorySchema),
+      })
     },
 
     async getRepo(params: GetRepoParams): Promise<Result<Repository>> {
@@ -49,9 +47,9 @@ export function createActions(http: HttpClient): GitHubActions {
       if (!validated.ok) return validated
 
       const { owner, repo } = validated.data
-      const result = await http(`/repos/${owner}/${repo}`)
-      if (!result.ok) return result
-      return parse(RepositorySchema, result.data)
+      return unwrap(await http(`/repos/${owner}/${repo}`), {
+        schema: RepositorySchema,
+      })
     },
 
     async createIssue(params: CreateIssueParams): Promise<Result<Issue>> {
@@ -59,12 +57,13 @@ export function createActions(http: HttpClient): GitHubActions {
       if (!validated.ok) return validated
 
       const { owner, repo, ...body } = validated.data
-      const result = await http(`/repos/${owner}/${repo}/issues`, {
-        method: 'POST',
-        body: JSON.stringify(body),
-      })
-      if (!result.ok) return result
-      return parse(IssueSchema, result.data)
+      return unwrap(
+        await http(`/repos/${owner}/${repo}/issues`, {
+          method: 'POST',
+          body: JSON.stringify(body),
+        }),
+        { schema: IssueSchema },
+      )
     },
 
     async createComment(params: CreateCommentParams): Promise<Result<Comment>> {
@@ -72,15 +71,13 @@ export function createActions(http: HttpClient): GitHubActions {
       if (!validated.ok) return validated
 
       const { owner, repo, issue_number, body } = validated.data
-      const result = await http(
-        `/repos/${owner}/${repo}/issues/${issue_number}/comments`,
-        {
+      return unwrap(
+        await http(`/repos/${owner}/${repo}/issues/${issue_number}/comments`, {
           method: 'POST',
           body: JSON.stringify({ body }),
-        },
+        }),
+        { schema: CommentSchema },
       )
-      if (!result.ok) return result
-      return parse(CommentSchema, result.data)
     },
   }
 }

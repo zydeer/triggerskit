@@ -58,3 +58,17 @@ export function parse<T>(schema: ZodType<T>, data: unknown): Result<T> {
     details: result.error.issues,
   })
 }
+
+export function unwrap<T, U>(
+  result: Result<T>,
+  options?: {
+    extract?: (data: any) => unknown
+    schema?: ZodType<U>
+  },
+): Result<U> {
+  if (!result.ok) return result
+
+  const data = options?.extract ? options.extract(result.data) : result.data
+
+  return options?.schema ? parse(options.schema, data) : (ok(data) as Result<U>)
+}
