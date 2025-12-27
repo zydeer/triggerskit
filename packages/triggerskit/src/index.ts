@@ -1,18 +1,18 @@
 import type {
+  BaseProvider,
   OAuthProvider,
-  Provider,
   WebhookContext,
   WebhookPayload,
 } from '@triggerskit/core/provider'
 import type { Result } from '@triggerskit/core/result'
 
-export type Providers = Record<string, Provider | OAuthProvider>
+type ProvidersMap = Record<string, BaseProvider | OAuthProvider>
 
 /**
  * The result of processing a webhook request.
  * Contains the provider name and the parsed webhook payload.
  */
-export type WebhookResult<T extends Providers> = {
+type WebhookResult<T extends ProvidersMap> = {
   [K in keyof T & string]: {
     /** The name of the provider that matched this webhook */
     provider: K
@@ -21,32 +21,36 @@ export type WebhookResult<T extends Providers> = {
   }
 }[keyof T & string]
 
-export type ProcessWebhook<T extends Providers> = (
+type ProcessWebhook<T extends ProvidersMap> = (
   request: Request,
 ) => Promise<Result<WebhookResult<T>>>
 
 /**
  * Parameters for OAuth authorization initiation.
  */
-export type AuthorizeParams = {
+type AuthorizeParams<T extends ProvidersMap = ProvidersMap> = {
   /** The provider name (must be one of the configured provider keys) */
-  provider: string
+  provider: keyof T & string
   /** The user ID for whom the OAuth flow is being initiated */
   userId: string
 }
 
-export type Authorize = (params: AuthorizeParams) => Promise<Response>
+type Authorize<T extends ProvidersMap = ProvidersMap> = (
+  params: AuthorizeParams<T>,
+) => Promise<Response>
 
-export type OAuthCallbackParams = {
+type OAuthCallbackParams<T extends ProvidersMap = ProvidersMap> = {
   /** The provider name (must be one of the configured provider keys) */
-  provider: string
+  provider: keyof T & string
   /** The user ID for whom the OAuth flow is being completed */
   userId: string
   /** The callback URL containing OAuth code and state parameters */
   callbackUrl: string | URL
 }
 
-export type OAuthCallback = (params: OAuthCallbackParams) => {
+type OAuthCallback<T extends ProvidersMap = ProvidersMap> = (
+  params: OAuthCallbackParams<T>,
+) => {
   /**
    * Chains a success callback that will be invoked after successful OAuth authentication.
    * @param callback - A function that returns a Response to be sent on successful authentication
@@ -55,7 +59,25 @@ export type OAuthCallback = (params: OAuthCallbackParams) => {
   onSuccess: (callback: () => Response) => Promise<Response>
 }
 
-export type Kit<T extends Providers> = T & {
+/**
+ * This allows you to reference the exact provider names you've configured in your Kit.
+ *
+ * @example
+ * ```ts
+ * const kit = triggers({
+ *   providers: {
+ *     github: github({ ... }),
+ *     slack: slack({ ... })
+ *   }
+ * })
+ *
+ * type MyProvider = Provider<typeof kit>
+ * // "github" | "slack"
+ * ```
+ */
+export type Provider<T> = T extends Kit<infer P> ? keyof P & string : never
+
+export type Kit<T extends ProvidersMap> = T & {
   /**
    * Processes incoming webhook requests and routes them to the appropriate provider.
    * @param request - The incoming webhook request
@@ -71,7 +93,7 @@ export type Kit<T extends Providers> = T & {
    * @param params - The OAuth parameters including provider and userId
    * @returns A promise that resolves to a Response redirecting to the OAuth provider's authorization page
    */
-  authorize: Authorize
+  authorize: Authorize<T>
   /**
    * Processes OAuth callback after user authorization.
    * Performs complete OAuth callback validation and token exchange:
@@ -84,10 +106,10 @@ export type Kit<T extends Providers> = T & {
    * @param params - The OAuth callback parameters including provider, userId, and callbackUrl
    * @returns An object with an onSuccess method that accepts a callback function returning a Response
    */
-  oauthCallback: OAuthCallback
+  oauthCallback: OAuthCallback<T>
 }
 
-export function triggers<T extends Providers>(config: {
+export function triggers<T extends ProvidersMap>(config: {
   providers: T
 }): Kit<T> {
   return {
@@ -98,7 +120,7 @@ export function triggers<T extends Providers>(config: {
   }
 }
 
-function createWebhookHandler<T extends Providers>(
+function createWebhookHandler<T extends ProvidersMap>(
   providers: T,
 ): ProcessWebhook<T> {
   return async (request) => {
@@ -139,7 +161,9 @@ function createWebhookHandler<T extends Providers>(
   }
 }
 
-function createOAuthHandler<T extends Providers>(providers: T): Authorize {
+function createOAuthHandler<T extends ProvidersMap>(
+  providers: T,
+): Authorize<T> {
   return async ({ provider, userId }) => {
     if (!userId) {
       return new Response('User ID is required but was not provided', {
@@ -185,9 +209,9 @@ function createOAuthHandler<T extends Providers>(providers: T): Authorize {
   }
 }
 
-function createOAuthCallbackHandler<T extends Providers>(
+function createOAuthCallbackHandler<T extends ProvidersMap>(
   providers: T,
-): OAuthCallback {
+): OAuthCallback<T> {
   return ({ provider, userId, callbackUrl }) => {
     return {
       onSuccess: async (callback) => {
