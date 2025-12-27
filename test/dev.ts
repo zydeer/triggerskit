@@ -3,7 +3,6 @@ import slack from '@triggerskit/slack'
 import telegram from '@triggerskit/telegram'
 import { Hono } from 'hono'
 import triggers from 'triggerskit'
-// import { oauth } from 'triggerskit/frameworks/hono'
 import { memory } from 'triggerskit/storage'
 
 const storage = memory()

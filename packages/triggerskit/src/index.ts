@@ -66,7 +66,7 @@ export type Kit<T extends Providers> = T & {
    * @param params - The OAuth parameters including provider and userId
    * @returns A promise that resolves to a Response redirecting to the OAuth provider's authorization page
    */
-  authorize: Authorize<T>
+  authorize: Authorize
   /**
    * Processes OAuth callback after user authorization.
    * Performs complete OAuth callback validation and token exchange:
@@ -79,7 +79,7 @@ export type Kit<T extends Providers> = T & {
    * @param params - The OAuth callback parameters including provider, userId, callbackUrl, and onSuccess
    * @returns A promise that resolves to a Response (from onSuccess on success, or an error response on failure)
    */
-  oauthCallback: OAuthCallback<T>
+  oauthCallback: OAuthCallback
 }
 
 export function triggers<T extends Providers>(config: {
