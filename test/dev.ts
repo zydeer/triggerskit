@@ -18,7 +18,6 @@ export const kit = triggers({
         clientSecret: '...',
         redirectUri: 'http://localhost:3000/auth/github/callback',
       },
-
       storage,
     }),
     slack: slack({
