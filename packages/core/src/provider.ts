@@ -21,7 +21,7 @@ export type ActionsMap = {
 /**
  * Base provider interface (token-based auth).
  */
-export interface BaseProvider<
+export interface Provider<
   TName extends string = string,
   TActions extends ActionsMap = ActionsMap,
   TEvents extends EventMap = EventMap,
@@ -81,14 +81,14 @@ export interface OAuthProvider<
 }
 
 export type WebhookPayload<T> =
-  T extends BaseProvider<string, any, EventMap, infer P>
+  T extends Provider<string, any, EventMap, infer P>
     ? P
     : T extends OAuthProvider<string, any, EventMap, infer P>
       ? P
       : unknown
 
 export type ProviderActions<T> =
-  T extends BaseProvider<string, infer A, any> ? A : never
+  T extends Provider<string, infer A, any> ? A : never
 
 export type ProviderEvents<T> =
-  T extends BaseProvider<string, any, infer E> ? E : never
+  T extends Provider<string, any, infer E> ? E : never

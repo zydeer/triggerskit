@@ -1,12 +1,12 @@
 import type {
-  BaseProvider,
   OAuthProvider,
+  Provider,
   WebhookContext,
   WebhookPayload,
 } from '@triggerskit/core/provider'
 import type { Result } from '@triggerskit/core/result'
 
-type ProvidersMap = Record<string, BaseProvider | OAuthProvider>
+type ProvidersMap = Record<string, Provider | OAuthProvider>
 
 /**
  * The result of processing a webhook request.
@@ -71,11 +71,11 @@ type OAuthCallback<T extends ProvidersMap = ProvidersMap> = (
  *   }
  * })
  *
- * type MyProvider = Provider<typeof kit>
+ * type MyProviderName = ProviderName<typeof kit>
  * // "github" | "slack"
  * ```
  */
-export type Provider<T> = T extends Kit<infer P> ? keyof P & string : never
+export type ProviderName<T> = T extends Kit<infer P> ? keyof P & string : never
 
 export type Kit<T extends ProvidersMap> = T & {
   /**
