@@ -63,7 +63,7 @@ type OAuthCallback<T extends ProvidersMap = ProvidersMap> = (
   onSuccess: (callback: () => Response) => Promise<Response>
 }
 
-type IsAuthenticated<T extends ProvidersMap = ProvidersMap> = (
+type HasAuth<T extends ProvidersMap = ProvidersMap> = (
   provider: keyof OAuthProvidersOnly<T> & string,
   userId: string,
 ) => Promise<boolean>
@@ -114,18 +114,18 @@ export type Kit<T extends ProvidersMap> = T & {
    */
   processWebhook: ProcessWebhook<T>
   /**
-   * Check if a user is authenticated with an OAuth provider.
+   * Check if a user has authentication for an OAuth provider.
    * @param provider - The OAuth provider name
    * @param userId - The user ID to check
    * @returns True if the user has valid tokens, false otherwise
    * @example
    * ```ts
-   * if (await kit.isAuthenticated('github', userId)) {
-   *   // User is authenticated with GitHub
+   * if (await kit.hasAuth('github', userId)) {
+   *   // User has GitHub authentication
    * }
    * ```
    */
-  isAuthenticated: IsAuthenticated<T>
+  hasAuth: HasAuth<T>
   /**
    * Initiates OAuth authorization by generating an authorization URL.
    * Automatically handles OAuth security features:
@@ -157,7 +157,7 @@ export function triggers<T extends ProvidersMap>(config: {
   return {
     ...config.providers,
     processWebhook: createWebhookHandler(config.providers),
-    isAuthenticated: createIsAuthenticatedHandler(config.providers),
+    hasAuth: createHasAuthHandler(config.providers),
     authorize: createOAuthHandler(config.providers),
     oauthCallback: createOAuthCallbackHandler(config.providers),
   }
@@ -204,9 +204,9 @@ function createWebhookHandler<T extends ProvidersMap>(
   }
 }
 
-function createIsAuthenticatedHandler<T extends ProvidersMap>(
+function createHasAuthHandler<T extends ProvidersMap>(
   providers: T,
-): IsAuthenticated<T> {
+): HasAuth<T> {
   return async (provider, userId) => {
     const providerConfig = providers[provider]
     if (!providerConfig || !('forUser' in providerConfig)) {
