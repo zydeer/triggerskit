@@ -4,49 +4,61 @@ import { createActions } from './actions'
 import { createSlackClient } from './client'
 import type { SlackEvents } from './events'
 import { createSlackOAuth } from './oauth'
-import type {
-  SlackConfigWithOAuth,
-  SlackConfigWithToken,
-  SlackProviderWithOAuth,
-  SlackProviderWithToken,
-} from './types'
+import type { SlackConfigWithOAuth, SlackConfigWithToken } from './types'
 import { createWebhookHandler, detectSlack } from './webhook'
 
-export function slack(config: SlackConfigWithOAuth): SlackProviderWithOAuth
-
-export function slack(config: SlackConfigWithToken): SlackProviderWithToken
+export function slack(
+  config: SlackConfigWithOAuth,
+): ReturnType<typeof createSlackWithOAuth>
 
 export function slack(
-  config: SlackConfigWithOAuth | SlackConfigWithToken,
-): SlackProviderWithOAuth | SlackProviderWithToken {
-  const emitter = createEmitter<SlackEvents>()
+  config: SlackConfigWithToken,
+): ReturnType<typeof createSlackWithToken>
 
+export function slack(config: SlackConfigWithOAuth | SlackConfigWithToken) {
+  const emitter = createEmitter<SlackEvents>()
   const handleWebhook = createWebhookHandler(emitter, config.signingSecret)
 
   if ('oauth' in config && config.oauth) {
-    const { oauth: oauthConfig, storage } = config
-
-    if (!storage) {
-      throw new TriggersError('Slack oauth requires storage')
-    }
-
-    return {
-      name: 'slack',
-      webhooks: { handle: handleWebhook },
-      on: emitter.on,
-      detect: detectSlack,
-      forUser: (userId: string) => {
-        const oauth = createSlackOAuth(oauthConfig, storage, userId)
-        const userHttp = createSlackClient({ config, oauth })
-        return { oauth, actions: createActions(userHttp), http: userHttp }
-      },
-    }
+    return createSlackWithOAuth(config, emitter, handleWebhook)
   }
 
+  return createSlackWithToken(config, emitter, handleWebhook)
+}
+
+function createSlackWithOAuth(
+  config: SlackConfigWithOAuth,
+  emitter: ReturnType<typeof createEmitter<SlackEvents>>,
+  handleWebhook: ReturnType<typeof createWebhookHandler>,
+) {
+  const { oauth: oauthConfig, storage } = config
+
+  if (!storage) {
+    throw new TriggersError('Slack oauth requires storage')
+  }
+
+  return {
+    name: 'slack' as const,
+    webhooks: { handle: handleWebhook },
+    on: emitter.on,
+    detect: detectSlack,
+    forUser: (userId: string) => {
+      const oauth = createSlackOAuth(oauthConfig, storage, userId)
+      const userHttp = createSlackClient({ config, oauth })
+      return { oauth, actions: createActions(userHttp), http: userHttp }
+    },
+  }
+}
+
+function createSlackWithToken(
+  config: SlackConfigWithToken,
+  emitter: ReturnType<typeof createEmitter<SlackEvents>>,
+  handleWebhook: ReturnType<typeof createWebhookHandler>,
+) {
   const http = createSlackClient({ config })
 
   return {
-    name: 'slack',
+    name: 'slack' as const,
     actions: createActions(http),
     webhooks: { handle: handleWebhook },
     on: emitter.on,

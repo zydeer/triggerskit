@@ -1,23 +1,4 @@
 import type { BaseOAuthConfig } from '@triggerskit/core/oauth'
-import type {
-  ActionsMap,
-  OAuthProvider,
-  Provider,
-  ProviderWebhooks,
-} from '@triggerskit/core/provider'
-import type { Result } from '@triggerskit/core/result'
-import type { SlackEvents } from './events'
-import type { SlackOAuth, SlackTokens } from './oauth'
-import type {
-  AuthTestData,
-  ConversationsList,
-  GetUserInfoParams,
-  ListConversationsParams,
-  Message,
-  PostMessageParams,
-  SlackEvent,
-  User,
-} from './schemas'
 
 export interface SlackOAuthConfig {
   /** Slack OAuth app client ID */
@@ -53,34 +34,3 @@ export interface SlackConfigWithToken {
 }
 
 export type SlackConfig = SlackConfigWithOAuth | SlackConfigWithToken
-
-export interface SlackActions extends ActionsMap {
-  /** Test authentication and get workspace/user information */
-  authTest(): Promise<Result<AuthTestData>>
-  /** Post a message to a channel */
-  postMessage(params: PostMessageParams): Promise<Result<Message>>
-  /** Get information about a user */
-  getUserInfo(params: GetUserInfoParams): Promise<Result<User>>
-  /** List conversations (channels) the bot has access to */
-  listConversations(
-    params?: ListConversationsParams,
-  ): Promise<Result<ConversationsList>>
-}
-
-export type SlackProviderWithOAuth = OAuthProvider<
-  'slack',
-  SlackActions,
-  SlackEvents,
-  SlackEvent,
-  ProviderWebhooks<SlackEvent>,
-  SlackTokens,
-  SlackOAuth
->
-
-export type SlackProviderWithToken = Provider<
-  'slack',
-  SlackActions,
-  SlackEvents,
-  SlackEvent,
-  ProviderWebhooks<SlackEvent>
->
