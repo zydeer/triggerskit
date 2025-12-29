@@ -1326,3 +1326,702 @@ export const CommentSchema = z
   })
 
 export type Comment = z.infer<typeof CommentSchema>
+
+/**
+ * Webhook configuration schema
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos
+ */
+export const WebhookConfigSchema = z
+  .object({
+    url: z.string().optional().meta({
+      description: 'The URL to which the payloads will be delivered.',
+    }),
+    content_type: z
+      .enum(['json', 'form'])
+      .optional()
+      .meta({ description: 'The media type used to serialize the payloads.' }),
+    secret: z
+      .string()
+      .optional()
+      .meta({ description: 'Secret token to validate webhook payloads.' }),
+    insecure_ssl: z
+      .enum(['0', '1'])
+      .optional()
+      .meta({ description: 'Whether to enable SSL verification.' }),
+  })
+  .meta({ description: 'Configuration for a repository webhook.' })
+
+export type WebhookConfig = z.infer<typeof WebhookConfigSchema>
+
+/**
+ * GitHub repository webhook schema
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos
+ */
+export const WebhookSchema = z
+  .object({
+    id: z.number().meta({ description: 'Webhook ID.' }),
+    url: z.string().meta({ description: 'Webhook URL.' }),
+    test_url: z.string().meta({ description: 'Test URL for the webhook.' }),
+    ping_url: z.string().meta({ description: 'Ping URL for the webhook.' }),
+    deliveries_url: z
+      .string()
+      .meta({ description: 'Deliveries URL for the webhook.' }),
+    name: z
+      .string()
+      .meta({ description: 'Name of the webhook (always "web").' }),
+    events: z
+      .array(z.string())
+      .meta({ description: 'Events that trigger the webhook.' }),
+    active: z.boolean().meta({ description: 'Whether the webhook is active.' }),
+    config: WebhookConfigSchema.meta({ description: 'Webhook configuration.' }),
+    updated_at: z.string().meta({ description: 'Last update timestamp.' }),
+    created_at: z.string().meta({ description: 'Creation timestamp.' }),
+    type: z.string().meta({ description: 'Type (always "Repository").' }),
+  })
+  .meta({ description: 'GitHub repository webhook.' })
+
+export type Webhook = z.infer<typeof WebhookSchema>
+
+/**
+ * Parameters for creating a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#create-a-repository-webhook
+ */
+export const CreateWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    config: WebhookConfigSchema.extend({
+      url: z.string().min(1).meta({
+        description: 'The URL to which the payloads will be delivered.',
+      }),
+    }).meta({ description: 'Webhook configuration.' }),
+    events: z.array(z.string()).optional().meta({
+      description: 'Events that trigger the webhook (default: ["push"]).',
+    }),
+    active: z
+      .boolean()
+      .optional()
+      .meta({ description: 'Whether the webhook is active (default: true).' }),
+  })
+  .meta({ description: 'Parameters for creating a webhook.' })
+
+export type CreateWebhookParams = z.infer<typeof CreateWebhookParamsSchema>
+
+/**
+ * Parameters for updating a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#update-a-repository-webhook
+ */
+export const UpdateWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    hook_id: z.number().int().positive().meta({
+      description: 'The unique identifier of the hook.',
+    }),
+    config: WebhookConfigSchema.optional().meta({
+      description: 'Webhook configuration.',
+    }),
+    events: z
+      .array(z.string())
+      .optional()
+      .meta({ description: 'Events that trigger the webhook.' }),
+    add_events: z
+      .array(z.string())
+      .optional()
+      .meta({ description: 'Events to add to the webhook.' }),
+    remove_events: z
+      .array(z.string())
+      .optional()
+      .meta({ description: 'Events to remove from the webhook.' }),
+    active: z
+      .boolean()
+      .optional()
+      .meta({ description: 'Whether the webhook is active.' }),
+  })
+  .meta({ description: 'Parameters for updating a webhook.' })
+
+export type UpdateWebhookParams = z.infer<typeof UpdateWebhookParamsSchema>
+
+/**
+ * Parameters for getting a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#get-a-repository-webhook
+ */
+export const GetWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    hook_id: z.number().int().positive().meta({
+      description: 'The unique identifier of the hook.',
+    }),
+  })
+  .meta({ description: 'Parameters for getting a webhook.' })
+
+export type GetWebhookParams = z.infer<typeof GetWebhookParamsSchema>
+
+/**
+ * Parameters for deleting a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#delete-a-repository-webhook
+ */
+export const DeleteWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    hook_id: z.number().int().positive().meta({
+      description: 'The unique identifier of the hook.',
+    }),
+  })
+  .meta({ description: 'Parameters for deleting a webhook.' })
+
+export type DeleteWebhookParams = z.infer<typeof DeleteWebhookParamsSchema>
+
+/**
+ * Parameters for listing webhooks
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#list-repository-webhooks
+ */
+export const ListWebhooksParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    per_page: z.number().min(1).max(100).optional().meta({
+      description: 'The number of results per page (max 100). Default: 30.',
+    }),
+    page: z.number().min(1).optional().meta({
+      description: 'The page number of the results to fetch. Default: 1.',
+    }),
+  })
+  .meta({ description: 'Parameters for listing webhooks.' })
+
+export type ListWebhooksParams = z.infer<typeof ListWebhooksParamsSchema>
+
+/**
+ * Parameters for pinging a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#ping-a-repository-webhook
+ */
+export const PingWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    hook_id: z.number().int().positive().meta({
+      description: 'The unique identifier of the hook.',
+    }),
+  })
+  .meta({ description: 'Parameters for pinging a webhook.' })
+
+export type PingWebhookParams = z.infer<typeof PingWebhookParamsSchema>
+
+/**
+ * Parameters for testing a webhook
+ *
+ * @see https://docs.github.com/en/rest/webhooks/repos#test-the-push-repository-webhook
+ */
+export const TestWebhookParamsSchema = z
+  .object({
+    owner: z.string().min(1).meta({
+      description:
+        'The account owner of the repository. The name is not case sensitive.',
+    }),
+    repo: z.string().min(1).meta({
+      description:
+        'The name of the repository without the .git extension. The name is not case sensitive.',
+    }),
+    hook_id: z.number().int().positive().meta({
+      description: 'The unique identifier of the hook.',
+    }),
+  })
+  .meta({ description: 'Parameters for testing a webhook.' })
+
+export type TestWebhookParams = z.infer<typeof TestWebhookParamsSchema>
+
+/**
+ * Webhook event payload for star events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#star
+ */
+export const StarEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['created', 'deleted'])
+    .meta({ description: 'Action performed on the star.' }),
+  starred_at: z
+    .string()
+    .nullable()
+    .meta({ description: 'ISO 8601 timestamp of when the star was created.' }),
+}).meta({
+  description: 'Webhook event payload for star events.',
+})
+
+export type StarEvent = z.infer<typeof StarEventSchema>
+
+/**
+ * Webhook event payload for fork events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#fork
+ */
+export const ForkEventSchema = WebhookEventSchema.extend({
+  forkee: RepositorySchema.meta({
+    description: 'The created fork repository.',
+  }),
+}).meta({
+  description: 'Webhook event payload for fork events.',
+})
+
+export type ForkEvent = z.infer<typeof ForkEventSchema>
+
+/**
+ * Webhook event payload for release events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#release
+ */
+export const ReleaseEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum([
+      'published',
+      'unpublished',
+      'created',
+      'edited',
+      'deleted',
+      'prereleased',
+      'released',
+    ])
+    .meta({ description: 'Action performed on the release.' }),
+  release: z
+    .object({
+      id: z.number().meta({ description: 'Release ID.' }),
+      node_id: z
+        .string()
+        .meta({ description: 'GraphQL global node identifier.' }),
+      tag_name: z.string().meta({ description: 'Tag name for the release.' }),
+      name: z.string().nullable().meta({ description: 'Release name.' }),
+      body: z
+        .string()
+        .nullable()
+        .meta({ description: 'Release description in markdown.' }),
+      draft: z.boolean().meta({ description: 'Whether this is a draft.' }),
+      prerelease: z
+        .boolean()
+        .meta({ description: 'Whether this is a prerelease.' }),
+      created_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of creation.' }),
+      published_at: z
+        .string()
+        .nullable()
+        .meta({ description: 'ISO 8601 timestamp of publication.' }),
+      author: UserSchema.meta({ description: 'Release author.' }),
+      html_url: z.string().meta({ description: 'Web URL for the release.' }),
+    })
+    .meta({ description: 'The release that was affected.' }),
+}).meta({
+  description: 'Webhook event payload for release events.',
+})
+
+export type ReleaseEvent = z.infer<typeof ReleaseEventSchema>
+
+/**
+ * Webhook event payload for watch events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#watch
+ */
+export const WatchEventSchema = WebhookEventSchema.extend({
+  action: z
+    .literal('started')
+    .meta({ description: 'Action performed (always "started").' }),
+}).meta({
+  description: 'Webhook event payload for watch (repository starred) events.',
+})
+
+export type WatchEvent = z.infer<typeof WatchEventSchema>
+
+/**
+ * Webhook event payload for create events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#create
+ */
+export const CreateEventSchema = WebhookEventSchema.extend({
+  ref: z
+    .string()
+    .meta({ description: 'Git ref that was created (branch or tag name).' }),
+  ref_type: z
+    .enum(['branch', 'tag'])
+    .meta({ description: 'Type of ref that was created.' }),
+  master_branch: z
+    .string()
+    .meta({ description: 'Name of the default branch.' }),
+  description: z
+    .string()
+    .nullable()
+    .meta({ description: 'Repository description.' }),
+}).meta({
+  description:
+    'Webhook event payload for create events (branch or tag creation).',
+})
+
+export type CreateEvent = z.infer<typeof CreateEventSchema>
+
+/**
+ * Webhook event payload for delete events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#delete
+ */
+export const DeleteEventSchema = WebhookEventSchema.extend({
+  ref: z
+    .string()
+    .meta({ description: 'Git ref that was deleted (branch or tag name).' }),
+  ref_type: z
+    .enum(['branch', 'tag'])
+    .meta({ description: 'Type of ref that was deleted.' }),
+}).meta({
+  description:
+    'Webhook event payload for delete events (branch or tag deletion).',
+})
+
+export type DeleteEvent = z.infer<typeof DeleteEventSchema>
+
+/**
+ * Webhook event payload for issue comment events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#issue_comment
+ */
+export const IssueCommentEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['created', 'edited', 'deleted'])
+    .meta({ description: 'Action performed on the comment.' }),
+  issue: IssueSchema.meta({ description: 'The issue the comment belongs to.' }),
+  comment: CommentSchema.meta({
+    description: 'The comment that was affected.',
+  }),
+}).meta({
+  description: 'Webhook event payload for issue comment events.',
+})
+
+export type IssueCommentEvent = z.infer<typeof IssueCommentEventSchema>
+
+/**
+ * Webhook event payload for pull request review events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request_review
+ */
+export const PullRequestReviewEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['submitted', 'edited', 'dismissed'])
+    .meta({ description: 'Action performed on the review.' }),
+  pull_request: PullRequestSchema.meta({
+    description: 'The pull request the review belongs to.',
+  }),
+  review: z
+    .object({
+      id: z.number().meta({ description: 'Review ID.' }),
+      node_id: z
+        .string()
+        .meta({ description: 'GraphQL global node identifier.' }),
+      user: UserSchema.meta({ description: 'User who created the review.' }),
+      body: z.string().nullable().meta({ description: 'Review body text.' }),
+      state: z
+        .enum(['approved', 'changes_requested', 'commented', 'dismissed'])
+        .meta({ description: 'Review state.' }),
+      html_url: z.string().meta({ description: 'Web URL for the review.' }),
+      submitted_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of submission.' }),
+    })
+    .meta({ description: 'The review that was affected.' }),
+}).meta({
+  description: 'Webhook event payload for pull request review events.',
+})
+
+export type PullRequestReviewEvent = z.infer<
+  typeof PullRequestReviewEventSchema
+>
+
+/**
+ * Webhook event payload for workflow run events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#workflow_run
+ */
+export const WorkflowRunEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['completed', 'requested', 'in_progress'])
+    .meta({ description: 'Action performed on the workflow run.' }),
+  workflow_run: z
+    .object({
+      id: z.number().meta({ description: 'Workflow run ID.' }),
+      name: z.string().nullable().meta({ description: 'Workflow name.' }),
+      status: z
+        .enum([
+          'queued',
+          'in_progress',
+          'completed',
+          'waiting',
+          'requested',
+          'pending',
+        ])
+        .meta({ description: 'Workflow run status.' }),
+      conclusion: z
+        .enum([
+          'success',
+          'failure',
+          'neutral',
+          'cancelled',
+          'skipped',
+          'timed_out',
+          'action_required',
+        ])
+        .nullable()
+        .meta({ description: 'Workflow run conclusion.' }),
+      head_branch: z
+        .string()
+        .nullable()
+        .meta({ description: 'Head branch name.' }),
+      head_sha: z.string().meta({ description: 'Head commit SHA.' }),
+      html_url: z
+        .string()
+        .meta({ description: 'Web URL for the workflow run.' }),
+      created_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of creation.' }),
+      updated_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of last update.' }),
+    })
+    .meta({ description: 'The workflow run that was affected.' }),
+}).meta({
+  description: 'Webhook event payload for workflow run events.',
+})
+
+export type WorkflowRunEvent = z.infer<typeof WorkflowRunEventSchema>
+
+/**
+ * Webhook event payload for check run events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#check_run
+ */
+export const CheckRunEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['created', 'completed', 'rerequested', 'requested_action'])
+    .meta({ description: 'Action performed on the check run.' }),
+  check_run: z
+    .object({
+      id: z.number().meta({ description: 'Check run ID.' }),
+      name: z.string().meta({ description: 'Check run name.' }),
+      status: z
+        .enum(['queued', 'in_progress', 'completed'])
+        .meta({ description: 'Check run status.' }),
+      conclusion: z
+        .enum([
+          'success',
+          'failure',
+          'neutral',
+          'cancelled',
+          'skipped',
+          'timed_out',
+          'action_required',
+        ])
+        .nullable()
+        .meta({ description: 'Check run conclusion.' }),
+      head_sha: z.string().meta({ description: 'Head commit SHA.' }),
+      html_url: z.string().meta({ description: 'Web URL for the check run.' }),
+    })
+    .meta({ description: 'The check run that was affected.' }),
+}).meta({
+  description: 'Webhook event payload for check run events.',
+})
+
+export type CheckRunEvent = z.infer<typeof CheckRunEventSchema>
+
+/**
+ * Webhook event payload for check suite events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#check_suite
+ */
+export const CheckSuiteEventSchema = WebhookEventSchema.extend({
+  action: z
+    .enum(['completed', 'requested', 'rerequested'])
+    .meta({ description: 'Action performed on the check suite.' }),
+  check_suite: z
+    .object({
+      id: z.number().meta({ description: 'Check suite ID.' }),
+      status: z
+        .enum(['queued', 'in_progress', 'completed'])
+        .meta({ description: 'Check suite status.' }),
+      conclusion: z
+        .enum([
+          'success',
+          'failure',
+          'neutral',
+          'cancelled',
+          'skipped',
+          'timed_out',
+          'action_required',
+        ])
+        .nullable()
+        .meta({ description: 'Check suite conclusion.' }),
+      head_sha: z.string().meta({ description: 'Head commit SHA.' }),
+      head_branch: z
+        .string()
+        .nullable()
+        .meta({ description: 'Head branch name.' }),
+    })
+    .meta({ description: 'The check suite that was affected.' }),
+}).meta({
+  description: 'Webhook event payload for check suite events.',
+})
+
+export type CheckSuiteEvent = z.infer<typeof CheckSuiteEventSchema>
+
+/**
+ * Webhook event payload for deployment events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#deployment
+ */
+export const DeploymentEventSchema = WebhookEventSchema.extend({
+  deployment: z
+    .object({
+      id: z.number().meta({ description: 'Deployment ID.' }),
+      sha: z.string().meta({ description: 'Commit SHA being deployed.' }),
+      ref: z.string().meta({ description: 'Ref being deployed.' }),
+      task: z.string().meta({ description: 'Deployment task name.' }),
+      environment: z
+        .string()
+        .meta({ description: 'Deployment environment name.' }),
+      description: z
+        .string()
+        .nullable()
+        .meta({ description: 'Deployment description.' }),
+      creator: UserSchema.meta({ description: 'User who created deployment.' }),
+      created_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of creation.' }),
+      updated_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of last update.' }),
+    })
+    .meta({ description: 'The deployment that was created.' }),
+}).meta({
+  description: 'Webhook event payload for deployment events.',
+})
+
+export type DeploymentEvent = z.infer<typeof DeploymentEventSchema>
+
+/**
+ * Webhook event payload for deployment status events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#deployment_status
+ */
+export const DeploymentStatusEventSchema = WebhookEventSchema.extend({
+  deployment_status: z
+    .object({
+      id: z.number().meta({ description: 'Deployment status ID.' }),
+      state: z
+        .enum([
+          'error',
+          'failure',
+          'inactive',
+          'pending',
+          'success',
+          'queued',
+          'in_progress',
+        ])
+        .meta({ description: 'Deployment state.' }),
+      description: z
+        .string()
+        .nullable()
+        .meta({ description: 'Status description.' }),
+      environment: z
+        .string()
+        .meta({ description: 'Deployment environment name.' }),
+      creator: UserSchema.meta({ description: 'User who created the status.' }),
+      created_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of creation.' }),
+      updated_at: z
+        .string()
+        .meta({ description: 'ISO 8601 timestamp of last update.' }),
+    })
+    .meta({ description: 'The deployment status.' }),
+  deployment: z
+    .object({
+      id: z.number().meta({ description: 'Deployment ID.' }),
+      sha: z.string().meta({ description: 'Commit SHA being deployed.' }),
+      ref: z.string().meta({ description: 'Ref being deployed.' }),
+      environment: z
+        .string()
+        .meta({ description: 'Deployment environment name.' }),
+    })
+    .meta({ description: 'The deployment.' }),
+}).meta({
+  description: 'Webhook event payload for deployment status events.',
+})
+
+export type DeploymentStatusEvent = z.infer<typeof DeploymentStatusEventSchema>
+
+/**
+ * Webhook event payload for ping events.
+ *
+ * @see https://docs.github.com/en/webhooks/webhook-events-and-payloads#ping
+ */
+export const PingEventSchema = WebhookEventSchema.extend({
+  zen: z.string().meta({ description: 'Random GitHub Zen message.' }),
+  hook_id: z.number().meta({ description: 'Webhook ID.' }),
+  hook: z
+    .object({
+      type: z.string().meta({ description: 'Webhook type.' }),
+      id: z.number().meta({ description: 'Webhook ID.' }),
+      name: z.string().meta({ description: 'Webhook name.' }),
+      active: z.boolean().meta({ description: 'Whether webhook is active.' }),
+      events: z
+        .array(z.string())
+        .meta({ description: 'Events the webhook is subscribed to.' }),
+      config: WebhookConfigSchema.meta({
+        description: 'Webhook configuration.',
+      }),
+    })
+    .meta({ description: 'The webhook configuration.' }),
+}).meta({
+  description:
+    'Webhook event payload for ping events sent when webhook is created or tested.',
+})
+
+export type PingEvent = z.infer<typeof PingEventSchema>

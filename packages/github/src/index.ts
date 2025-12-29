@@ -1,6 +1,6 @@
 import { createEmitter } from '@triggerskit/core/events'
 import { TriggersError } from '@triggerskit/core/result'
-import { createActions } from './actions'
+import { createActions, createWebhookActions } from './actions'
 import { createGitHubClient } from './client'
 import type { GitHubEvents } from './events'
 import { createGitHubOAuth } from './oauth'
@@ -29,9 +29,11 @@ export function github(
       throw new TriggersError('GitHub oauth requires storage')
     }
 
+    const http = createGitHubClient({ config })
+
     return {
       name: 'github',
-      webhooks: { handle: handleWebhook },
+      webhooks: createWebhookActions(http, handleWebhook),
       on: emitter.on,
       detect: detectGitHub,
       forUser: (userId) => {
@@ -52,7 +54,7 @@ export function github(
   return {
     name: 'github',
     actions: createActions(http),
-    webhooks: { handle: handleWebhook },
+    webhooks: createWebhookActions(http, handleWebhook),
     on: emitter.on,
     http,
     detect: detectGitHub,
@@ -60,27 +62,50 @@ export function github(
 }
 
 export type {
+  CheckRunEvent,
+  CheckSuiteEvent,
   Comment,
   CreateCommentParams,
+  CreateEvent,
   CreateIssueParams,
+  CreateWebhookParams,
+  DeleteEvent,
+  DeleteWebhookParams,
+  DeploymentEvent,
+  DeploymentStatusEvent,
+  ForkEvent,
   GetRepoParams,
   GetUserParams,
+  GetWebhookParams,
   Issue,
+  IssueCommentEvent,
   IssuesEvent,
   Label,
   License,
   ListOrgReposParams,
   ListReposParams,
+  ListWebhooksParams,
   Milestone,
   Permissions,
+  PingEvent,
+  PingWebhookParams,
   PullRequest,
   PullRequestEvent,
   PullRequestReference,
+  PullRequestReviewEvent,
   PushEvent,
+  ReleaseEvent,
   Repository,
   SecurityAndAnalysis,
+  StarEvent,
+  TestWebhookParams,
+  UpdateWebhookParams,
   User,
+  WatchEvent,
+  Webhook,
+  WebhookConfig,
   WebhookEvent,
+  WorkflowRunEvent,
 } from './schemas'
 
 export default github

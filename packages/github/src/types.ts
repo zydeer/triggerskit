@@ -12,11 +12,19 @@ import type {
   Comment,
   CreateCommentParams,
   CreateIssueParams,
+  CreateWebhookParams,
+  DeleteWebhookParams,
   GetRepoParams,
+  GetWebhookParams,
   Issue,
   ListReposParams,
+  ListWebhooksParams,
+  PingWebhookParams,
   Repository,
+  TestWebhookParams,
+  UpdateWebhookParams,
   User,
+  Webhook,
   WebhookEvent,
 } from './schemas'
 
@@ -62,12 +70,30 @@ export interface GitHubActions extends ActionsMap {
   createComment(params: CreateCommentParams): Promise<Result<Comment>>
 }
 
+/** GitHub webhooks interface with webhook management actions */
+export type GitHubWebhooks = ProviderWebhooks<WebhookEvent> & {
+  /** Create a repository webhook */
+  create(params: CreateWebhookParams): Promise<Result<Webhook>>
+  /** List repository webhooks */
+  list(params: ListWebhooksParams): Promise<Result<Webhook[]>>
+  /** Get a specific webhook */
+  get(params: GetWebhookParams): Promise<Result<Webhook>>
+  /** Update a webhook */
+  update(params: UpdateWebhookParams): Promise<Result<Webhook>>
+  /** Delete a webhook */
+  delete(params: DeleteWebhookParams): Promise<Result<void>>
+  /** Ping a webhook */
+  ping(params: PingWebhookParams): Promise<Result<void>>
+  /** Test a webhook */
+  test(params: TestWebhookParams): Promise<Result<void>>
+}
+
 export type GitHubProviderWithOAuth = OAuthProvider<
   'github',
   GitHubActions,
   GitHubEvents,
   WebhookEvent,
-  ProviderWebhooks<WebhookEvent>,
+  GitHubWebhooks,
   OAuthTokens,
   GitHubOAuth
 >
@@ -77,5 +103,5 @@ export type GitHubProviderWithToken = Provider<
   GitHubActions,
   GitHubEvents,
   WebhookEvent,
-  ProviderWebhooks<WebhookEvent>
+  GitHubWebhooks
 >
