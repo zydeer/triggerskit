@@ -25,12 +25,16 @@ type ProcessWebhook<T extends ProvidersMap> = (
   request: Request,
 ) => Promise<Result<WebhookResult<T>>>
 
+type OAuthProvidersOnly<T extends ProvidersMap> = {
+  [K in keyof T as T[K] extends OAuthProvider ? K : never]: T[K]
+}
+
 /**
  * Parameters for OAuth authorization initiation.
  */
 type AuthorizeParams<T extends ProvidersMap = ProvidersMap> = {
-  /** The provider name (must be one of the configured provider keys) */
-  provider: keyof T & string
+  /** The provider name (must be one of the configured OAuth provider keys) */
+  provider: keyof OAuthProvidersOnly<T> & string
   /** The user ID for whom the OAuth flow is being initiated */
   userId: string
 }
@@ -40,8 +44,8 @@ type Authorize<T extends ProvidersMap = ProvidersMap> = (
 ) => Promise<Response>
 
 type OAuthCallbackParams<T extends ProvidersMap = ProvidersMap> = {
-  /** The provider name (must be one of the configured provider keys) */
-  provider: keyof T & string
+  /** The provider name (must be one of the configured OAuth provider keys) */
+  provider: keyof OAuthProvidersOnly<T> & string
   /** The user ID for whom the OAuth flow is being completed */
   userId: string
   /** The callback URL containing OAuth code and state parameters */
@@ -76,6 +80,26 @@ type OAuthCallback<T extends ProvidersMap = ProvidersMap> = (
  * ```
  */
 export type ProviderName<T> = T extends Kit<infer P> ? keyof P & string : never
+
+/**
+ * This allows you to reference only the OAuth provider names you've configured in your Kit.
+ * Excludes providers that don't support OAuth (like token-based providers).
+ *
+ * @example
+ * ```ts
+ * const kit = triggers({
+ *   providers: {
+ *     github: github({ oauth: { ... } }),  // OAuth provider
+ *     telegram: telegram({ token: '...' })  // Token-based provider
+ *   }
+ * })
+ *
+ * type MyOAuthProviderName = OAuthProviderName<typeof kit>
+ * // "github" (telegram is excluded)
+ * ```
+ */
+export type OAuthProviderName<T> =
+  T extends Kit<infer P> ? keyof OAuthProvidersOnly<P> & string : never
 
 export type Kit<T extends ProvidersMap> = T & {
   /**

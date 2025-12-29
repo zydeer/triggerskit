@@ -2,7 +2,7 @@ import github from '@triggerskit/github'
 import slack from '@triggerskit/slack'
 import telegram from '@triggerskit/telegram'
 import { Hono } from 'hono'
-import { type ProviderName, triggers } from 'triggerskit'
+import { type OAuthProviderName, triggers } from 'triggerskit'
 import { memory } from 'triggerskit/storage'
 
 const storage = memory()
@@ -49,7 +49,7 @@ app.get('/', async () => {
 
 app.get('/auth/:provider', (c) =>
   kit.authorize({
-    provider: c.req.param('provider') as ProviderName<typeof kit>,
+    provider: c.req.param('provider') as OAuthProviderName<typeof kit>,
     userId,
   }),
 )
@@ -57,7 +57,7 @@ app.get('/auth/:provider', (c) =>
 app.get('/auth/:provider/callback', (c) =>
   kit
     .oauthCallback({
-      provider: c.req.param('provider') as ProviderName<typeof kit>,
+      provider: c.req.param('provider') as OAuthProviderName<typeof kit>,
       userId,
       callbackUrl: c.req.url,
     })
