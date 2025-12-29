@@ -63,6 +63,11 @@ type OAuthCallback<T extends ProvidersMap = ProvidersMap> = (
   onSuccess: (callback: () => Response) => Promise<Response>
 }
 
+type IsAuthenticated<T extends ProvidersMap = ProvidersMap> = (
+  provider: keyof OAuthProvidersOnly<T> & string,
+  userId: string,
+) => Promise<boolean>
+
 /**
  * This allows you to reference the exact provider names you've configured in your Kit.
  *
@@ -109,6 +114,19 @@ export type Kit<T extends ProvidersMap> = T & {
    */
   processWebhook: ProcessWebhook<T>
   /**
+   * Check if a user is authenticated with an OAuth provider.
+   * @param provider - The OAuth provider name
+   * @param userId - The user ID to check
+   * @returns True if the user has valid tokens, false otherwise
+   * @example
+   * ```ts
+   * if (await kit.isAuthenticated('github', userId)) {
+   *   // User is authenticated with GitHub
+   * }
+   * ```
+   */
+  isAuthenticated: IsAuthenticated<T>
+  /**
    * Initiates OAuth authorization by generating an authorization URL.
    * Automatically handles OAuth security features:
    * - Generates and stores a cryptographically secure state parameter for CSRF protection
@@ -139,6 +157,7 @@ export function triggers<T extends ProvidersMap>(config: {
   return {
     ...config.providers,
     processWebhook: createWebhookHandler(config.providers),
+    isAuthenticated: createIsAuthenticatedHandler(config.providers),
     authorize: createOAuthHandler(config.providers),
     oauthCallback: createOAuthCallbackHandler(config.providers),
   }
@@ -182,6 +201,21 @@ function createWebhookHandler<T extends ProvidersMap>(
       ok: false,
       error: { message: 'No matching provider found for this webhook' },
     }
+  }
+}
+
+function createIsAuthenticatedHandler<T extends ProvidersMap>(
+  providers: T,
+): IsAuthenticated<T> {
+  return async (provider, userId) => {
+    const providerConfig = providers[provider]
+    if (!providerConfig || !('forUser' in providerConfig)) {
+      return false
+    }
+
+    const oauthProvider = providerConfig as OAuthProvider
+    const user = oauthProvider.forUser(userId)
+    return await user.oauth.isAuthenticated()
   }
 }
 

@@ -31,13 +31,11 @@ const userId = '1234567890'
 const app = new Hono()
 
 app.get('/', async () => {
-  const user = kit.github.forUser(userId)
-
-  const isAuthenticated = await user.oauth.isAuthenticated()
-
-  if (!isAuthenticated) {
+  if (!(await kit.isAuthenticated('github', userId))) {
     return Response.redirect('/auth/github')
   }
+
+  const user = kit.github.forUser(userId)
 
   const repo = await user.actions.getRepo({
     owner: 'arshad-yaseen',
