@@ -62,6 +62,32 @@ app.get('/auth/:provider/callback', (c) =>
     .onSuccess(() => Response.redirect('/')),
 )
 
+app.get('/webhook', async (c) => {
+  const result = await kit.processWebhook(c.req.raw)
+
+  if (!result.ok) {
+    return Response.json({ error: result.error })
+  }
+
+  const data = result.data
+
+  switch (data.provider) {
+    case 'github':
+      console.log(data.payload.repository)
+      break
+    case 'slack':
+      console.log(data.payload.event_id)
+      break
+    case 'telegram':
+      console.log(data.payload.channel_post)
+      break
+    default:
+      break
+  }
+
+  return Response.json({ message: 'Webhook processed successfully' })
+})
+
 export default {
   port: 3000,
   fetch: app.fetch,
