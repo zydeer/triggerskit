@@ -1,7 +1,9 @@
 import type { EventHandler, EventMap, Unsubscribe } from './events'
 import type { HttpClient } from './http'
 import type { OAuth, OAuthTokens } from './oauth'
-import type { Result } from './result'
+import type { Result, TKError } from './result'
+
+export type { Result, TKError }
 
 export interface WebhookContext {
   headers: Headers

@@ -4,55 +4,68 @@ import { createActions, createWebhookActions } from './actions'
 import { createGitHubClient } from './client'
 import type { GitHubEvents } from './events'
 import { createGitHubOAuth } from './oauth'
-import type {
-  GitHubConfigWithOAuth,
-  GitHubConfigWithToken,
-  GitHubProviderWithOAuth,
-  GitHubProviderWithToken,
-} from './types'
+import type { GitHubConfigWithOAuth, GitHubConfigWithToken } from './types'
 import { createWebhookHandler, detectGitHub } from './webhook'
 
-export function github(config: GitHubConfigWithOAuth): GitHubProviderWithOAuth
-
-export function github(config: GitHubConfigWithToken): GitHubProviderWithToken
+export function github(
+  config: GitHubConfigWithOAuth,
+): ReturnType<typeof createGitHubWithOAuth>
 
 export function github(
-  config: GitHubConfigWithOAuth | GitHubConfigWithToken,
-): GitHubProviderWithOAuth | GitHubProviderWithToken {
+  config: GitHubConfigWithToken,
+): ReturnType<typeof createGitHubWithToken>
+
+export function github(config: GitHubConfigWithOAuth | GitHubConfigWithToken) {
   const emitter = createEmitter<GitHubEvents>()
   const handleWebhook = createWebhookHandler(emitter)
 
   if ('oauth' in config && config.oauth) {
-    const { oauth: oauthConfig, storage } = config
+    return createGitHubWithOAuth(config, emitter, handleWebhook)
+  }
 
-    if (!storage) {
-      throw new TriggersError('GitHub oauth requires storage')
-    }
+  return createGitHubWithToken(config, emitter, handleWebhook)
+}
 
-    const http = createGitHubClient({ config })
+function createGitHubWithOAuth(
+  config: GitHubConfigWithOAuth,
+  emitter: ReturnType<typeof createEmitter<GitHubEvents>>,
+  handleWebhook: ReturnType<typeof createWebhookHandler>,
+) {
+  const { oauth: oauthConfig, storage } = config
 
-    return {
-      name: 'github',
-      webhooks: createWebhookActions(http, handleWebhook),
-      on: emitter.on,
-      detect: detectGitHub,
-      forUser: (userId) => {
-        const oauth = createGitHubOAuth(oauthConfig, storage, userId)
-
-        const userHttp = createGitHubClient({
-          config,
-          getToken: () => oauth.getAccessToken(),
-        })
-
-        return { oauth, actions: createActions(userHttp), http: userHttp }
-      },
-    }
+  if (!storage) {
+    throw new TriggersError('GitHub oauth requires storage')
   }
 
   const http = createGitHubClient({ config })
 
   return {
-    name: 'github',
+    name: 'github' as const,
+    webhooks: createWebhookActions(http, handleWebhook),
+    on: emitter.on,
+    detect: detectGitHub,
+    forUser: (userId: string) => {
+      const oauth = createGitHubOAuth(oauthConfig, storage, userId)
+
+      const userHttp = createGitHubClient({
+        config,
+        getToken: () => oauth.getAccessToken(),
+      })
+
+      return { oauth, actions: createActions(userHttp), http: userHttp }
+    },
+  }
+}
+
+function createGitHubWithToken(
+  config: GitHubConfigWithToken,
+  emitter: ReturnType<typeof createEmitter<GitHubEvents>>,
+  handleWebhook: ReturnType<typeof createWebhookHandler>,
+) {
+  const http = createGitHubClient({ config })
+
+  return {
+    name: 'github' as const,
     actions: createActions(http),
     webhooks: createWebhookActions(http, handleWebhook),
     on: emitter.on,

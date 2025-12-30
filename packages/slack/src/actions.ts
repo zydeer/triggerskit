@@ -3,21 +3,32 @@ import { parse, unwrap } from '@triggerskit/core/result'
 import {
   AuthTestDataSchema,
   ConversationsListSchema,
+  type GetUserInfoParams,
   GetUserInfoParamsSchema,
+  type ListConversationsParams,
   ListConversationsParamsSchema,
   MessageSchema,
+  type PostMessageParams,
   PostMessageParamsSchema,
   UserSchema,
 } from './schemas'
-import type { SlackActions } from './types'
 
-export function createActions(http: HttpClient): SlackActions {
+export function createActions(http: HttpClient) {
   return {
+    /**
+     * Test authentication and get workspace/user information.
+     * @returns Authentication test results including user and team info
+     */
     async authTest() {
       return unwrap(await http('/auth.test'), { schema: AuthTestDataSchema })
     },
 
-    async postMessage(params) {
+    /**
+     * Post a message to a channel.
+     * @param params - Message parameters including channel, text, and optional formatting
+     * @returns Posted message object
+     */
+    async postMessage(params: PostMessageParams) {
       const validated = parse(PostMessageParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -33,7 +44,12 @@ export function createActions(http: HttpClient): SlackActions {
       )
     },
 
-    async getUserInfo(params) {
+    /**
+     * Get information about a user.
+     * @param params - User ID and optional locale settings
+     * @returns User profile information
+     */
+    async getUserInfo(params: GetUserInfoParams) {
       const validated = parse(GetUserInfoParamsSchema, params)
 
       if (!validated.ok) return validated
@@ -55,7 +71,12 @@ export function createActions(http: HttpClient): SlackActions {
       })
     },
 
-    async listConversations(params) {
+    /**
+     * List conversations (channels) the bot has access to.
+     * @param params - Optional filtering and pagination parameters
+     * @returns List of conversations with pagination info
+     */
+    async listConversations(params?: ListConversationsParams) {
       if (params) {
         const validated = parse(ListConversationsParamsSchema, params)
         if (!validated.ok) return validated

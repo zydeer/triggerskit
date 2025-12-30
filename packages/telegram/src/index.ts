@@ -2,19 +2,19 @@ import { createEmitter } from '@triggerskit/core/events'
 import { createActions, createWebhookActions } from './actions'
 import { createTelegramClient } from './client'
 import type { TelegramEvents } from './events'
-import type { TelegramConfig, TelegramProvider } from './types'
+import type { TelegramConfig } from './types'
 import { createWebhookHandler, detectTelegram } from './webhook'
 
 /**
  * Create a Telegram bot provider instance.
  */
-export function telegram(config: TelegramConfig): TelegramProvider {
+export function telegram(config: TelegramConfig) {
   const http = createTelegramClient(config)
   const emitter = createEmitter<TelegramEvents>()
   const handleWebhook = createWebhookHandler(emitter)
 
   return {
-    name: 'telegram',
+    name: 'telegram' as const,
     actions: createActions(http),
     webhooks: createWebhookActions(http, handleWebhook),
     on: emitter.on,
@@ -23,6 +23,7 @@ export function telegram(config: TelegramConfig): TelegramProvider {
   }
 }
 
+export type { DeleteWebhookParams, SetWebhookParams } from './actions'
 export type {
   Animation,
   Audio,

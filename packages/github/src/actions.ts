@@ -1,8 +1,8 @@
 import type { HttpClient } from '@triggerskit/core/http'
-import { ok, parse, type Result, unwrap } from '@triggerskit/core/result'
+import type { ProviderWebhooks } from '@triggerskit/core/provider'
+import { ok, parse, unwrap } from '@triggerskit/core/result'
 import { z } from 'zod'
 import {
-  type Comment,
   CommentSchema,
   type CreateCommentParams,
   CreateCommentParamsSchema,
@@ -16,7 +16,6 @@ import {
   GetRepoParamsSchema,
   type GetWebhookParams,
   GetWebhookParamsSchema,
-  type Issue,
   IssueSchema,
   type ListReposParams,
   ListReposParamsSchema,
@@ -24,26 +23,32 @@ import {
   ListWebhooksParamsSchema,
   type PingWebhookParams,
   PingWebhookParamsSchema,
-  type Repository,
   RepositorySchema,
   type TestWebhookParams,
   TestWebhookParamsSchema,
   type UpdateWebhookParams,
   UpdateWebhookParamsSchema,
-  type User,
   UserSchema,
-  type Webhook,
+  type WebhookEvent,
   WebhookSchema,
 } from './schemas'
-import type { GitHubActions, GitHubWebhooks } from './types'
 
-export function createActions(http: HttpClient): GitHubActions {
+export function createActions(http: HttpClient) {
   return {
-    async getUser(): Promise<Result<User>> {
+    /**
+     * Get information about the authenticated user.
+     * @returns User profile information
+     */
+    async getUser() {
       return unwrap(await http('/user'), { schema: UserSchema })
     },
 
-    async listRepos(params?: ListReposParams): Promise<Result<Repository[]>> {
+    /**
+     * List repositories for the authenticated user.
+     * @param params - Optional parameters for filtering and pagination
+     * @returns Array of repository objects
+     */
+    async listRepos(params?: ListReposParams) {
       if (params) {
         const validated = parse(ListReposParamsSchema, params)
         if (!validated.ok) return validated
@@ -58,7 +63,12 @@ export function createActions(http: HttpClient): GitHubActions {
       })
     },
 
-    async getRepo(params: GetRepoParams): Promise<Result<Repository>> {
+    /**
+     * Get a specific repository.
+     * @param params - Repository owner and name
+     * @returns Repository object
+     */
+    async getRepo(params: GetRepoParams) {
       const validated = parse(GetRepoParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -68,7 +78,12 @@ export function createActions(http: HttpClient): GitHubActions {
       })
     },
 
-    async createIssue(params: CreateIssueParams): Promise<Result<Issue>> {
+    /**
+     * Create a new issue in a repository.
+     * @param params - Issue details including title, body, and assignees
+     * @returns Created issue object
+     */
+    async createIssue(params: CreateIssueParams) {
       const validated = parse(CreateIssueParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -82,7 +97,12 @@ export function createActions(http: HttpClient): GitHubActions {
       )
     },
 
-    async createComment(params: CreateCommentParams): Promise<Result<Comment>> {
+    /**
+     * Create a comment on an issue or pull request.
+     * @param params - Comment content and target issue/PR
+     * @returns Created comment object
+     */
+    async createComment(params: CreateCommentParams) {
       const validated = parse(CreateCommentParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -100,12 +120,17 @@ export function createActions(http: HttpClient): GitHubActions {
 
 export function createWebhookActions(
   http: HttpClient,
-  handle: GitHubWebhooks['handle'],
-): GitHubWebhooks {
+  handle: ProviderWebhooks<WebhookEvent>['handle'],
+) {
   return {
     handle,
 
-    async create(params: CreateWebhookParams): Promise<Result<Webhook>> {
+    /**
+     * Create a repository webhook.
+     * @param params - Webhook configuration including URL, events, and settings
+     * @returns Created webhook object
+     */
+    async create(params: CreateWebhookParams) {
       const validated = parse(CreateWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -119,7 +144,12 @@ export function createWebhookActions(
       )
     },
 
-    async list(params: ListWebhooksParams): Promise<Result<Webhook[]>> {
+    /**
+     * List repository webhooks.
+     * @param params - Repository owner and name
+     * @returns Array of webhook objects
+     */
+    async list(params: ListWebhooksParams) {
       const validated = parse(ListWebhooksParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -133,7 +163,12 @@ export function createWebhookActions(
       })
     },
 
-    async get(params: GetWebhookParams): Promise<Result<Webhook>> {
+    /**
+     * Get a specific webhook.
+     * @param params - Repository details and webhook ID
+     * @returns Webhook object
+     */
+    async get(params: GetWebhookParams) {
       const validated = parse(GetWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -143,7 +178,12 @@ export function createWebhookActions(
       })
     },
 
-    async update(params: UpdateWebhookParams): Promise<Result<Webhook>> {
+    /**
+     * Update a webhook.
+     * @param params - Webhook ID and updated configuration
+     * @returns Updated webhook object
+     */
+    async update(params: UpdateWebhookParams) {
       const validated = parse(UpdateWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -157,7 +197,11 @@ export function createWebhookActions(
       )
     },
 
-    async delete(params: DeleteWebhookParams): Promise<Result<void>> {
+    /**
+     * Delete a webhook.
+     * @param params - Repository details and webhook ID
+     */
+    async delete(params: DeleteWebhookParams) {
       const validated = parse(DeleteWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -173,7 +217,11 @@ export function createWebhookActions(
       return ok(undefined)
     },
 
-    async ping(params: PingWebhookParams): Promise<Result<void>> {
+    /**
+     * Ping a webhook to test connectivity.
+     * @param params - Repository details and webhook ID
+     */
+    async ping(params: PingWebhookParams) {
       const validated = parse(PingWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
@@ -192,7 +240,11 @@ export function createWebhookActions(
       return ok(undefined)
     },
 
-    async test(params: TestWebhookParams): Promise<Result<void>> {
+    /**
+     * Test a webhook by triggering a test event.
+     * @param params - Repository details and webhook ID
+     */
+    async test(params: TestWebhookParams) {
       const validated = parse(TestWebhookParamsSchema, params)
       if (!validated.ok) return validated
 
