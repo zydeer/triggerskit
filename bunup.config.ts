@@ -17,16 +17,16 @@ export default defineWorkspace(
       },
     },
     {
-      name: 'telegram',
-      root: 'packages/telegram',
-    },
-    {
       name: 'github',
       root: 'packages/github',
     },
     {
       name: 'slack',
       root: 'packages/slack',
+    },
+    {
+      name: 'telegram',
+      root: 'packages/telegram',
     },
   ],
   {
